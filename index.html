@@ -387,6 +387,62 @@
     font-size: 11px; color: var(--text-faint); font-family: 'DM Mono', monospace;
   }
 
+  /* 統計バー */
+  .stats-bar {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    padding: 0.6rem 1.25rem;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .stat-item { display: flex; flex-direction: column; gap: 2px; }
+  .stat-item .s-label { font-size: 10px; color: var(--text-faint); font-family: 'DM Mono', monospace; letter-spacing: 0.06em; }
+  .stat-item .s-val   { font-size: 15px; font-weight: 500; color: var(--text); font-family: 'DM Mono', monospace; }
+  .stat-item .s-val span { font-size: 10px; color: var(--text-muted); margin-left: 2px; }
+
+  /* 編集モーダル */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+    opacity: 0; pointer-events: none;
+    transition: opacity .2s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    width: min(480px, 92vw);
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal-title {
+    font-size: 13px; font-weight: 500; color: var(--text-muted);
+    font-family: 'DM Mono', monospace; letter-spacing: 0.08em;
+    text-transform: uppercase; margin-bottom: 1.25rem;
+  }
+  .modal-actions { display: flex; gap: 8px; margin-top: 1.25rem; }
+  .btn-save {
+    flex: 1; padding: 9px; background: var(--accent); color: #0e0f11;
+    border: none; border-radius: 8px; font-size: 14px; font-weight: 700;
+    cursor: pointer; font-family: 'Noto Sans JP', sans-serif;
+  }
+  .btn-cancel {
+    padding: 9px 18px; background: none; border: 1px solid var(--border);
+    color: var(--text-muted); border-radius: 8px; font-size: 14px;
+    cursor: pointer; font-family: 'Noto Sans JP', sans-serif;
+  }
+  .btn-edit {
+    background: none; border: none; color: var(--text-faint);
+    cursor: pointer; font-size: 13px; padding: 4px 6px; border-radius: 4px;
+    line-height: 1; transition: color .15s; font-family: 'DM Mono', monospace;
+  }
+  .btn-edit:hover { color: var(--accent); }
+
   @media (max-width: 700px) {
     header { padding: 1rem; }
     .ver-selector { padding: 0.75rem 1rem 0; }
@@ -506,6 +562,12 @@
       <button class="filter-btn" data-val="weapon" onclick="setBannerFilter(this,'weapon')">邦ドラム</button>
     </div>
 
+    <div class="stats-bar" id="stats-bar" style="display:none">
+      <div class="stat-item"><div class="s-label">記録数</div><div class="s-val" id="st-total">0<span>件</span></div></div>
+      <div class="stat-item"><div class="s-label">Sランク</div><div class="s-val" id="st-s">0<span>件</span></div></div>
+      <div class="stat-item"><div class="s-label">平均連数</div><div class="s-val" id="st-avg">-<span>連</span></div></div>
+      <div class="stat-item"><div class="s-label">すり抜け率</div><div class="s-val" id="st-loss">-<span>%</span></div></div>
+    </div>
     <div id="record-list"></div>
     <div class="count-bar">
       <span id="count-label">0 件</span>
@@ -513,6 +575,60 @@
     </div>
   </div>
 
+</div>
+
+<!-- 編集モーダル -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-title">記録を編集</div>
+    <div class="field">
+      <label>キャラ / 武器名</label>
+      <input type="text" id="edit-name" placeholder="例：アンビー">
+    </div>
+    <div class="field">
+      <label>何連目で出たか</label>
+      <input type="number" id="edit-pull" min="1" max="80">
+    </div>
+    <div class="field">
+      <label>レア度</label>
+      <div class="toggle-group" id="edit-grp-rarity">
+        <button class="toggle-btn on" data-val="S">Sランク</button>
+        <button class="toggle-btn" data-val="A">Aランク</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>凸数</label>
+      <div class="toggle-group" id="edit-grp-cons">
+        <button class="toggle-btn on" data-val="0">0凸</button>
+        <button class="toggle-btn" data-val="1">1凸</button>
+        <button class="toggle-btn" data-val="2">2凸</button>
+        <button class="toggle-btn" data-val="3">3凸</button>
+        <button class="toggle-btn" data-val="4">4凸</button>
+        <button class="toggle-btn" data-val="5">5凸</button>
+        <button class="toggle-btn" data-val="6">6凸</button>
+      </div>
+    </div>
+    <div class="field" id="edit-field-lose">
+      <label>すり抜け</label>
+      <div class="toggle-group" id="edit-grp-lose">
+        <button class="toggle-btn on" data-val="win">確定</button>
+        <button class="toggle-btn" data-val="loss">すり抜け</button>
+        <button class="toggle-btn" data-val="-">50%</button>
+      </div>
+    </div>
+    <div class="field" id="edit-field-wpn-lose" style="display:none">
+      <label>すり抜け</label>
+      <div class="toggle-group" id="edit-grp-wpn-lose">
+        <button class="toggle-btn on" data-val="win">確定</button>
+        <button class="toggle-btn" data-val="loss">すり抜け</button>
+        <button class="toggle-btn" data-val="-">75%</button>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-save" onclick="saveEdit()">保存する</button>
+      <button class="btn-cancel" onclick="closeEdit()">キャンセル</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -775,7 +891,10 @@ function renderList() {
         <div class="record-name">${attrIcon} ${r.name} ${rareBadge}${consBadge}${losePart}</div>
         <div class="record-sub">${bannerLbl}</div>
       </div>
-      <button class="btn-del" onclick="deleteRecord(${r.id})" title="削除">×</button>
+      <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+        <button class="btn-edit" onclick="openEdit(${r.id})" title="編集">✎</button>
+        <button class="btn-del" onclick="deleteRecord(${r.id})" title="削除">×</button>
+      </div>
     </div>`;
   }
 
@@ -795,10 +914,95 @@ function renderList() {
 
   el.innerHTML = html;
 
-  const sCount = list.filter(r => r.rarity === 'S').length;
+  const allVer  = records.filter(r => r.ver === currentVer);
+  const sRanks  = allVer.filter(r => r.rarity === 'S');
+  const sCount  = list.filter(r => r.rarity === 'S').length;
+  const avgPull = sRanks.length ? Math.round(sRanks.reduce((a,r)=>a+r.pull,0)/sRanks.length) : null;
+  const agentS  = allVer.filter(r => r.banner === 'agent' && r.rarity === 'S');
+  const lossCount = agentS.filter(r => r.lose === 'loss').length;
+  const lossRate  = agentS.length ? Math.round(lossCount/agentS.length*100) : null;
+
+  const sb = document.getElementById('stats-bar');
+  if (allVer.length) {
+    sb.style.display = '';
+    document.getElementById('st-total').innerHTML = allVer.length + '<span>件</span>';
+    document.getElementById('st-s').innerHTML     = sRanks.length + '<span>件</span>';
+    document.getElementById('st-avg').innerHTML   = (avgPull ?? '-') + '<span>連</span>';
+    document.getElementById('st-loss').innerHTML  = (lossRate !== null ? lossRate : '-') + '<span>%</span>';
+  } else {
+    sb.style.display = 'none';
+  }
+
   document.getElementById('count-label').textContent = list.length + ' 件';
   document.getElementById('s-count').textContent = sCount ? `Sランク ${sCount} 件` : '';
 }
+
+let editingId = null;
+
+function openEdit(id) {
+  const r = records.find(r => r.id === id);
+  if (!r) return;
+  editingId = id;
+  document.getElementById('edit-name').value = r.name;
+  document.getElementById('edit-pull').value = r.pull;
+  setToggle('edit-grp-rarity', r.rarity);
+  setToggle('edit-grp-cons', r.cons || '0');
+  setToggle('edit-grp-lose', r.lose || 'win');
+  setToggle('edit-grp-wpn-lose', r.wpnLose || 'win');
+  document.getElementById('edit-field-lose').style.display     = r.banner === 'agent'  ? '' : 'none';
+  document.getElementById('edit-field-wpn-lose').style.display = r.banner === 'weapon' ? '' : 'none';
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+function closeEdit() {
+  editingId = null;
+  document.getElementById('edit-modal').classList.remove('open');
+}
+
+function saveEdit() {
+  const r = records.find(r => r.id === editingId);
+  if (!r) return;
+  const name = document.getElementById('edit-name').value.trim();
+  const pull = parseInt(document.getElementById('edit-pull').value);
+  if (!name) { return; }
+  if (!pull || pull < 1) { return; }
+  r.name    = name;
+  r.pull    = pull;
+  r.rarity  = getEditVal('edit-grp-rarity');
+  r.cons    = getEditVal('edit-grp-cons');
+  r.lose    = r.banner === 'agent'  ? getEditVal('edit-grp-lose')     : '-';
+  r.wpnLose = r.banner === 'weapon' ? getEditVal('edit-grp-wpn-lose') : '-';
+  save();
+  closeEdit();
+  renderList();
+}
+
+function getEditVal(groupId) {
+  const btn = document.querySelector('#' + groupId + ' .toggle-btn.on');
+  return btn ? btn.dataset.val : '';
+}
+
+function setToggle(groupId, val) {
+  document.querySelectorAll('#' + groupId + ' .toggle-btn').forEach(b => {
+    b.classList.toggle('on', b.dataset.val === val);
+  });
+}
+
+// モーダル外クリックで閉じる
+document.getElementById('edit-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeEdit();
+});
+
+// 編集モーダルのトグル初期化
+['edit-grp-rarity','edit-grp-cons','edit-grp-lose','edit-grp-wpn-lose'].forEach(id => {
+  const grp = document.getElementById(id);
+  grp.querySelectorAll('.toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      grp.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+    });
+  });
+});
 
 load();
 initToggle('grp-banner');
