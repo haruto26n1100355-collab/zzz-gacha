@@ -79,6 +79,49 @@
     color: var(--accent);
     background: var(--accent-dim);
   }
+  .auth-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 8px;
+    padding-left: 8px;
+    border-left: 1px solid var(--border);
+  }
+  .auth-user {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .sync-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--text-faint);
+    flex-shrink: 0;
+  }
+  .sync-dot.on { background: var(--win); }
+  .sync-dot.busy { background: var(--accent); animation: pulse 1s infinite; }
+  @keyframes pulse { 50% { opacity: 0.4; } }
+  .btn-google {
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    cursor: pointer;
+    transition: all .15s;
+    white-space: nowrap;
+  }
+  .btn-google:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
 
   /* バージョン選択バー（ヘッダー直下） */
   .ver-selector {
@@ -511,6 +554,23 @@
 
   #import-file-input { display: none; }
 
+  .file-warning {
+    background: rgba(232,96,75,0.15);
+    border-bottom: 1px solid rgba(232,96,75,0.4);
+    padding: 12px 2rem;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.7;
+  }
+  .file-warning strong { color: var(--loss); }
+  .file-warning code {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    background: var(--surface2);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
   @media (max-width: 700px) {
     header { padding: 1rem; gap: 8px; }
     .header-actions { gap: 6px; }
@@ -536,6 +596,13 @@
 </head>
 <body>
 
+<div class="file-warning" id="file-warning" style="display:none">
+  <strong>file:// で開いているため Google ログインは使えません。</strong><br>
+  Finder で <code>サーバーを起動.command</code> をダブルクリックするか、ターミナルで
+  <code>cd ~/Desktop/work && ruby -run -e httpd . -p 3000</code> を実行し、
+  アドレス欄に <code>http://localhost:3000</code> を入力して開いてください（<code>127.0.0.1</code> では Google ログイン不可）。
+</div>
+
 <header>
   <div class="logo-mark">ZZZ</div>
   <h1>ガチャ記録</h1>
@@ -543,6 +610,12 @@
   <div class="header-actions">
     <button class="btn-io" onclick="triggerImport()">↑ インポート</button>
     <button class="btn-io" onclick="exportData()">↓ エクスポート</button>
+    <div class="auth-wrap" id="auth-wrap">
+      <span class="sync-dot" id="sync-dot" title="クラウド同期"></span>
+      <span class="auth-user" id="auth-user" style="display:none"></span>
+      <button type="button" class="btn-google" id="btn-login">Google でログイン</button>
+      <button class="btn-google" id="btn-logout" onclick="signOutGoogle()" style="display:none">ログアウト</button>
+    </div>
   </div>
 </header>
 
@@ -569,7 +642,7 @@
         <label>バナー種別</label>
         <div class="toggle-group" id="grp-banner">
           <button class="toggle-btn on" data-val="agent">エージェント</button>
-          <button class="toggle-btn" data-val="weapon">邦ドラム（武器）</button>
+          <button class="toggle-btn" data-val="weapon">音動機（武器）</button>
         </div>
       </div>
 
@@ -635,7 +708,7 @@
       <span class="filter-label">バナー：</span>
       <button class="filter-btn on" data-val="" onclick="setBannerFilter(this,'')">すべて</button>
       <button class="filter-btn" data-val="agent" onclick="setBannerFilter(this,'agent')">エージェント</button>
-      <button class="filter-btn" data-val="weapon" onclick="setBannerFilter(this,'weapon')">邦ドラム</button>
+      <button class="filter-btn" data-val="weapon" onclick="setBannerFilter(this,'weapon')">音動機</button>
     </div>
 
     <div class="stats-bar" id="stats-bar" style="display:none">
@@ -855,12 +928,210 @@ let records = [];
 let currentVer   = '1';
 let bannerFilter = '';
 let pendingImport = null;
+let firebaseUser = null;
+let cloudReady = false;
+let cloudSaving = false;
 
-function load() {
+function loadLocal() {
   try { records = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch(e) { records = []; }
 }
-function save() {
+function saveLocal() {
   localStorage.setItem(KEY, JSON.stringify(records));
+}
+
+function load() { loadLocal(); }
+
+function save() {
+  saveLocal();
+  if (firebaseUser && cloudReady) persistCloud();
+}
+
+function isFirebaseConfigured() {
+  return typeof firebaseConfig !== 'undefined'
+    && firebaseConfig.apiKey
+    && firebaseConfig.apiKey !== 'YOUR_API_KEY';
+}
+
+function setSyncStatus(state) {
+  const dot = document.getElementById('sync-dot');
+  dot.className = 'sync-dot' + (state ? ' ' + state : '');
+  dot.title = state === 'on' ? 'クラウド同期中'
+    : state === 'busy' ? '保存中…'
+    : 'ローカルのみ';
+}
+
+function updateAuthUI(user) {
+  const login = document.getElementById('btn-login');
+  const logout = document.getElementById('btn-logout');
+  const label = document.getElementById('auth-user');
+  if (user) {
+    login.style.display = 'none';
+    logout.style.display = '';
+    label.style.display = '';
+    label.textContent = user.email || 'ログイン中';
+    setSyncStatus(cloudReady ? 'on' : 'busy');
+  } else {
+    login.style.display = '';
+    logout.style.display = 'none';
+    label.style.display = 'none';
+    setSyncStatus('');
+  }
+}
+
+async function signInGoogle() {
+  const btn = document.getElementById('btn-login');
+  btn.disabled = false;
+
+  if (location.protocol === 'file:') {
+    alert('index.html を直接開いています。\n先に「サーバーを起動.command」で http://localhost:3000 を開いてください。');
+    return;
+  }
+  if (!isFirebaseConfigured()) {
+    alert('firebase-config.js が読み込めていません。');
+    return;
+  }
+  if (typeof firebase === 'undefined') {
+    flash('Firebase の読み込みに失敗しました。再読み込みしてください', 'err');
+    return;
+  }
+
+  const host = location.hostname;
+  if (host === '127.0.0.1') {
+    flash('アドレスを http://localhost:3000 に変えて再試行してください', 'err');
+    return;
+  }
+
+  btn.disabled = true;
+  flash('ログイン処理中…', 'ok');
+  const provider = new firebase.auth.GoogleAuthProvider();
+
+  try {
+    await firebase.auth().signInWithPopup(provider);
+    flash('ログインしました', 'ok');
+  } catch (e) {
+    console.error('popup failed', e);
+    if (e.code === 'auth/popup-closed-by-user') {
+      flash('ログインをキャンセルしました', 'err');
+      btn.disabled = false;
+      return;
+    }
+    try {
+      flash('別の方法でログインします…', 'ok');
+      await firebase.auth().signInWithRedirect(provider);
+      return;
+    } catch (e2) {
+      console.error('redirect failed', e2);
+      flash('ログイン失敗: ' + (e2.message || e2.code || e.message), 'err');
+      btn.disabled = false;
+    }
+  }
+}
+
+async function signOutGoogle() {
+  if (!isFirebaseConfigured()) return;
+  try {
+    await firebase.auth().signOut();
+    flash('ログアウトしました（この端末のデータは残ります）', 'ok');
+  } catch (e) {
+    console.error(e);
+    flash('ログアウトに失敗しました', 'err');
+  }
+}
+
+function userDocRef(uid) {
+  return firebase.firestore().collection('users').doc(uid);
+}
+
+async function loadFromCloud(uid) {
+  cloudReady = false;
+  setSyncStatus('busy');
+  const snap = await userDocRef(uid).get();
+  const cloudRecords = snap.exists ? (snap.data().records || []) : [];
+  loadLocal();
+  const localRecords = records.slice();
+
+  if (!cloudRecords.length && localRecords.length) {
+    records = localRecords;
+    await userDocRef(uid).set({
+      records,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+  } else if (cloudRecords.length && !localRecords.length) {
+    records = cloudRecords;
+    saveLocal();
+  } else if (cloudRecords.length && localRecords.length) {
+    records = cloudRecords.length >= localRecords.length ? cloudRecords : localRecords;
+    saveLocal();
+    if (records !== cloudRecords) {
+      await userDocRef(uid).set({
+        records,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+    }
+  } else {
+    records = cloudRecords;
+    saveLocal();
+  }
+  cloudReady = true;
+  setSyncStatus('on');
+  renderList();
+}
+
+let persistTimer = null;
+function persistCloud() {
+  if (!firebaseUser || !cloudReady) return;
+  clearTimeout(persistTimer);
+  persistTimer = setTimeout(async () => {
+    cloudSaving = true;
+    setSyncStatus('busy');
+    try {
+      await userDocRef(firebaseUser.uid).set({
+        records,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+      setSyncStatus('on');
+    } catch (e) {
+      console.error(e);
+      flash('クラウドへの保存に失敗しました', 'err');
+      setSyncStatus('on');
+    } finally {
+      cloudSaving = false;
+    }
+  }, 400);
+}
+
+function initFirebaseAuth() {
+  if (!isFirebaseConfigured()) return;
+  firebase.initializeApp(firebaseConfig);
+  firebase.auth().getRedirectResult().catch((e) => {
+    console.error(e);
+    const btn = document.getElementById('btn-login');
+    if (btn) btn.disabled = false;
+    if (e.code && e.code !== 'auth/no-auth-event') {
+      flash('ログインに失敗: ' + (e.message || e.code), 'err');
+    }
+  });
+  firebase.auth().onAuthStateChanged(async (user) => {
+    const btn = document.getElementById('btn-login');
+    if (btn) btn.disabled = false;
+    firebaseUser = user;
+    updateAuthUI(user);
+    if (user) {
+      try {
+        await loadFromCloud(user.uid);
+      } catch (e) {
+        console.error(e);
+        cloudReady = false;
+        loadLocal();
+        renderList();
+        flash('クラウドからの読み込みに失敗しました', 'err');
+      }
+    } else {
+      cloudReady = false;
+      loadLocal();
+      renderList();
+    }
+  });
 }
 
 function selectVer(el, ver) {
@@ -976,7 +1247,7 @@ function renderList() {
           : '';
     const consBadge = (r.cons !== undefined && r.cons !== '0')
       ? `<span class="badge badge-cons">${r.cons}凸</span>` : '';
-    const bannerLbl = r.banner === 'agent' ? 'エージェント' : '邦ドラム';
+    const bannerLbl = r.banner === 'agent' ? 'エージェント' : '音動機';
     const losePart  = r.banner === 'agent' ? loseBadge : wpnLoseBadge;
 
     return `<div class="record-item">
@@ -999,7 +1270,7 @@ function renderList() {
       html += agentRecs.map(makeItem).join('');
     }
     if (weaponRecs.length) {
-      html += `<div class="divider">邦ドラム</div>`;
+      html += `<div class="divider">音動機</div>`;
       html += weaponRecs.map(makeItem).join('');
     }
   } else {
@@ -1157,13 +1428,32 @@ document.getElementById('import-modal').addEventListener('click', function(e) {
   if (e.target === this) closeImport();
 });
 
-load();
+if (location.protocol === 'file:') {
+  document.getElementById('file-warning').style.display = 'block';
+  const loginBtn = document.getElementById('btn-login');
+  loginBtn.disabled = true;
+  loginBtn.title = 'サーバー起動後に http://localhost:3000 から開いてください';
+  loginBtn.style.opacity = '0.45';
+  loginBtn.style.cursor = 'not-allowed';
+}
+document.getElementById('btn-login').addEventListener('click', signInGoogle);
+
+loadLocal();
 initToggle('grp-banner');
 initToggle('grp-rarity');
 initToggle('grp-cons');
 initToggle('grp-lose');
 initToggle('grp-wpn-lose');
 renderList();
+</script>
+
+<!-- Firebase: firebase-config.js を用意したら有効 -->
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+  if (typeof firebaseConfig !== 'undefined') initFirebaseAuth();
 </script>
 </body>
 </html>
