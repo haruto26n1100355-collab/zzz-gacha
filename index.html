@@ -873,6 +873,1885 @@
 // キャラ名 → 属性マッピング（日本語名・英語名両対応）
 const CHAR_ATTR = {
   // Electric
+  'アンビー':1,'anby':1,'安比':1,
+  'アントン':1,'anton':1,
+  'セス':1,'seth':1,
+  'チンイー':1,'qingyi':1,'青衣':1,
+  'リナ':1,'rina':1,
+  'グレース':1,'grace':1,
+  'トリガー':1,'trigger':1,
+  'ヤナギ':1,'yanagi':1,'柳':1,
+  'ハルマサ':1,'harumasa':1,'悠真':1,
+  'プルクラ':1,'pulchra':1,
+  '0号アンビー':1,'soldier 0 anby':1,'anby soldier 0':1,'ソルジャー0':1,
+  'シード':1,'seed':1,
+  'アンドー':1,'ando':1,
+  'シーシィア':1,'cissia':1,
+  // Fire
+  'コレダ':2,'koleda':2,
+  'ベン':2,'ben':2,
+  'ルーシー':2,'lucy':2,
+  'ソルジャー11':2,'soldier 11':2,'ソルジャー１１':2,'11号':2,
+  'バーニス':2,'burnice':2,
+  'ライター':2,'lighter':2,'ライト':2,
+  'エヴリン':2,'evelyn':2,'イヴリン':2,
+  'クレタ':2,'claret':2,
+  '盤岳':2,'banyue':2,
+  '狛野真斗':2,'真斗':2,'狛野':2,'まなと':2,'manato':2,
+  'オルペウス':2,'orphie':2,'orphie & magus':2,
+  '橘福福':2,'福福':2,'フーフー':2,'ju fufu':2,
+  // Ice
+  'エレン':3,'ellen':3,
+  'ライカン':3,'lycaon':3,
+  'ソウカク':3,'soukaku':3,
+  'ミヤビ':3,'miyabi':3,
+  'ユズハ':3,'yuzuha':3,
+  'ザオ':3,'zhao':3,
+  'イドリー':3,'yidhari':3,
+  'ヒューゴ':3,'hugo':3,
+  'プロメイア':3,'promeia':3,
+  'エルフィ':3,'elfie':3,
+  '蒼角':3,'soukaku2':3,
+  '星見雅':7,'雅':7,'miyabi':7,
+  // Physical
+  'ネコマタ':4,'nekomata':4,'猫又':4,
+  'コリン':4,'corin':4,'カリン':4,
+  'パイパー':4,'piper':4,
+  'ビリー':4,'billy':4,
+  'ジェーン':4,'jane':4,'ジェーン・ドゥ':4,'jane doe':4,
+  'シーザー':4,'caesar':4,
+  'ジャオ':4,
+  'ナンゴンユー':4,'nangong yu':4,
+  'プロメア':4,
+  'スターライトビリー':4,'starlight billy':4,'billy starlight':4,
+  'プルクラ':4,'pulchra':4,
+  '千夏':4,'chinatsu':4,
+  'ダイアリン':4,'dialyn':4,
+  'アリス':4,'alice':4,
+  '柚葉':4,'yuzuha2':4,
+  '潘引壺':4,'パンダ':4,'パン':4,'pan yinhu':4,
+  '瞬光':8,'trigger2':8,'shunguang':8,
+  // Ether
+  'ニコール':5,'ニコ':5,'nicole':5,
+  'ジュユアン':5,'zhu yuan':5,'朱鳶':5,
+  'アストラヤオ':5,'astra yao':5,'アストラ':5,
+  'イーシュアン':5,'yixuan':5,
+  'イェシュングァン':5,'ye shunguang':5,
+  'スナ':5,'sunna':5,
+  'イーシェン':6,'yixuan':6,'羽':5,'ゆう':5,
+  'アリア':5,'aria':5,
+  'リュシア':5,'lucia':5,
+  'ビビアン':5,'vivian':5,
+};
+
+const ATTR_INFO = {
+  1: { cls: 'attr-electric', icon: '⚡', label: '電気' },
+  2: { cls: 'attr-fire',     icon: '🔥', label: '炎' },
+  3: { cls: 'attr-ice',      icon: '❄',  label: '氷' },
+  4: { cls: 'attr-physical', icon: '⚔',  label: '物理' },
+  5: { cls: 'attr-ether',    icon: '✦',  label: 'エーテル' },
+  6: { cls: 'attr-yixuan',   icon: '⧖',  label: 'エーテル（イーシェン）' },
+  7: { cls: 'attr-miyabi',   icon: '✿',  label: '氷（星見雅）' },
+  8: { cls: 'attr-trigger',  icon: '✦',  label: '物理（瞬光）' },
+};
+
+function getAttrIcon(name) {
+  const key = name.trim().toLowerCase();
+  const attrId = CHAR_ATTR[key] || CHAR_ATTR[name.trim()];
+  if (!attrId) return '<span class="attr-icon attr-unknown">？</span>';
+  const a = ATTR_INFO[attrId];
+  if (attrId === 8) {
+    const svg = `<svg width="14" height="14" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(7,7)">
+        <path d="M0,-1 C1,-3 4,-4 3,-1 C4,0 3,3 1,1 Z" fill="rgba(160,120,240,0.85)" stroke="#c0a0ff" stroke-width="0.3" transform="rotate(0)"/>
+        <path d="M0,-1 C1,-3 4,-4 3,-1 C4,0 3,3 1,1 Z" fill="rgba(160,120,240,0.85)" stroke="#c0a0ff" stroke-width="0.3" transform="rotate(72)"/>
+        <path d="M0,-1 C1,-3 4,-4 3,-1 C4,0 3,3 1,1 Z" fill="rgba(160,120,240,0.85)" stroke="#c0a0ff" stroke-width="0.3" transform="rotate(144)"/>
+        <path d="M0,-1 C1,-3 4,-4 3,-1 C4,0 3,3 1,1 Z" fill="rgba(160,120,240,0.85)" stroke="#c0a0ff" stroke-width="0.3" transform="rotate(216)"/>
+        <path d="M0,-1 C1,-3 4,-4 3,-1 C4,0 3,3 1,1 Z" fill="rgba(160,120,240,0.85)" stroke="#c0a0ff" stroke-width="0.3" transform="rotate(288)"/>
+      </g>
+      <circle cx="7" cy="7" r="1.5" fill="#c0a0ff" stroke="#9060d0" stroke-width="0.5"/>
+    </svg>`;
+    return `<span class="attr-icon attr-trigger" title="${a.label}" style="animation: miyabi-spin 3s linear infinite; display:inline-flex; align-items:center; justify-content:center;">${svg}</span>`;
+  }
+  if (attrId === 7) {
+    const svg = `<svg width="14" height="14" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(7,7)">
+        <ellipse rx="2.2" ry="4.5" fill="rgba(100,200,240,0.7)" stroke="#a0e8ff" stroke-width="0.4" transform="rotate(0)"/>
+        <ellipse rx="2.2" ry="4.5" fill="rgba(100,200,240,0.7)" stroke="#a0e8ff" stroke-width="0.4" transform="rotate(60)"/>
+        <ellipse rx="2.2" ry="4.5" fill="rgba(100,200,240,0.7)" stroke="#a0e8ff" stroke-width="0.4" transform="rotate(120)"/>
+      </g>
+      <circle cx="7" cy="7" r="1.8" fill="#a0e8ff" stroke="#64c8f0" stroke-width="0.5"/>
+    </svg>`;
+    return `<span class="attr-icon attr-miyabi" title="${a.label}">${svg}</span>`;
+  }
+  if (attrId === 6) {
+    const svg = `<svg width="14" height="14" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg">
+      <path d="M7 1 L10 4 L13 7 L10 10 L7 13 L4 10 L1 7 L4 4 Z" fill="none" stroke="#c8a84b" stroke-width="1.2"/>
+      <path d="M7 3.5 L9 5.5 L11 7 L9 8.5 L7 10.5 L5 8.5 L3 7 L5 5.5 Z" fill="rgba(200,168,75,0.3)" stroke="#e8d080" stroke-width="0.6"/>
+      <circle cx="7" cy="7" r="1.2" fill="#c8a84b"/>
+    </svg>`;
+    return `<span class="attr-icon attr-yixuan" title="${a.label}">${svg}</span>`;
+  }
+  return `<span class="attr-icon ${a.cls}" title="${a.label}">${a.icon}</span>`;
+}
+
+// 候補一覧（表示名は漢字優先・カタカナは別名で検索可）
+const AGENT_ROSTER = [
+  { name: '安比', attr: 1, aliases: ['アンビー', 'anby'] },
+  { name: 'アントン', attr: 1, aliases: ['anton'] },
+  { name: 'セス', attr: 1, aliases: ['seth'] },
+  { name: '青衣', attr: 1, aliases: ['チンイー', 'qingyi'] },
+  { name: 'リナ', attr: 1, aliases: ['rina'] },
+  { name: 'グレース', attr: 1, aliases: ['grace'] },
+  { name: 'トリガー', attr: 1, aliases: ['trigger'] },
+  { name: '柳', attr: 1, aliases: ['ヤナギ', 'yanagi'] },
+  { name: '悠真', attr: 1, aliases: ['ハルマサ', 'harumasa'] },
+  { name: '0号アンビー', attr: 1, aliases: ['soldier 0 anby', 'ソルジャー0', '安比'] },
+  { name: 'シード', attr: 1, aliases: ['seed'] },
+  { name: 'アンドー', attr: 1, aliases: ['ando'] },
+  { name: 'シーシィア', attr: 1, aliases: ['cissia'] },
+  { name: 'コレダ', attr: 2, aliases: ['koleda'] },
+  { name: 'ベン', attr: 2, aliases: ['ben'] },
+  { name: 'ルーシー', attr: 2, aliases: ['lucy'] },
+  { name: '11号', attr: 2, aliases: ['ソルジャー11', 'soldier 11'] },
+  { name: 'バーニス', attr: 2, aliases: ['burnice'] },
+  { name: 'ライター', attr: 2, aliases: ['lighter', 'ライト'] },
+  { name: 'エヴリン', attr: 2, aliases: ['evelyn', 'イヴリン'] },
+  { name: 'クレタ', attr: 2, aliases: ['claret'] },
+  { name: '盤岳', attr: 2, aliases: ['banyue'] },
+  { name: '狛野真斗', attr: 2, aliases: ['真斗', 'manato', '狛野'] },
+  { name: 'オルペウス', attr: 2, aliases: ['orphie'] },
+  { name: '橘福福', attr: 2, aliases: ['福福', 'フーフー', 'ju fufu'] },
+  { name: 'エレン', attr: 3, aliases: ['ellen'] },
+  { name: 'ライカン', attr: 3, aliases: ['lycaon'] },
+  { name: 'ソウカク', attr: 3, aliases: ['soukaku'] },
+  { name: '蒼角', attr: 3, aliases: ['soukaku2'] },
+  { name: 'ユズハ', attr: 3, aliases: ['yuzuha'] },
+  { name: 'ザオ', attr: 3, aliases: ['zhao'] },
+  { name: 'イドリー', attr: 3, aliases: ['yidhari'] },
+  { name: 'ヒューゴ', attr: 3, aliases: ['hugo'] },
+  { name: 'プロメイア', attr: 3, aliases: ['promeia'] },
+  { name: 'エルフィ', attr: 3, aliases: ['elfie'] },
+  { name: '星見雅', attr: 7, aliases: ['ミヤビ', '雅', 'miyabi'] },
+  { name: '猫又', attr: 4, aliases: ['ネコマタ', 'nekomata'] },
+  { name: 'コリン', attr: 4, aliases: ['corin', 'カリン'] },
+  { name: 'パイパー', attr: 4, aliases: ['piper'] },
+  { name: 'ビリー', attr: 4, aliases: ['billy'] },
+  { name: 'ジェーン', attr: 4, aliases: ['jane doe', 'ジェーン・ドゥ', 'jane'] },
+  { name: 'シーザー', attr: 4, aliases: ['caesar'] },
+  { name: 'ジャオ', attr: 4 },
+  { name: 'ナンゴンユー', attr: 4, aliases: ['nangong yu'] },
+  { name: 'スターライトビリー', attr: 4, aliases: ['starlight billy', 'billy starlight'] },
+  { name: 'プルクラ', attr: 4, aliases: ['pulchra'] },
+  { name: '千夏', attr: 4, aliases: ['chinatsu'] },
+  { name: 'ダイアリン', attr: 4, aliases: ['dialyn'] },
+  { name: 'アリス', attr: 4, aliases: ['alice'] },
+  { name: '柚葉', attr: 4, aliases: ['yuzuha2'] },
+  { name: '潘引壺', attr: 4, aliases: ['パンダ', 'パン', 'pan yinhu'] },
+  { name: 'プロメア', attr: 4 },
+  { name: '瞬光', attr: 8, aliases: ['shunguang', 'trigger2'] },
+  { name: 'ニコール', attr: 5, aliases: ['nicole', 'ニコ'] },
+  { name: '朱鳶', attr: 5, aliases: ['ジュユアン', 'zhu yuan'] },
+  { name: 'アストラヤオ', attr: 5, aliases: ['astra yao', 'アストラ'] },
+  { name: 'イーシュアン', attr: 5, aliases: ['yixuan'] },
+  { name: 'イェシュングァン', attr: 5, aliases: ['ye shunguang'] },
+  { name: 'スナ', attr: 5, aliases: ['sunna'] },
+  { name: 'イーシェン', attr: 6, aliases: ['羽', 'ゆう', 'yixuan'] },
+  { name: 'アリア', attr: 5, aliases: ['aria'] },
+  { name: 'リュシア', attr: 5, aliases: ['lucia'] },
+  { name: 'ビビアン', attr: 5, aliases: ['vivian'] },
+];
+
+const WEAPON_ROSTER = [
+  { name: 'ディープシー', attr: 1 },
+  { name: 'フォルジ・ヘルヴァ', attr: 4, aliases: ['フォージャー'] },
+  { name: 'スターシャイン', attr: 1 },
+  { name: '獅裁ち', attr: 2 },
+  { name: '磔刑・苦刑架', attr: 2 },
+  { name: '澄日策', attr: 3 },
+  { name: '含光の影', attr: 3 },
+  { name: '海の唄', attr: 3 },
+  { name: 'ウェイト・オブ・ザ・パスト', attr: 3 },
+  { name: '心弦のキオク', attr: 5 },
+  { name: '魂の揺蕩', attr: 5 },
+  { name: 'ガーディアン', attr: 5 },
+  { name: '煽風こそ炎のように', attr: 2, aliases: ['煽風'] },
+  { name: '炎心篆刃', attr: 2 },
+  { name: 'ちゃ入れ刀', attr: 4 },
+  { name: '攘臂三番', attr: 4 },
+  { name: 'フーリーノート', attr: 4 },
+  { name: 'ヴィジョン', attr: 1 },
+  { name: '激昂', attr: 2 },
+  { name: 'テイルズ・オブ・ウォリン', attr: 4 },
+];
+
+const ATTR_FILTERS = [
+  { val: '', label: 'すべて' },
+  { val: '1', label: '⚡ 電気' },
+  { val: '2', label: '🔥 炎' },
+  { val: '3', label: '❄ 氷' },
+  { val: '4', label: '⚔ 物理' },
+  { val: '5', label: '✦ エーテル' },
+];
+
+const namePickerState = {};
+
+function attrMatchesFilter(itemAttr, filterVal) {
+  if (!filterVal) return true;
+  const a = Number(itemAttr);
+  const f = Number(filterVal);
+  if (f === 3) return a === 3 || a === 7;
+  if (f === 4) return a === 4 || a === 8;
+  if (f === 5) return a === 5 || a === 6;
+  return a === f;
+}
+
+function buildSearchTerms(item) {
+  const terms = [item.name];
+  (item.aliases || []).forEach(t => terms.push(t));
+  return terms;
+}
+
+function itemMatchesQuery(item, query) {
+  if (!query) return true;
+  const q = query.trim();
+  const ql = q.toLowerCase();
+  return buildSearchTerms(item).some(t => {
+    const tl = t.toLowerCase();
+    return t.includes(q) || tl.includes(ql);
+  });
+}
+
+function getRoster(banner) {
+  return banner === 'weapon' ? WEAPON_ROSTER : AGENT_ROSTER;
+}
+
+function getFilteredRoster(banner, attrFilter, query) {
+  return getRoster(banner)
+    .filter(item => attrMatchesFilter(item.attr, attrFilter))
+    .filter(item => itemMatchesQuery(item, query))
+    .slice(0, 40);
+}
+
+function initNamePicker(cfg) {
+  const input = document.getElementById(cfg.inputId);
+  const suggest = document.getElementById(cfg.suggestId);
+  const filterRow = document.getElementById(cfg.filterId);
+  if (!input || !suggest || !filterRow) return;
+
+  const state = {
+    inputId: cfg.inputId,
+    suggestId: cfg.suggestId,
+    filterId: cfg.filterId,
+    attrFilter: '',
+    activeIdx: -1,
+    getBanner: cfg.getBanner,
+  };
+  namePickerState[cfg.inputId] = state;
+
+  filterRow.innerHTML = ATTR_FILTERS.map(f =>
+    `<button type="button" class="attr-filter-btn${f.val === '' ? ' on' : ''}" data-attr="${f.val}">${f.label}</button>`
+  ).join('');
+
+  filterRow.querySelectorAll('.attr-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterRow.querySelectorAll('.attr-filter-btn').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      state.attrFilter = btn.dataset.attr;
+      renderNameSuggest(state);
+      input.focus();
+    });
+  });
+
+  input.addEventListener('input', () => {
+    state.activeIdx = -1;
+    renderNameSuggest(state);
+  });
+  input.addEventListener('focus', () => renderNameSuggest(state));
+  input.addEventListener('keydown', (e) => handleNameSuggestKey(e, state));
+  suggest.addEventListener('mousedown', (e) => {
+    const item = e.target.closest('.name-suggest-item');
+    if (item) {
+      e.preventDefault();
+      pickNameSuggest(state, item.dataset.name);
+    }
+  });
+}
+
+function renderNameSuggest(state) {
+  const input = document.getElementById(state.inputId);
+  const suggest = document.getElementById(state.suggestId);
+  const banner = state.getBanner();
+  const list = getFilteredRoster(banner, state.attrFilter, input.value);
+
+  if (!list.length) {
+    suggest.innerHTML = '<div class="name-suggest-empty">候補がありません（手入力も可）</div>';
+    suggest.classList.add('open');
+    return;
+  }
+
+  suggest.innerHTML = list.map((item, i) =>
+    `<div class="name-suggest-item${i === state.activeIdx ? ' active' : ''}" data-name="${escapeHtmlAttr(item.name)}">
+      ${getAttrIcon(item.name)}
+      <span class="s-name">${escapeHtml(item.name)}</span>
+    </div>`
+  ).join('');
+  suggest.classList.add('open');
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escapeHtmlAttr(s) {
+  return escapeHtml(s).replace(/'/g, '&#39;');
+}
+
+function pickNameSuggest(state, name) {
+  const input = document.getElementById(state.inputId);
+  const suggest = document.getElementById(state.suggestId);
+  input.value = name;
+  suggest.classList.remove('open');
+  state.activeIdx = -1;
+}
+
+function closeNameSuggest(state) {
+  const suggest = document.getElementById(state.suggestId);
+  if (suggest) suggest.classList.remove('open');
+  state.activeIdx = -1;
+}
+
+function handleNameSuggestKey(e, state) {
+  const suggest = document.getElementById(state.suggestId);
+  if (!suggest.classList.contains('open')) {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') renderNameSuggest(state);
+    return;
+  }
+  const items = suggest.querySelectorAll('.name-suggest-item');
+  if (!items.length) return;
+
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    state.activeIdx = Math.min(state.activeIdx + 1, items.length - 1);
+    updateSuggestActive(state, items);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    state.activeIdx = Math.max(state.activeIdx - 1, 0);
+    updateSuggestActive(state, items);
+  } else if (e.key === 'Enter' && state.activeIdx >= 0) {
+    e.preventDefault();
+    pickNameSuggest(state, items[state.activeIdx].dataset.name);
+  } else if (e.key === 'Escape') {
+    closeNameSuggest(state);
+  }
+}
+
+function updateSuggestActive(state, items) {
+  items.forEach((el, i) => el.classList.toggle('active', i === state.activeIdx));
+  if (items[state.activeIdx]) items[state.activeIdx].scrollIntoView({ block: 'nearest' });
+}
+
+document.addEventListener('click', (e) => {
+  Object.values(namePickerState).forEach(state => {
+    const wrap = document.getElementById(state.inputId)?.closest('.name-picker-wrap');
+    const filter = document.getElementById(state.filterId);
+    if (wrap && !wrap.contains(e.target) && filter && !filter.contains(e.target)) {
+      closeNameSuggest(state);
+    }
+  });
+});
+
+const KEY = 'zzz_gacha_v4';
+let records = [];
+let currentVer   = '1';
+let recordVer    = '1';
+
+function recordsForView() {
+  return currentVer === 'all' ? records : records.filter(r => r.ver === currentVer);
+}
+let bannerFilter = '';
+let pendingImport = null;
+let firebaseUser = null;
+let cloudReady = false;
+let cloudSaving = false;
+
+function loadLocal() {
+  try { records = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch(e) { records = []; }
+}
+function saveLocal() {
+  localStorage.setItem(KEY, JSON.stringify(records));
+}
+
+function load() { loadLocal(); }
+
+function save() {
+  saveLocal();
+  if (firebaseUser && cloudReady) persistCloud();
+}
+
+function isFirebaseConfigured() {
+  return typeof firebaseConfig !== 'undefined'
+    && firebaseConfig.apiKey
+    && firebaseConfig.apiKey !== 'YOUR_API_KEY';
+}
+
+function setSyncStatus(state) {
+  const dot = document.getElementById('sync-dot');
+  dot.className = 'sync-dot' + (state ? ' ' + state : '');
+  dot.title = state === 'on' ? 'クラウド同期中'
+    : state === 'busy' ? '保存中…'
+    : 'ローカルのみ';
+}
+
+function updateAuthUI(user) {
+  const login = document.getElementById('btn-login');
+  const logout = document.getElementById('btn-logout');
+  const label = document.getElementById('auth-user');
+  if (user) {
+    login.style.display = 'none';
+    logout.style.display = '';
+    label.style.display = '';
+    label.textContent = user.email || 'ログイン中';
+    setSyncStatus(cloudReady ? 'on' : 'busy');
+  } else {
+    login.style.display = '';
+    logout.style.display = 'none';
+    label.style.display = 'none';
+    setSyncStatus('');
+  }
+}
+
+function authErrorMessage(e) {
+  const code = e && e.code ? e.code : '';
+  if (code === 'auth/unauthorized-domain') {
+    return 'このサイトのドメインが Firebase で許可されていません';
+  }
+  if (code === 'auth/popup-blocked') {
+    return 'ポップアップがブロックされています。Chrome/Edge で許可するか、ページを再読み込みしてください';
+  }
+  if (code === 'auth/network-request-failed') {
+    return 'ネットワークエラーです。接続を確認してください';
+  }
+  return 'ログイン失敗: ' + ((e && e.message) || code || '不明なエラー');
+}
+
+/** スマホのみ画面遷移。PC/Windows はポップアップ優先（Gmail 選択後に戻れない対策） */
+function preferAuthRedirect() {
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+async function signInGoogle() {
+  const btn = document.getElementById('btn-login');
+  btn.disabled = false;
+
+  if (location.protocol === 'file:') {
+    alert('HTML を直接開いています。\nhttp://localhost:3000 または公開 URL から開いてください。');
+    return;
+  }
+  if (!isFirebaseConfigured()) {
+    alert('Firebase の設定が読み込めていません。ページを再読み込みしてください。');
+    return;
+  }
+  if (typeof firebase === 'undefined') {
+    flash('Firebase の読み込みに失敗しました。再読み込みしてください', 'err');
+    return;
+  }
+
+  const host = location.hostname;
+  if (host === '127.0.0.1') {
+    flash('アドレスを http://localhost:3000 に変えて再試行してください', 'err');
+    return;
+  }
+
+  btn.disabled = true;
+  const provider = new firebase.auth.GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
+
+  const finishFail = (e) => {
+    console.error(e);
+    flash(authErrorMessage(e), 'err');
+    btn.disabled = false;
+  };
+
+  if (preferAuthRedirect()) {
+    flash('Google のログイン画面に移動します…', 'ok');
+    try {
+      await firebase.auth().signInWithRedirect(provider);
+    } catch (e) { finishFail(e); }
+    return;
+  }
+
+  flash('ポップアップでログインします（ブロックされたら許可）…', 'ok');
+  try {
+    const result = await firebase.auth().signInWithPopup(provider);
+    if (result.user) {
+      flash('ログインしました', 'ok');
+      try {
+        await loadFromCloud(result.user.uid);
+      } catch (e) {
+        console.error(e);
+        flash('ログイン済み・データ読込失敗: ' + authErrorMessage(e), 'err');
+        loadLocal();
+        renderList();
+      }
+    }
+    btn.disabled = false;
+  } catch (e) {
+    if (e.code === 'auth/popup-closed-by-user') {
+      flash('ログインをキャンセルしました', 'err');
+      btn.disabled = false;
+      return;
+    }
+    if (e.code === 'auth/popup-blocked') {
+      flash('ポップアップを許可してください。別方式を試します…', 'ok');
+      try {
+        await firebase.auth().signInWithRedirect(provider);
+        return;
+      } catch (e2) { finishFail(e2); return; }
+    }
+    finishFail(e);
+  }
+}
+
+async function signOutGoogle() {
+  if (!isFirebaseConfigured()) return;
+  try {
+    await firebase.auth().signOut();
+    flash('ログアウトしました（この端末のデータは残ります）', 'ok');
+  } catch (e) {
+    console.error(e);
+    flash('ログアウトに失敗しました', 'err');
+  }
+}
+
+function userDocRef(uid) {
+  return firebase.firestore().collection('users').doc(uid);
+}
+
+async function loadFromCloud(uid) {
+  cloudReady = false;
+  setSyncStatus('busy');
+  const snap = await userDocRef(uid).get();
+  const cloudRecords = snap.exists ? (snap.data().records || []) : [];
+  loadLocal();
+  const localRecords = records.slice();
+
+  if (!cloudRecords.length && localRecords.length) {
+    records = localRecords;
+    await userDocRef(uid).set({
+      records,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+  } else if (cloudRecords.length && !localRecords.length) {
+    records = cloudRecords;
+    saveLocal();
+  } else if (cloudRecords.length && localRecords.length) {
+    records = cloudRecords.length >= localRecords.length ? cloudRecords : localRecords;
+    saveLocal();
+    if (records !== cloudRecords) {
+      await userDocRef(uid).set({
+        records,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+    }
+  } else {
+    records = cloudRecords;
+    saveLocal();
+  }
+  cloudReady = true;
+  setSyncStatus('on');
+  renderList();
+}
+
+let persistTimer = null;
+function persistCloud() {
+  if (!firebaseUser || !cloudReady) return;
+  clearTimeout(persistTimer);
+  persistTimer = setTimeout(async () => {
+    cloudSaving = true;
+    setSyncStatus('busy');
+    try {
+      await userDocRef(firebaseUser.uid).set({
+        records,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+      setSyncStatus('on');
+    } catch (e) {
+      console.error(e);
+      flash('クラウドへの保存に失敗しました', 'err');
+      setSyncStatus('on');
+    } finally {
+      cloudSaving = false;
+    }
+  }, 400);
+}
+
+function initFirebaseAuth() {
+  if (!isFirebaseConfigured()) return;
+  firebase.initializeApp(firebaseConfig);
+  firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+  firebase.auth().getRedirectResult()
+    .then(async (result) => {
+      const btn = document.getElementById('btn-login');
+      if (btn) btn.disabled = false;
+      if (!result || !result.user) return;
+      flash('ログインしました', 'ok');
+      try {
+        await loadFromCloud(result.user.uid);
+      } catch (e) {
+        console.error(e);
+        flash('ログイン済み・データ読込失敗: ' + authErrorMessage(e), 'err');
+        loadLocal();
+        renderList();
+      }
+    })
+    .catch((e) => {
+      console.error(e);
+      const btn = document.getElementById('btn-login');
+      if (btn) btn.disabled = false;
+      if (e.code && e.code !== 'auth/no-auth-event') {
+        flash(authErrorMessage(e), 'err');
+        showAuthHelpBanner();
+      }
+    });
+
+  firebase.auth().onAuthStateChanged(async (user) => {
+    const btn = document.getElementById('btn-login');
+    if (btn) btn.disabled = false;
+    firebaseUser = user;
+    updateAuthUI(user);
+    if (user) {
+      try {
+        await loadFromCloud(user.uid);
+      } catch (e) {
+        console.error(e);
+        cloudReady = false;
+        loadLocal();
+        renderList();
+        flash('ログイン済み（' + (user.email || '') + '）・クラウド読込失敗', 'err');
+      }
+    } else {
+      cloudReady = false;
+      loadLocal();
+      renderList();
+    }
+  });
+}
+
+function showAuthHelpBanner() {
+  const el = document.getElementById('auth-help');
+  if (el) el.style.display = 'block';
+}
+
+function selectVer(el, ver) {
+  document.querySelectorAll('.ver-range-btn').forEach(b => b.classList.remove('on'));
+  el.classList.add('on');
+  currentVer = ver;
+  if (ver !== 'all') recordVer = ver;
+  renderList();
+}
+
+function setBannerFilter(el, val) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('on'));
+  el.classList.add('on');
+  bannerFilter = val;
+  renderList();
+}
+
+function initToggle(groupId) {
+  const grp = document.getElementById(groupId);
+  grp.querySelectorAll('.toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      grp.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      if (groupId === 'grp-banner') onBannerChange(btn.dataset.val);
+    });
+  });
+}
+
+function getVal(groupId) {
+  const btn = document.querySelector('#' + groupId + ' .toggle-btn.on');
+  return btn ? btn.dataset.val : '';
+}
+
+function onBannerChange(val) {
+  document.getElementById('field-lose').style.display     = val === 'agent' ? '' : 'none';
+  document.getElementById('field-wpn-lose').style.display = val === 'weapon' ? '' : 'none';
+  const st = namePickerState['inp-name'];
+  if (st) {
+    closeNameSuggest(st);
+    renderNameSuggest(st);
+  }
+}
+
+function resetAttrFilter(filterId) {
+  const row = document.getElementById(filterId);
+  if (!row) return;
+  row.querySelectorAll('.attr-filter-btn').forEach(b => {
+    b.classList.toggle('on', b.dataset.attr === '');
+  });
+}
+
+function addRecord() {
+  const name   = document.getElementById('inp-name').value.trim();
+  const pull   = parseInt(document.getElementById('inp-pull').value);
+  const banner = getVal('grp-banner');
+  const rarity = getVal('grp-rarity');
+  const cons   = getVal('grp-cons');
+  const lose    = getVal('grp-lose');
+  const wpnLose = getVal('grp-wpn-lose');
+
+  if (!name)             { flash('名前を入力してください', 'err'); return; }
+  if (!pull || pull < 1) { flash('連数を入力してください', 'err'); return; }
+
+  records.unshift({
+    id: Date.now(),
+    ver: recordVer,
+    banner, name, pull, rarity, cons,
+    lose:    banner === 'agent'  ? lose    : '-',
+    wpnLose: banner === 'weapon' ? wpnLose : '-',
+  });
+  save();
+  flash('記録しました', 'ok');
+  document.getElementById('inp-name').value = '';
+  document.getElementById('inp-pull').value = '';
+  renderList();
+}
+
+function deleteRecord(id) {
+  records = records.filter(r => r.id !== id);
+  save();
+  renderList();
+}
+
+function flash(msg, type) {
+  const el = document.getElementById('flash');
+  el.textContent = msg;
+  el.className = 'show ' + type;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+function renderList() {
+  let list = recordsForView();
+  if (bannerFilter) list = list.filter(r => r.banner === bannerFilter);
+
+  const el = document.getElementById('record-list');
+
+  if (!list.length) {
+    el.innerHTML = '<div class="empty-state"><div class="e-icon">◇</div><div>記録がありません</div></div>';
+    document.getElementById('count-label').textContent = '0 件';
+    document.getElementById('s-count').textContent = '';
+    document.getElementById('stats-bar').style.display = 'none';
+    return;
+  }
+
+  const agentRecs  = list.filter(r => r.banner === 'agent');
+  const weaponRecs = list.filter(r => r.banner === 'weapon');
+
+  function makeItem(r) {
+    const attrIcon  = getAttrIcon(r.name);
+    const rareBadge = r.rarity === 'S'
+      ? '<span class="badge badge-s">S</span>'
+      : '<span class="badge badge-a">A</span>';
+    const loseBadge = r.lose === 'win'
+      ? '<span class="badge badge-win">確定</span>'
+      : r.lose === 'loss'
+        ? '<span class="badge badge-loss">すり抜け</span>'
+        : r.lose === '-'
+          ? '<span class="badge badge-50">50%</span>'
+          : '';
+    const wpnLoseBadge = r.wpnLose === 'win'
+      ? '<span class="badge badge-win">確定</span>'
+      : r.wpnLose === 'loss'
+        ? '<span class="badge badge-loss">すり抜け</span>'
+        : r.wpnLose === '-'
+          ? '<span class="badge badge-75">75%</span>'
+          : '';
+    const consBadge = (r.cons !== undefined && r.cons !== '0')
+      ? `<span class="badge badge-cons">${r.cons}凸</span>` : '';
+    const bannerLbl = r.banner === 'agent' ? 'エージェント' : '音動機';
+    const losePart  = r.banner === 'agent' ? loseBadge : wpnLoseBadge;
+
+    return `<div class="record-item">
+      <div class="pull-count">${r.pull}<span class="unit">連</span></div>
+      <div class="record-info">
+        <div class="record-name">${attrIcon} ${r.name} ${rareBadge}${consBadge}${losePart}</div>
+        <div class="record-sub">${bannerLbl}</div>
+      </div>
+      <div class="item-actions">
+        <button class="btn-edit" onclick="openEdit(${r.id})" title="編集">✎</button>
+        <button class="btn-del" onclick="deleteRecord(${r.id})" title="削除">×</button>
+      </div>
+    </div>`;
+  }
+
+  let html = '';
+  if (!bannerFilter) {
+    if (agentRecs.length) {
+      html += `<div class="divider">エージェント</div>`;
+      html += agentRecs.map(makeItem).join('');
+    }
+    if (weaponRecs.length) {
+      html += `<div class="divider">音動機</div>`;
+      html += weaponRecs.map(makeItem).join('');
+    }
+  } else {
+    html = list.map(makeItem).join('');
+  }
+
+  el.innerHTML = html;
+
+  const allVer  = recordsForView();
+  const sRanks  = allVer.filter(r => r.rarity === 'S');
+  const sCount  = list.filter(r => r.rarity === 'S').length;
+  const avgPull = sRanks.length ? Math.round(sRanks.reduce((a,r)=>a+r.pull,0)/sRanks.length) : null;
+  const agentS  = allVer.filter(r => r.banner === 'agent' && r.rarity === 'S');
+  const lossCount = agentS.filter(r => r.lose === 'loss').length;
+  const lossRate  = agentS.length ? Math.round(lossCount/agentS.length*100) : null;
+
+  const sb = document.getElementById('stats-bar');
+  if (allVer.length) {
+    sb.style.display = '';
+    document.getElementById('st-total').innerHTML = allVer.length + '<span>件</span>';
+    document.getElementById('st-s').innerHTML     = sRanks.length + '<span>件</span>';
+    document.getElementById('st-avg').innerHTML   = (avgPull ?? '-') + '<span>連</span>';
+    document.getElementById('st-loss').innerHTML  = (lossRate !== null ? lossRate : '-') + '<span>%</span>';
+  } else {
+    sb.style.display = 'none';
+  }
+
+  document.getElementById('count-label').textContent = list.length + ' 件';
+  document.getElementById('s-count').textContent = sCount ? `Sランク ${sCount} 件` : '';
+}
+
+let editingId = null;
+
+function openEdit(id) {
+  const r = records.find(r => r.id === id);
+  if (!r) return;
+  editingId = id;
+  document.getElementById('edit-name').value = r.name;
+  document.getElementById('edit-pull').value = r.pull;
+  setToggle('edit-grp-rarity', r.rarity);
+  setToggle('edit-grp-cons', r.cons || '0');
+  setToggle('edit-grp-lose', r.lose || 'win');
+  setToggle('edit-grp-wpn-lose', r.wpnLose || 'win');
+  document.getElementById('edit-field-lose').style.display     = r.banner === 'agent'  ? '' : 'none';
+  document.getElementById('edit-field-wpn-lose').style.display = r.banner === 'weapon' ? '' : 'none';
+  document.getElementById('edit-modal').classList.add('open');
+  const st = namePickerState['edit-name'];
+  if (st) {
+    st.attrFilter = '';
+    resetAttrFilter(st.filterId);
+    closeNameSuggest(st);
+  }
+}
+
+function closeEdit() {
+  editingId = null;
+  document.getElementById('edit-modal').classList.remove('open');
+}
+
+function saveEdit() {
+  const r = records.find(r => r.id === editingId);
+  if (!r) return;
+  const name = document.getElementById('edit-name').value.trim();
+  const pull = parseInt(document.getElementById('edit-pull').value);
+  if (!name) { return; }
+  if (!pull || pull < 1) { return; }
+  r.name    = name;
+  r.pull    = pull;
+  r.rarity  = getEditVal('edit-grp-rarity');
+  r.cons    = getEditVal('edit-grp-cons');
+  r.lose    = r.banner === 'agent'  ? getEditVal('edit-grp-lose')     : '-';
+  r.wpnLose = r.banner === 'weapon' ? getEditVal('edit-grp-wpn-lose') : '-';
+  save();
+  closeEdit();
+  renderList();
+}
+
+function getEditVal(groupId) {
+  const btn = document.querySelector('#' + groupId + ' .toggle-btn.on');
+  return btn ? btn.dataset.val : '';
+}
+
+function setToggle(groupId, val) {
+  document.querySelectorAll('#' + groupId + ' .toggle-btn').forEach(b => {
+    b.classList.toggle('on', b.dataset.val === val);
+  });
+}
+
+// モーダル外クリックで閉じる
+document.getElementById('edit-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeEdit();
+});
+
+// 編集モーダルのトグル初期化
+['edit-grp-rarity','edit-grp-cons','edit-grp-lose','edit-grp-wpn-lose'].forEach(id => {
+  const grp = document.getElementById(id);
+  grp.querySelectorAll('.toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      grp.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+    });
+  });
+});
+
+// ★★★ エクスポート/インポート機能
+function exportData() {
+  if (!records.length) {
+    alert('記録がありません');
+    return;
+  }
+  const blob = new Blob([JSON.stringify(records, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `zzz-gacha-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  flash('エクスポートしました', 'ok');
+}
+
+function triggerImport() {
+  document.getElementById('import-file-input').click();
+}
+
+function handleImportFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!Array.isArray(data)) throw new Error('Invalid format');
+      pendingImport = data;
+      document.getElementById('import-preview').textContent = `${data.length} 件のデータが見つかりました`;
+      document.getElementById('import-modal').classList.add('open');
+    } catch (err) {
+      alert('ファイルの読み込みに失敗しました。正しいJSONファイルを選択してください。');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+function confirmImport() {
+  if (!pendingImport) return;
+  records = pendingImport;
+  pendingImport = null;
+  save();
+  closeImport();
+  renderList();
+  flash('インポートしました', 'ok');
+}
+
+function closeImport() {
+  pendingImport = null;
+  document.getElementById('import-modal').classList.remove('open');
+}
+
+document.getElementById('import-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeImport();
+});
+
+if (location.protocol === 'file:') {
+  document.getElementById('file-warning').style.display = 'block';
+  const loginBtn = document.getElementById('btn-login');
+  loginBtn.disabled = true;
+  loginBtn.title = 'サーバー起動後に http://localhost:3000 から開いてください';
+  loginBtn.style.opacity = '0.45';
+  loginBtn.style.cursor = 'not-allowed';
+}
+document.getElementById('btn-login').addEventListener('click', signInGoogle);
+
+loadLocal();
+initToggle('grp-banner');
+initToggle('grp-rarity');
+initToggle('grp-cons');
+initToggle('grp-lose');
+initToggle('grp-wpn-lose');
+initNamePicker({
+  inputId: 'inp-name',
+  suggestId: 'inp-suggest',
+  filterId: 'inp-attr-filter',
+  getBanner: () => getVal('grp-banner'),
+});
+initNamePicker({
+  inputId: 'edit-name',
+  suggestId: 'edit-suggest',
+  filterId: 'edit-attr-filter',
+  getBanner: () => {
+    const r = records.find(x => x.id === editingId);
+    return r ? r.banner : 'agent';
+  },
+});
+renderList();
+</script>
+
+<!-- Firebase（設定は index.html 内に記載。別ファイルは広告ブロックで止まることがある） -->
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: 'AIzaSyCOpf2aXd7BPLIoiFXqJRzFG2_GgmKxFSY',
+  authDomain: 'zzz-gacha-tracker.firebaseapp.com',
+  projectId: 'zzz-gacha-tracker',
+  storageBucket: 'zzz-gacha-tracker.firebasestorage.app',
+  messagingSenderId: '1052303250566',
+  appId: '1:1052303250566:web:574b285ae7b39ccd4aad07',
+  measurementId: 'G-7LZBKQ2N1Q',
+};
+if (typeof firebase !== 'undefined') {
+  initFirebaseAuth();
+} else {
+  console.error('Firebase SDK が読み込めません（広告ブロック等）');
+}
+</script>
+</body>
+</html>
+    line-height: 1.6;
+  }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 1.25rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo-mark {
+    width: 32px; height: 32px;
+    border: 1.5px solid var(--accent);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+  header h1 { font-size: 15px; font-weight: 500; letter-spacing: 0.02em; }
+  header span { font-size: 12px; color: var(--text-muted); font-family: 'DM Mono', monospace; }
+  
+  .header-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+  }
+  .btn-io {
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    cursor: pointer;
+    transition: all .15s;
+    letter-spacing: 0.02em;
+  }
+  .btn-io:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
+  .auth-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 8px;
+    padding-left: 8px;
+    border-left: 1px solid var(--border);
+  }
+  .auth-user {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .sync-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--text-faint);
+    flex-shrink: 0;
+  }
+  .sync-dot.on { background: var(--win); }
+  .sync-dot.busy { background: var(--accent); animation: pulse 1s infinite; }
+  @keyframes pulse { 50% { opacity: 0.4; } }
+  .btn-google {
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    cursor: pointer;
+    transition: all .15s;
+    white-space: nowrap;
+  }
+  .btn-google:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  /* バージョン選択バー（ヘッダー直下） */
+  .ver-selector {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 1rem 2rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .ver-selector-label {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-faint);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .ver-selector-btns {
+    display: flex;
+    gap: 8px;
+  }
+  .ver-range-btn {
+    padding: 7px 22px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-family: 'DM Mono', monospace;
+    cursor: pointer;
+    transition: all .15s;
+    letter-spacing: 0.02em;
+  }
+  .ver-range-btn:hover { border-color: var(--border-hover); color: var(--text); }
+  .ver-range-btn.on {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 1.25rem 2rem 2rem;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .panel-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-family: 'DM Mono', monospace;
+  }
+  .panel-body { padding: 1.25rem; }
+
+  .field { margin-bottom: 1rem; }
+  .field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    font-family: 'DM Mono', monospace;
+  }
+  input[type=text], input[type=number] {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 14px;
+    padding: 8px 12px;
+    height: 38px;
+    outline: none;
+    transition: border-color .15s;
+  }
+  input[type=text]:focus, input[type=number]:focus { border-color: var(--accent); }
+  input::placeholder { color: var(--text-faint); }
+
+  .name-picker-wrap { position: relative; }
+  .attr-filter-row {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px;
+  }
+  .attr-filter-btn {
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'Noto Sans JP', sans-serif;
+    transition: all .15s;
+    line-height: 1.4;
+  }
+  .attr-filter-btn:hover { border-color: var(--border-hover); color: var(--text); }
+  .attr-filter-btn.on {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .name-suggest-list {
+    position: absolute;
+    left: 0; right: 0; top: calc(100% + 4px);
+    z-index: 50;
+    max-height: 220px;
+    overflow-y: auto;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+    display: none;
+  }
+  .name-suggest-list.open { display: block; }
+  .name-suggest-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background .1s;
+  }
+  .name-suggest-item:hover,
+  .name-suggest-item.active { background: var(--accent-dim); }
+  .name-suggest-item .s-name { flex: 1; }
+  .name-suggest-empty {
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--text-faint);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .toggle-group { display: flex; gap: 6px; flex-wrap: wrap; }
+  .toggle-btn {
+    padding: 5px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 13px;
+    cursor: pointer;
+    font-family: 'Noto Sans JP', sans-serif;
+    transition: all .15s;
+  }
+  .toggle-btn:hover { border-color: var(--border-hover); color: var(--text); }
+  .toggle-btn.on {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .btn-submit {
+    width: 100%;
+    padding: 10px;
+    background: var(--accent);
+    color: #0e0f11;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Noto Sans JP', sans-serif;
+    letter-spacing: 0.04em;
+    transition: opacity .15s, transform .1s;
+    margin-top: 1.25rem;
+  }
+  .btn-submit:hover { opacity: 0.9; }
+  .btn-submit:active { transform: scale(0.98); }
+
+  #flash {
+    font-size: 12px;
+    text-align: center;
+    margin-top: 8px;
+    height: 16px;
+    font-family: 'DM Mono', monospace;
+    transition: opacity .3s;
+    opacity: 0;
+  }
+  #flash.show { opacity: 1; }
+  #flash.ok { color: var(--win); }
+  #flash.err { color: var(--loss); }
+
+  .history-panel { grid-column: 2; }
+
+  .filter-row {
+    display: flex;
+    gap: 8px;
+    padding: 0.6rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+  }
+  .filter-label { font-size: 11px; color: var(--text-faint); font-family: 'DM Mono', monospace; }
+  .filter-btn {
+    padding: 3px 10px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    transition: all .15s;
+  }
+  .filter-btn:hover { color: var(--text); border-color: var(--border-hover); }
+  .filter-btn.on { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+  #record-list { padding: 0.75rem 1.25rem; display: flex; flex-direction: column; gap: 6px; min-height: 200px; }
+
+  .empty-state {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 8px; color: var(--text-faint); font-size: 13px; padding: 3rem 0;
+    font-family: 'DM Mono', monospace;
+  }
+  .empty-state .e-icon { font-size: 24px; opacity: 0.3; }
+
+  .record-item {
+    display: grid;
+    grid-template-columns: 48px 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    animation: slideIn .2s ease;
+    transition: border-color .15s;
+  }
+  .record-item:hover { border-color: var(--border-hover); }
+  @keyframes slideIn {
+    from { opacity:0; transform: translateY(-4px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+
+  .pull-count {
+    text-align: right;
+    font-family: 'DM Mono', monospace;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--text-muted);
+    line-height: 1;
+  }
+  .pull-count .unit { font-size: 10px; color: var(--text-faint); display: block; text-align: right; margin-top: 2px; }
+
+  .record-name {
+    font-size: 14px; font-weight: 500; color: var(--text);
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  }
+  .record-sub { font-size: 11px; color: var(--text-muted); margin-top: 3px; font-family: 'DM Mono', monospace; }
+
+  .badge {
+    font-size: 10px; font-weight: 700; padding: 1px 6px;
+    border-radius: 4px; font-family: 'DM Mono', monospace; letter-spacing: 0.04em;
+  }
+  .badge-s { background: rgba(232,184,75,0.15); color: var(--s-rank); }
+  .badge-a { background: rgba(122,162,232,0.15); color: var(--a-rank); }
+  .badge-win { background: var(--win-bg); color: var(--win); }
+  .badge-loss { background: var(--loss-bg); color: var(--loss); }
+  .badge-wpn { background: rgba(255,255,255,0.05); color: var(--text-muted); }
+  .badge-cons { background: rgba(180,140,255,0.15); color: #b48cff; border: 1px solid rgba(180,140,255,0.25); }
+  .badge-75 {
+    position: relative;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    background-image: linear-gradient(90deg, #c084a0, #a07cc8, #7ca8c8, #7cc8a8, #c8b87c, #c084a0);
+    background-size: 200% auto;
+    animation: rainbow-shift 4s linear infinite;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .badge-50 {
+    position: relative;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    background-image: linear-gradient(90deg, #c084a0, #a07cc8, #7ca8c8, #7cc8a8, #c8b87c, #c084a0);
+    background-size: 200% auto;
+    animation: rainbow-shift 4s linear infinite;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  @keyframes rainbow-shift {
+    0%   { background-position: 0% center; }
+    100% { background-position: 200% center; }
+  }
+
+
+  /* 属性アイコン */
+  .attr-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+  .attr-electric { background: rgba(122,162,232,0.2); color: #7aa2e8; border: 1px solid rgba(122,162,232,0.3); }
+  .attr-fire     { background: rgba(232,120,75,0.2);  color: #e8784b; border: 1px solid rgba(232,120,75,0.3); }
+  .attr-ice      { background: rgba(100,200,240,0.2); color: #64c8f0; border: 1px solid rgba(100,200,240,0.3); }
+  .attr-physical { background: rgba(200,168,75,0.2);  color: #c8a84b; border: 1px solid rgba(200,168,75,0.3); }
+  .attr-ether    { background: rgba(180,140,255,0.2); color: #b48cff; border: 1px solid rgba(180,140,255,0.3); }
+  .attr-unknown  { background: rgba(255,255,255,0.05); color: var(--text-faint); border: 1px solid var(--border); }
+  .attr-trigger {
+    background: rgba(180,140,255,0.12);
+    border: 1px solid rgba(180,140,255,0.35);
+    position: relative;
+    overflow: hidden;
+  }
+  .attr-miyabi {
+    background: rgba(80,200,240,0.12);
+    border: 1px solid rgba(100,200,240,0.35);
+    position: relative;
+    overflow: hidden;
+  }
+  .attr-miyabi::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: conic-gradient(from 0deg, #64c8f0, #a0e8ff, #64c8f0, #3090b8, #64c8f0);
+    border-radius: 50%;
+    animation: miyabi-spin 4s linear infinite;
+    opacity: 0.5;
+  }
+  @keyframes miyabi-spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  .attr-yixuan {
+    background: rgba(200,168,75,0.1);
+    border: 1px solid rgba(200,168,75,0.3);
+    position: relative;
+    overflow: hidden;
+  }
+  .attr-yixuan::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: conic-gradient(from 0deg, #c8a84b, #e8d080, #c8a84b, #a07820, #c8a84b);
+    border-radius: 50%;
+    animation: yixuan-spin 3s linear infinite;
+    opacity: 0.7;
+  }
+  .attr-yixuan span { position: relative; z-index: 1; }
+  @keyframes yixuan-spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  /* ★ ボタンを左右並びに */
+  .item-actions {
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    align-items: center;
+  }
+  .btn-edit {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-faint);
+    cursor: pointer;
+    font-size: 13px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    line-height: 1;
+    transition: all .15s;
+    font-family: 'DM Mono', monospace;
+  }
+  .btn-edit:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--accent-dim);
+  }
+  .btn-del {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-faint);
+    cursor: pointer;
+    font-size: 13px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    line-height: 1;
+    transition: all .15s;
+    font-family: 'DM Mono', monospace;
+  }
+  .btn-del:hover {
+    color: var(--loss);
+    border-color: var(--loss);
+    background: var(--loss-bg);
+  }
+
+  .divider {
+    font-size: 10px; color: var(--text-faint); font-family: 'DM Mono', monospace;
+    letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 0 2px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .count-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.6rem 1.25rem; border-top: 1px solid var(--border);
+    font-size: 11px; color: var(--text-faint); font-family: 'DM Mono', monospace;
+  }
+
+  /* 統計バー */
+  .stats-bar {
+    display: flex;
+    gap: 16px;
+    border-bottom: 1px solid var(--border);
+    padding: 0.6rem 1.25rem;
+    flex-wrap: wrap;
+  }
+  .stat-item { display: flex; flex-direction: column; gap: 2px; }
+  .stat-item .s-label { font-size: 10px; color: var(--text-faint); font-family: 'DM Mono', monospace; letter-spacing: 0.06em; }
+  .stat-item .s-val   { font-size: 15px; font-weight: 500; color: var(--text); font-family: 'DM Mono', monospace; }
+  .stat-item .s-val span { font-size: 10px; color: var(--text-muted); margin-left: 2px; }
+
+  /* 編集モーダル */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+    opacity: 0; pointer-events: none;
+    transition: opacity .2s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    width: min(480px, 92vw);
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal-title {
+    font-size: 13px; font-weight: 500; color: var(--text-muted);
+    font-family: 'DM Mono', monospace; letter-spacing: 0.08em;
+    text-transform: uppercase; margin-bottom: 1.25rem;
+  }
+  .modal-actions { display: flex; gap: 8px; margin-top: 1.25rem; }
+  .btn-save {
+    flex: 1; padding: 9px; background: var(--accent); color: #0e0f11;
+    border: none; border-radius: 8px; font-size: 14px; font-weight: 700;
+    cursor: pointer; font-family: 'Noto Sans JP', sans-serif;
+  }
+  .btn-cancel {
+    padding: 9px 18px; background: none; border: 1px solid var(--border);
+    color: var(--text-muted); border-radius: 8px; font-size: 14px;
+    cursor: pointer; font-family: 'Noto Sans JP', sans-serif;
+  }
+
+  /* インポート確認用スタイル */
+  .import-note {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+    line-height: 1.7;
+    margin-bottom: 1rem;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .import-note strong { color: var(--loss); }
+
+  #import-file-input { display: none; }
+
+  .file-warning {
+    background: rgba(232,96,75,0.15);
+    border-bottom: 1px solid rgba(232,96,75,0.4);
+    padding: 12px 2rem;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.7;
+  }
+  .file-warning strong { color: var(--loss); }
+  .file-warning code {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    background: var(--surface2);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  @media (max-width: 700px) {
+    header { padding: 1rem; gap: 8px; }
+    .header-actions { gap: 6px; }
+    .btn-io { padding: 5px 10px; font-size: 11px; }
+    .ver-selector { padding: 0.75rem 1rem 0; }
+    .ver-selector-btns { flex-direction: column; gap: 6px; }
+    .ver-range-btn { width: 100%; text-align: center; }
+    .container { grid-template-columns: 1fr; padding: 0.75rem 1rem 2rem; gap: 1rem; }
+    .history-panel { grid-column: 1; }
+    .panel-body { padding: 1rem; }
+    .toggle-group { gap: 5px; }
+    .toggle-btn { padding: 5px 10px; font-size: 12px; }
+    .filter-row { flex-wrap: wrap; gap: 6px; padding: 0.5rem 1rem; }
+    #record-list { padding: 0.5rem 1rem; }
+    .record-item { padding: 8px 10px; gap: 8px; }
+    .pull-count { font-size: 17px; min-width: 36px; }
+    .record-name { font-size: 13px; gap: 4px; }
+    .record-sub { font-size: 10px; }
+    .badge { font-size: 9px; padding: 1px 5px; }
+    .btn-submit { padding: 12px; font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="file-warning" id="auth-help" style="display:none">
+  <strong>Google で戻ったのにログインされない場合（Windows など）</strong><br>
+  ① ブラウザで <strong>ポップアップを許可</strong>（アドレス欄のブロックアイコン）<br>
+  ② Edge/Chrome の <strong>Cookie（サードパーティ）</strong> を許可<br>
+  ③ 広告ブロックをオフ<br>
+  ④ ページを再読み込みして「Google でログイン」をもう一度
+</div>
+
+<div class="file-warning" id="file-warning" style="display:none">
+  <strong>file:// で開いているため Google ログインは使えません。</strong><br>
+  Finder で <code>サーバーを起動.command</code> をダブルクリックするか、ターミナルで
+  <code>cd ~/Desktop/work && ruby -run -e httpd . -p 3000</code> を実行し、
+  アドレス欄に <code>http://localhost:3000</code> を入力して開いてください（<code>127.0.0.1</code> では Google ログイン不可）。
+</div>
+
+<header>
+  <div class="logo-mark">ZZZ</div>
+  <h1>ガチャ記録</h1>
+  <span>/ Zenless Zone Zero</span>
+  <div class="header-actions">
+    <button class="btn-io" onclick="triggerImport()">↑ インポート</button>
+    <button class="btn-io" onclick="exportData()">↓ エクスポート</button>
+    <div class="auth-wrap" id="auth-wrap">
+      <span class="sync-dot" id="sync-dot" title="クラウド同期"></span>
+      <span class="auth-user" id="auth-user" style="display:none"></span>
+      <button type="button" class="btn-google" id="btn-login">Google でログイン</button>
+      <button class="btn-google" id="btn-logout" onclick="signOutGoogle()" style="display:none">ログアウト</button>
+    </div>
+  </div>
+</header>
+
+<input type="file" id="import-file-input" accept=".json" onchange="handleImportFile(event)">
+
+<!-- バージョン選択 -->
+<div class="ver-selector">
+  <div class="ver-selector-label">version</div>
+  <div class="ver-selector-btns">
+    <button class="ver-range-btn" data-ver="all" onclick="selectVer(this,'all')">ALL</button>
+    <button class="ver-range-btn on" data-ver="1" onclick="selectVer(this,'1')">1.0 〜 1.7</button>
+    <button class="ver-range-btn" data-ver="2" onclick="selectVer(this,'2')">2.0 〜 2.8</button>
+    <button class="ver-range-btn" data-ver="3" onclick="selectVer(this,'3')">3.0 〜</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 入力フォーム -->
+  <div class="panel">
+    <div class="panel-header">新しく記録する</div>
+    <div class="panel-body">
+
+      <div class="field">
+        <label>バナー種別</label>
+        <div class="toggle-group" id="grp-banner">
+          <button class="toggle-btn on" data-val="agent">エージェント</button>
+          <button class="toggle-btn" data-val="weapon">音動機（武器）</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>キャラ / 武器名</label>
+        <div class="attr-filter-row" id="inp-attr-filter"></div>
+        <div class="name-picker-wrap">
+          <input type="text" id="inp-name" placeholder="例：雅、青衣、朱鳶（一部入力で候補表示）" autocomplete="off">
+          <div class="name-suggest-list" id="inp-suggest"></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>何連目で出たか</label>
+        <input type="number" id="inp-pull" min="1" max="80" placeholder="例：34">
+      </div>
+
+      <div class="field">
+        <label>レア度</label>
+        <div class="toggle-group" id="grp-rarity">
+          <button class="toggle-btn on" data-val="S">Sランク</button>
+          <button class="toggle-btn" data-val="A">Aランク</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>凸数</label>
+        <div class="toggle-group" id="grp-cons">
+          <button class="toggle-btn on" data-val="0">0凸</button>
+          <button class="toggle-btn" data-val="1">1凸</button>
+          <button class="toggle-btn" data-val="2">2凸</button>
+          <button class="toggle-btn" data-val="3">3凸</button>
+          <button class="toggle-btn" data-val="4">4凸</button>
+          <button class="toggle-btn" data-val="5">5凸</button>
+          <button class="toggle-btn" data-val="6">6凸</button>
+        </div>
+      </div>
+
+      <div class="field" id="field-lose">
+        <label>すり抜け</label>
+        <div class="toggle-group" id="grp-lose">
+          <button class="toggle-btn on" data-val="win">確定</button>
+          <button class="toggle-btn" data-val="loss">すり抜け</button>
+          <button class="toggle-btn" data-val="-">50%</button>
+        </div>
+      </div>
+
+      <div class="field" id="field-wpn-lose" style="display:none">
+        <label>すり抜け</label>
+        <div class="toggle-group" id="grp-wpn-lose">
+          <button class="toggle-btn on" data-val="win">確定</button>
+          <button class="toggle-btn" data-val="loss">すり抜け</button>
+          <button class="toggle-btn" data-val="-">75%</button>
+        </div>
+      </div>
+
+      <button class="btn-submit" onclick="addRecord()">記録する</button>
+      <div id="flash"></div>
+    </div>
+  </div>
+
+  <!-- 履歴 -->
+  <div class="panel history-panel">
+    <div class="panel-header">履歴</div>
+
+    <div class="filter-row">
+      <span class="filter-label">バナー：</span>
+      <button class="filter-btn on" data-val="" onclick="setBannerFilter(this,'')">すべて</button>
+      <button class="filter-btn" data-val="agent" onclick="setBannerFilter(this,'agent')">エージェント</button>
+      <button class="filter-btn" data-val="weapon" onclick="setBannerFilter(this,'weapon')">音動機</button>
+    </div>
+
+    <div class="stats-bar" id="stats-bar" style="display:none">
+      <div class="stat-item"><div class="s-label">記録数</div><div class="s-val" id="st-total">0<span>件</span></div></div>
+      <div class="stat-item"><div class="s-label">Sランク</div><div class="s-val" id="st-s">0<span>件</span></div></div>
+      <div class="stat-item"><div class="s-label">平均連数</div><div class="s-val" id="st-avg">-<span>連</span></div></div>
+      <div class="stat-item"><div class="s-label">すり抜け率</div><div class="s-val" id="st-loss">-<span>%</span></div></div>
+    </div>
+    <div id="record-list"></div>
+    <div class="count-bar">
+      <span id="count-label">0 件</span>
+      <span id="s-count"></span>
+    </div>
+  </div>
+
+</div>
+
+<!-- 編集モーダル -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-title">記録を編集</div>
+    <div class="field">
+      <label>キャラ / 武器名</label>
+      <div class="attr-filter-row" id="edit-attr-filter"></div>
+      <div class="name-picker-wrap">
+        <input type="text" id="edit-name" placeholder="例：安比、猫又、星見雅" autocomplete="off">
+        <div class="name-suggest-list" id="edit-suggest"></div>
+      </div>
+    </div>
+    <div class="field">
+      <label>何連目で出たか</label>
+      <input type="number" id="edit-pull" min="1" max="80">
+    </div>
+    <div class="field">
+      <label>レア度</label>
+      <div class="toggle-group" id="edit-grp-rarity">
+        <button class="toggle-btn on" data-val="S">Sランク</button>
+        <button class="toggle-btn" data-val="A">Aランク</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>凸数</label>
+      <div class="toggle-group" id="edit-grp-cons">
+        <button class="toggle-btn on" data-val="0">0凸</button>
+        <button class="toggle-btn" data-val="1">1凸</button>
+        <button class="toggle-btn" data-val="2">2凸</button>
+        <button class="toggle-btn" data-val="3">3凸</button>
+        <button class="toggle-btn" data-val="4">4凸</button>
+        <button class="toggle-btn" data-val="5">5凸</button>
+        <button class="toggle-btn" data-val="6">6凸</button>
+      </div>
+    </div>
+    <div class="field" id="edit-field-lose">
+      <label>すり抜け</label>
+      <div class="toggle-group" id="edit-grp-lose">
+        <button class="toggle-btn on" data-val="win">確定</button>
+        <button class="toggle-btn" data-val="loss">すり抜け</button>
+        <button class="toggle-btn" data-val="-">50%</button>
+      </div>
+    </div>
+    <div class="field" id="edit-field-wpn-lose" style="display:none">
+      <label>すり抜け</label>
+      <div class="toggle-group" id="edit-grp-wpn-lose">
+        <button class="toggle-btn on" data-val="win">確定</button>
+        <button class="toggle-btn" data-val="loss">すり抜け</button>
+        <button class="toggle-btn" data-val="-">75%</button>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-save" onclick="saveEdit()">保存する</button>
+      <button class="btn-cancel" onclick="closeEdit()">キャンセル</button>
+    </div>
+  </div>
+</div>
+
+<!-- インポート確認モーダル -->
+<div class="modal-overlay" id="import-modal">
+  <div class="modal">
+    <div class="modal-title">データをインポート</div>
+    <div class="import-note">
+      <strong>⚠ 現在のデータはすべて上書きされます。</strong><br>
+      インポート前にエクスポートしてバックアップを取ることをおすすめします。
+    </div>
+    <div style="font-size:13px; color: var(--text-muted); margin-bottom: 0.5rem;" id="import-preview"></div>
+    <div class="modal-actions">
+      <button class="btn-save" onclick="confirmImport()" style="background:var(--loss);color:#fff;">上書きしてインポート</button>
+      <button class="btn-cancel" onclick="closeImport()">キャンセル</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+// キャラ名 → 属性マッピング（日本語名・英語名両対応）
+const CHAR_ATTR = {
+  // Electric
   'アンビー':1,'anby':1
   'セス':1,'seth':1,
   'チンイー':1,'qingyi':1,'青衣':1,
