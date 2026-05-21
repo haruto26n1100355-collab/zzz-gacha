@@ -634,6 +634,7 @@
   <div class="ver-selector-label">version</div>
   <div class="ver-selector-btns">
     <button class="ver-range-btn on" data-ver="1" onclick="selectVer(this,'1')">1.0 〜 1.7</button>
+    <button class="ver-range-btn" data-ver="all" onclick="selectVer(this,'all')">ALL</button>
     <button class="ver-range-btn" data-ver="2" onclick="selectVer(this,'2')">2.0 〜 2.8</button>
     <button class="ver-range-btn" data-ver="3" onclick="selectVer(this,'3')">3.0 〜</button>
   </div>
@@ -934,6 +935,11 @@ function getAttrIcon(name) {
 const KEY = 'zzz_gacha_v4';
 let records = [];
 let currentVer   = '1';
+let recordVer    = '1';
+
+function recordsForView() {
+  return currentVer === 'all' ? records : records.filter(r => r.ver === currentVer);
+}
 let bannerFilter = '';
 let pendingImport = null;
 let firebaseUser = null;
@@ -1213,6 +1219,7 @@ function selectVer(el, ver) {
   document.querySelectorAll('.ver-range-btn').forEach(b => b.classList.remove('on'));
   el.classList.add('on');
   currentVer = ver;
+  if (ver !== 'all') recordVer = ver;
   renderList();
 }
 
@@ -1258,7 +1265,7 @@ function addRecord() {
 
   records.unshift({
     id: Date.now(),
-    ver: currentVer,
+    ver: recordVer,
     banner, name, pull, rarity, cons,
     lose:    banner === 'agent'  ? lose    : '-',
     wpnLose: banner === 'weapon' ? wpnLose : '-',
@@ -1285,7 +1292,7 @@ function flash(msg, type) {
 }
 
 function renderList() {
-  let list = records.filter(r => r.ver === currentVer);
+  let list = recordsForView();
   if (bannerFilter) list = list.filter(r => r.banner === bannerFilter);
 
   const el = document.getElementById('record-list');
@@ -1354,7 +1361,7 @@ function renderList() {
 
   el.innerHTML = html;
 
-  const allVer  = records.filter(r => r.ver === currentVer);
+  const allVer  = recordsForView();
   const sRanks  = allVer.filter(r => r.rarity === 'S');
   const sCount  = list.filter(r => r.rarity === 'S').length;
   const avgPull = sRanks.length ? Math.round(sRanks.reduce((a,r)=>a+r.pull,0)/sRanks.length) : null;
