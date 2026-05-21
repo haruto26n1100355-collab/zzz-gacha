@@ -218,6 +218,61 @@
   input[type=text]:focus, input[type=number]:focus { border-color: var(--accent); }
   input::placeholder { color: var(--text-faint); }
 
+  .name-picker-wrap { position: relative; }
+  .attr-filter-row {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px;
+  }
+  .attr-filter-btn {
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'Noto Sans JP', sans-serif;
+    transition: all .15s;
+    line-height: 1.4;
+  }
+  .attr-filter-btn:hover { border-color: var(--border-hover); color: var(--text); }
+  .attr-filter-btn.on {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .name-suggest-list {
+    position: absolute;
+    left: 0; right: 0; top: calc(100% + 4px);
+    z-index: 50;
+    max-height: 220px;
+    overflow-y: auto;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+    display: none;
+  }
+  .name-suggest-list.open { display: block; }
+  .name-suggest-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background .1s;
+  }
+  .name-suggest-item:hover,
+  .name-suggest-item.active { background: var(--accent-dim); }
+  .name-suggest-item .s-name { flex: 1; }
+  .name-suggest-empty {
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--text-faint);
+    font-family: 'DM Mono', monospace;
+  }
+
   .toggle-group { display: flex; gap: 6px; flex-wrap: wrap; }
   .toggle-btn {
     padding: 5px 12px;
@@ -657,7 +712,11 @@
 
       <div class="field">
         <label>キャラ / 武器名</label>
-        <input type="text" id="inp-name" placeholder="例：アンビー、ディープシー">
+        <div class="attr-filter-row" id="inp-attr-filter"></div>
+        <div class="name-picker-wrap">
+          <input type="text" id="inp-name" placeholder="名前の一部を入力、または属性で絞る" autocomplete="off">
+          <div class="name-suggest-list" id="inp-suggest"></div>
+        </div>
       </div>
 
       <div class="field">
@@ -741,7 +800,11 @@
     <div class="modal-title">記録を編集</div>
     <div class="field">
       <label>キャラ / 武器名</label>
-      <input type="text" id="edit-name" placeholder="例：アンビー">
+      <div class="attr-filter-row" id="edit-attr-filter"></div>
+      <div class="name-picker-wrap">
+        <input type="text" id="edit-name" placeholder="名前の一部を入力、または属性で絞る" autocomplete="off">
+        <div class="name-suggest-list" id="edit-suggest"></div>
+      </div>
     </div>
     <div class="field">
       <label>何連目で出たか</label>
@@ -931,6 +994,269 @@ function getAttrIcon(name) {
   }
   return `<span class="attr-icon ${a.cls}" title="${a.label}">${a.icon}</span>`;
 }
+
+// 候補一覧（表示名・属性・検索用別名）
+const AGENT_ROSTER = [
+  { name: 'アンビー', attr: 1, aliases: ['anby', '安比'] },
+  { name: 'アントン', attr: 1, aliases: ['anton'] },
+  { name: 'セス', attr: 1, aliases: ['seth'] },
+  { name: 'チンイー', attr: 1, aliases: ['qingyi', '青衣'] },
+  { name: 'リナ', attr: 1, aliases: ['rina'] },
+  { name: 'グレース', attr: 1, aliases: ['grace'] },
+  { name: 'トリガー', attr: 1, aliases: ['trigger'] },
+  { name: 'ヤナギ', attr: 1, aliases: ['yanagi', '柳'] },
+  { name: 'ハルマサ', attr: 1, aliases: ['harumasa', '悠真'] },
+  { name: '0号アンビー', attr: 1, aliases: ['soldier 0 anby', 'ソルジャー0'] },
+  { name: 'シード', attr: 1, aliases: ['seed'] },
+  { name: 'アンドー', attr: 1, aliases: ['ando'] },
+  { name: 'シーシィア', attr: 1, aliases: ['cissia'] },
+  { name: 'コレダ', attr: 2, aliases: ['koleda'] },
+  { name: 'ベン', attr: 2, aliases: ['ben'] },
+  { name: 'ルーシー', attr: 2, aliases: ['lucy'] },
+  { name: 'ソルジャー11', attr: 2, aliases: ['soldier 11', '11号'] },
+  { name: 'バーニス', attr: 2, aliases: ['burnice'] },
+  { name: 'ライター', attr: 2, aliases: ['lighter', 'ライト'] },
+  { name: 'エヴリン', attr: 2, aliases: ['evelyn', 'イヴリン'] },
+  { name: 'クレタ', attr: 2, aliases: ['claret'] },
+  { name: '盤岳', attr: 2, aliases: ['banyue'] },
+  { name: '狛野真斗', attr: 2, aliases: ['真斗', 'manato'] },
+  { name: 'オルペウス', attr: 2, aliases: ['orphie'] },
+  { name: '橘福福', attr: 2, aliases: ['福福', 'フーフー', 'ju fufu'] },
+  { name: 'エレン', attr: 3, aliases: ['ellen'] },
+  { name: 'ライカン', attr: 3, aliases: ['lycaon'] },
+  { name: 'ソウカク', attr: 3, aliases: ['soukaku'] },
+  { name: 'ユズハ', attr: 3, aliases: ['yuzuha'] },
+  { name: 'ザオ', attr: 3, aliases: ['zhao'] },
+  { name: 'イドリー', attr: 3, aliases: ['yidhari'] },
+  { name: 'ヒューゴ', attr: 3, aliases: ['hugo'] },
+  { name: 'プロメイア', attr: 3, aliases: ['promeia'] },
+  { name: 'エルフィ', attr: 3, aliases: ['elfie'] },
+  { name: '星見雅', attr: 7, aliases: ['ミヤビ', '雅', 'miyabi'] },
+  { name: 'ネコマタ', attr: 4, aliases: ['nekomata', '猫又'] },
+  { name: 'コリン', attr: 4, aliases: ['corin', 'カリン'] },
+  { name: 'パイパー', attr: 4, aliases: ['piper'] },
+  { name: 'ビリー', attr: 4, aliases: ['billy'] },
+  { name: 'ジェーン', attr: 4, aliases: ['jane doe', 'ジェーン・ドゥ'] },
+  { name: 'シーザー', attr: 4, aliases: ['caesar'] },
+  { name: 'ジャオ', attr: 4 },
+  { name: 'ナンゴンユー', attr: 4, aliases: ['nangong yu'] },
+  { name: 'スターライトビリー', attr: 4, aliases: ['starlight billy'] },
+  { name: 'プルクラ', attr: 4, aliases: ['pulchra'] },
+  { name: '千夏', attr: 4, aliases: ['chinatsu'] },
+  { name: 'ダイアリン', attr: 4, aliases: ['dialyn'] },
+  { name: 'アリス', attr: 4, aliases: ['alice'] },
+  { name: '柚葉', attr: 4 },
+  { name: '潘引壺', attr: 4, aliases: ['パンダ', 'パン', 'pan yinhu'] },
+  { name: '瞬光', attr: 8, aliases: ['shunguang'] },
+  { name: 'ニコール', attr: 5, aliases: ['nicole', 'ニコ'] },
+  { name: 'ジュユアン', attr: 5, aliases: ['zhu yuan', '朱鳶'] },
+  { name: 'アストラヤオ', attr: 5, aliases: ['astra yao', 'アストラ'] },
+  { name: 'イーシュアン', attr: 5, aliases: ['yixuan'] },
+  { name: 'イェシュングァン', attr: 5, aliases: ['ye shunguang'] },
+  { name: 'スナ', attr: 5, aliases: ['sunna'] },
+  { name: 'イーシェン', attr: 6, aliases: ['羽', 'ゆう'] },
+  { name: 'アリア', attr: 5, aliases: ['aria'] },
+  { name: 'リュシア', attr: 5, aliases: ['lucia'] },
+  { name: 'ビビアン', attr: 5, aliases: ['vivian'] },
+];
+
+const WEAPON_ROSTER = [
+  { name: 'ディープシー', attr: 1 },
+  { name: 'フォルジ・ヘルヴァ', attr: 4, aliases: ['フォージャー'] },
+  { name: 'スターシャイン', attr: 1 },
+  { name: '獅裁ち', attr: 2 },
+  { name: '磔刑・苦刑架', attr: 2 },
+  { name: '澄日策', attr: 3 },
+  { name: '含光の影', attr: 3 },
+  { name: '海の唄', attr: 3 },
+  { name: 'ウェイト・オブ・ザ・パスト', attr: 3 },
+  { name: '心弦のキオク', attr: 5 },
+  { name: '魂の揺蕩', attr: 5 },
+  { name: 'ガーディアン', attr: 5 },
+  { name: '煽風こそ炎のように', attr: 2, aliases: ['煽風'] },
+  { name: '炎心篆刃', attr: 2 },
+  { name: 'ちゃ入れ刀', attr: 4 },
+  { name: '攘臂三番', attr: 4 },
+  { name: 'フーリーノート', attr: 4 },
+  { name: 'ヴィジョン', attr: 1 },
+  { name: '激昂', attr: 2 },
+  { name: 'テイルズ・オブ・ウォリン', attr: 4 },
+];
+
+const ATTR_FILTERS = [
+  { val: '', label: 'すべて' },
+  { val: '1', label: '⚡ 電気' },
+  { val: '2', label: '🔥 炎' },
+  { val: '3', label: '❄ 氷' },
+  { val: '4', label: '⚔ 物理' },
+  { val: '5', label: '✦ エーテル' },
+];
+
+const namePickerState = {};
+
+function attrMatchesFilter(itemAttr, filterVal) {
+  if (!filterVal) return true;
+  const a = Number(itemAttr);
+  const f = Number(filterVal);
+  if (f === 3) return a === 3 || a === 7;
+  if (f === 4) return a === 4 || a === 8;
+  if (f === 5) return a === 5 || a === 6;
+  return a === f;
+}
+
+function buildSearchTerms(item) {
+  const terms = [item.name];
+  (item.aliases || []).forEach(t => terms.push(t));
+  return terms;
+}
+
+function itemMatchesQuery(item, query) {
+  if (!query) return true;
+  const q = query.trim();
+  const ql = q.toLowerCase();
+  return buildSearchTerms(item).some(t => {
+    const tl = t.toLowerCase();
+    return t.includes(q) || tl.includes(ql);
+  });
+}
+
+function getRoster(banner) {
+  return banner === 'weapon' ? WEAPON_ROSTER : AGENT_ROSTER;
+}
+
+function getFilteredRoster(banner, attrFilter, query) {
+  return getRoster(banner)
+    .filter(item => attrMatchesFilter(item.attr, attrFilter))
+    .filter(item => itemMatchesQuery(item, query))
+    .slice(0, 40);
+}
+
+function initNamePicker(cfg) {
+  const input = document.getElementById(cfg.inputId);
+  const suggest = document.getElementById(cfg.suggestId);
+  const filterRow = document.getElementById(cfg.filterId);
+  if (!input || !suggest || !filterRow) return;
+
+  const state = {
+    inputId: cfg.inputId,
+    suggestId: cfg.suggestId,
+    filterId: cfg.filterId,
+    attrFilter: '',
+    activeIdx: -1,
+    getBanner: cfg.getBanner,
+  };
+  namePickerState[cfg.inputId] = state;
+
+  filterRow.innerHTML = ATTR_FILTERS.map(f =>
+    `<button type="button" class="attr-filter-btn${f.val === '' ? ' on' : ''}" data-attr="${f.val}">${f.label}</button>`
+  ).join('');
+
+  filterRow.querySelectorAll('.attr-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterRow.querySelectorAll('.attr-filter-btn').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      state.attrFilter = btn.dataset.attr;
+      renderNameSuggest(state);
+      input.focus();
+    });
+  });
+
+  input.addEventListener('input', () => {
+    state.activeIdx = -1;
+    renderNameSuggest(state);
+  });
+  input.addEventListener('focus', () => renderNameSuggest(state));
+  input.addEventListener('keydown', (e) => handleNameSuggestKey(e, state));
+  suggest.addEventListener('mousedown', (e) => {
+    const item = e.target.closest('.name-suggest-item');
+    if (item) {
+      e.preventDefault();
+      pickNameSuggest(state, item.dataset.name);
+    }
+  });
+}
+
+function renderNameSuggest(state) {
+  const input = document.getElementById(state.inputId);
+  const suggest = document.getElementById(state.suggestId);
+  const banner = state.getBanner();
+  const list = getFilteredRoster(banner, state.attrFilter, input.value);
+
+  if (!list.length) {
+    suggest.innerHTML = '<div class="name-suggest-empty">候補がありません（手入力も可）</div>';
+    suggest.classList.add('open');
+    return;
+  }
+
+  suggest.innerHTML = list.map((item, i) =>
+    `<div class="name-suggest-item${i === state.activeIdx ? ' active' : ''}" data-name="${escapeHtmlAttr(item.name)}">
+      ${getAttrIcon(item.name)}
+      <span class="s-name">${escapeHtml(item.name)}</span>
+    </div>`
+  ).join('');
+  suggest.classList.add('open');
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escapeHtmlAttr(s) {
+  return escapeHtml(s).replace(/'/g, '&#39;');
+}
+
+function pickNameSuggest(state, name) {
+  const input = document.getElementById(state.inputId);
+  const suggest = document.getElementById(state.suggestId);
+  input.value = name;
+  suggest.classList.remove('open');
+  state.activeIdx = -1;
+}
+
+function closeNameSuggest(state) {
+  const suggest = document.getElementById(state.suggestId);
+  if (suggest) suggest.classList.remove('open');
+  state.activeIdx = -1;
+}
+
+function handleNameSuggestKey(e, state) {
+  const suggest = document.getElementById(state.suggestId);
+  if (!suggest.classList.contains('open')) {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') renderNameSuggest(state);
+    return;
+  }
+  const items = suggest.querySelectorAll('.name-suggest-item');
+  if (!items.length) return;
+
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    state.activeIdx = Math.min(state.activeIdx + 1, items.length - 1);
+    updateSuggestActive(state, items);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    state.activeIdx = Math.max(state.activeIdx - 1, 0);
+    updateSuggestActive(state, items);
+  } else if (e.key === 'Enter' && state.activeIdx >= 0) {
+    e.preventDefault();
+    pickNameSuggest(state, items[state.activeIdx].dataset.name);
+  } else if (e.key === 'Escape') {
+    closeNameSuggest(state);
+  }
+}
+
+function updateSuggestActive(state, items) {
+  items.forEach((el, i) => el.classList.toggle('active', i === state.activeIdx));
+  if (items[state.activeIdx]) items[state.activeIdx].scrollIntoView({ block: 'nearest' });
+}
+
+document.addEventListener('click', (e) => {
+  Object.values(namePickerState).forEach(state => {
+    const wrap = document.getElementById(state.inputId)?.closest('.name-picker-wrap');
+    const filter = document.getElementById(state.filterId);
+    if (wrap && !wrap.contains(e.target) && filter && !filter.contains(e.target)) {
+      closeNameSuggest(state);
+    }
+  });
+});
 
 const KEY = 'zzz_gacha_v4';
 let records = [];
@@ -1249,6 +1575,19 @@ function getVal(groupId) {
 function onBannerChange(val) {
   document.getElementById('field-lose').style.display     = val === 'agent' ? '' : 'none';
   document.getElementById('field-wpn-lose').style.display = val === 'weapon' ? '' : 'none';
+  const st = namePickerState['inp-name'];
+  if (st) {
+    closeNameSuggest(st);
+    renderNameSuggest(st);
+  }
+}
+
+function resetAttrFilter(filterId) {
+  const row = document.getElementById(filterId);
+  if (!row) return;
+  row.querySelectorAll('.attr-filter-btn').forEach(b => {
+    b.classList.toggle('on', b.dataset.attr === '');
+  });
 }
 
 function addRecord() {
@@ -1399,6 +1738,12 @@ function openEdit(id) {
   document.getElementById('edit-field-lose').style.display     = r.banner === 'agent'  ? '' : 'none';
   document.getElementById('edit-field-wpn-lose').style.display = r.banner === 'weapon' ? '' : 'none';
   document.getElementById('edit-modal').classList.add('open');
+  const st = namePickerState['edit-name'];
+  if (st) {
+    st.attrFilter = '';
+    resetAttrFilter(st.filterId);
+    closeNameSuggest(st);
+  }
 }
 
 function closeEdit() {
@@ -1526,6 +1871,21 @@ initToggle('grp-rarity');
 initToggle('grp-cons');
 initToggle('grp-lose');
 initToggle('grp-wpn-lose');
+initNamePicker({
+  inputId: 'inp-name',
+  suggestId: 'inp-suggest',
+  filterId: 'inp-attr-filter',
+  getBanner: () => getVal('grp-banner'),
+});
+initNamePicker({
+  inputId: 'edit-name',
+  suggestId: 'edit-suggest',
+  filterId: 'edit-attr-filter',
+  getBanner: () => {
+    const r = records.find(x => x.id === editingId);
+    return r ? r.banner : 'agent';
+  },
+});
 renderList();
 </script>
 
