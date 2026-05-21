@@ -596,6 +596,14 @@
 </head>
 <body>
 
+<div class="file-warning" id="auth-help" style="display:none">
+  <strong>Google で戻ったのにログインされない場合（Windows など）</strong><br>
+  ① ブラウザで <strong>ポップアップを許可</strong>（アドレス欄のブロックアイコン）<br>
+  ② Edge/Chrome の <strong>Cookie（サードパーティ）</strong> を許可<br>
+  ③ 広告ブロックをオフ<br>
+  ④ ページを再読み込みして「Google でログイン」をもう一度
+</div>
+
 <div class="file-warning" id="file-warning" style="display:none">
   <strong>file:// で開いているため Google ログインは使えません。</strong><br>
   Finder で <code>サーバーを起動.command</code> をダブルクリックするか、ターミナルで
@@ -978,16 +986,35 @@ function updateAuthUI(user) {
   }
 }
 
+function authErrorMessage(e) {
+  const code = e && e.code ? e.code : '';
+  if (code === 'auth/unauthorized-domain') {
+    return 'このサイトのドメインが Firebase で許可されていません';
+  }
+  if (code === 'auth/popup-blocked') {
+    return 'ポップアップがブロックされています。Chrome/Edge で許可するか、ページを再読み込みしてください';
+  }
+  if (code === 'auth/network-request-failed') {
+    return 'ネットワークエラーです。接続を確認してください';
+  }
+  return 'ログイン失敗: ' + ((e && e.message) || code || '不明なエラー');
+}
+
+/** スマホのみ画面遷移。PC/Windows はポップアップ優先（Gmail 選択後に戻れない対策） */
+function preferAuthRedirect() {
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
 async function signInGoogle() {
   const btn = document.getElementById('btn-login');
   btn.disabled = false;
 
   if (location.protocol === 'file:') {
-    alert('index.html を直接開いています。\n先に「サーバーを起動.command」で http://localhost:3000 を開いてください。');
+    alert('HTML を直接開いています。\nhttp://localhost:3000 または公開 URL から開いてください。');
     return;
   }
   if (!isFirebaseConfigured()) {
-    alert('firebase-config.js が読み込めていません。');
+    alert('Firebase の設定が読み込めていません。ページを再読み込みしてください。');
     return;
   }
   if (typeof firebase === 'undefined') {
@@ -1002,28 +1029,52 @@ async function signInGoogle() {
   }
 
   btn.disabled = true;
-  flash('ログイン処理中…', 'ok');
   const provider = new firebase.auth.GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
 
+  const finishFail = (e) => {
+    console.error(e);
+    flash(authErrorMessage(e), 'err');
+    btn.disabled = false;
+  };
+
+  if (preferAuthRedirect()) {
+    flash('Google のログイン画面に移動します…', 'ok');
+    try {
+      await firebase.auth().signInWithRedirect(provider);
+    } catch (e) { finishFail(e); }
+    return;
+  }
+
+  flash('ポップアップでログインします（ブロックされたら許可）…', 'ok');
   try {
-    await firebase.auth().signInWithPopup(provider);
-    flash('ログインしました', 'ok');
+    const result = await firebase.auth().signInWithPopup(provider);
+    if (result.user) {
+      flash('ログインしました', 'ok');
+      try {
+        await loadFromCloud(result.user.uid);
+      } catch (e) {
+        console.error(e);
+        flash('ログイン済み・データ読込失敗: ' + authErrorMessage(e), 'err');
+        loadLocal();
+        renderList();
+      }
+    }
+    btn.disabled = false;
   } catch (e) {
-    console.error('popup failed', e);
     if (e.code === 'auth/popup-closed-by-user') {
       flash('ログインをキャンセルしました', 'err');
       btn.disabled = false;
       return;
     }
-    try {
-      flash('別の方法でログインします…', 'ok');
-      await firebase.auth().signInWithRedirect(provider);
-      return;
-    } catch (e2) {
-      console.error('redirect failed', e2);
-      flash('ログイン失敗: ' + (e2.message || e2.code || e.message), 'err');
-      btn.disabled = false;
+    if (e.code === 'auth/popup-blocked') {
+      flash('ポップアップを許可してください。別方式を試します…', 'ok');
+      try {
+        await firebase.auth().signInWithRedirect(provider);
+        return;
+      } catch (e2) { finishFail(e2); return; }
     }
+    finishFail(e);
   }
 }
 
@@ -1103,14 +1154,33 @@ function persistCloud() {
 function initFirebaseAuth() {
   if (!isFirebaseConfigured()) return;
   firebase.initializeApp(firebaseConfig);
-  firebase.auth().getRedirectResult().catch((e) => {
-    console.error(e);
-    const btn = document.getElementById('btn-login');
-    if (btn) btn.disabled = false;
-    if (e.code && e.code !== 'auth/no-auth-event') {
-      flash('ログインに失敗: ' + (e.message || e.code), 'err');
-    }
-  });
+  firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+  firebase.auth().getRedirectResult()
+    .then(async (result) => {
+      const btn = document.getElementById('btn-login');
+      if (btn) btn.disabled = false;
+      if (!result || !result.user) return;
+      flash('ログインしました', 'ok');
+      try {
+        await loadFromCloud(result.user.uid);
+      } catch (e) {
+        console.error(e);
+        flash('ログイン済み・データ読込失敗: ' + authErrorMessage(e), 'err');
+        loadLocal();
+        renderList();
+      }
+    })
+    .catch((e) => {
+      console.error(e);
+      const btn = document.getElementById('btn-login');
+      if (btn) btn.disabled = false;
+      if (e.code && e.code !== 'auth/no-auth-event') {
+        flash(authErrorMessage(e), 'err');
+        showAuthHelpBanner();
+      }
+    });
+
   firebase.auth().onAuthStateChanged(async (user) => {
     const btn = document.getElementById('btn-login');
     if (btn) btn.disabled = false;
@@ -1124,7 +1194,7 @@ function initFirebaseAuth() {
         cloudReady = false;
         loadLocal();
         renderList();
-        flash('クラウドからの読み込みに失敗しました', 'err');
+        flash('ログイン済み（' + (user.email || '') + '）・クラウド読込失敗', 'err');
       }
     } else {
       cloudReady = false;
@@ -1132,6 +1202,11 @@ function initFirebaseAuth() {
       renderList();
     }
   });
+}
+
+function showAuthHelpBanner() {
+  const el = document.getElementById('auth-help');
+  if (el) el.style.display = 'block';
 }
 
 function selectVer(el, ver) {
@@ -1447,13 +1522,25 @@ initToggle('grp-wpn-lose');
 renderList();
 </script>
 
-<!-- Firebase: firebase-config.js を用意したら有効 -->
+<!-- Firebase（設定は index.html 内に記載。別ファイルは広告ブロックで止まることがある） -->
 <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js"></script>
 <script>
-  if (typeof firebaseConfig !== 'undefined') initFirebaseAuth();
+const firebaseConfig = {
+  apiKey: 'AIzaSyCOpf2aXd7BPLIoiFXqJRzFG2_GgmKxFSY',
+  authDomain: 'zzz-gacha-tracker.firebaseapp.com',
+  projectId: 'zzz-gacha-tracker',
+  storageBucket: 'zzz-gacha-tracker.firebasestorage.app',
+  messagingSenderId: '1052303250566',
+  appId: '1:1052303250566:web:574b285ae7b39ccd4aad07',
+  measurementId: 'G-7LZBKQ2N1Q',
+};
+if (typeof firebase !== 'undefined') {
+  initFirebaseAuth();
+} else {
+  console.error('Firebase SDK が読み込めません（広告ブロック等）');
+}
 </script>
 </body>
 </html>
