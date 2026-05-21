@@ -56,6 +56,29 @@
   }
   header h1 { font-size: 15px; font-weight: 500; letter-spacing: 0.02em; }
   header span { font-size: 12px; color: var(--text-muted); font-family: 'DM Mono', monospace; }
+  
+  .header-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+  }
+  .btn-io {
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    cursor: pointer;
+    transition: all .15s;
+    letter-spacing: 0.02em;
+  }
+  .btn-io:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
 
   /* バージョン選択バー（ヘッダー直下） */
   .ver-selector {
@@ -367,12 +390,48 @@
     from { transform: rotate(0deg); }
     to   { transform: rotate(360deg); }
   }
-  .btn-del {
-    background: none; border: none; color: var(--text-faint);
-    cursor: pointer; font-size: 16px; padding: 4px; border-radius: 4px;
-    line-height: 1; transition: color .15s;
+
+  /* ★ ボタンを左右並びに */
+  .item-actions {
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    align-items: center;
   }
-  .btn-del:hover { color: var(--loss); }
+  .btn-edit {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-faint);
+    cursor: pointer;
+    font-size: 13px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    line-height: 1;
+    transition: all .15s;
+    font-family: 'DM Mono', monospace;
+  }
+  .btn-edit:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--accent-dim);
+  }
+  .btn-del {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-faint);
+    cursor: pointer;
+    font-size: 13px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    line-height: 1;
+    transition: all .15s;
+    font-family: 'DM Mono', monospace;
+  }
+  .btn-del:hover {
+    color: var(--loss);
+    border-color: var(--loss);
+    background: var(--loss-bg);
+  }
 
   .divider {
     font-size: 10px; color: var(--text-faint); font-family: 'DM Mono', monospace;
@@ -390,10 +449,9 @@
   /* 統計バー */
   .stats-bar {
     display: flex;
-    gap: 0;
+    gap: 16px;
     border-bottom: 1px solid var(--border);
     padding: 0.6rem 1.25rem;
-    gap: 16px;
     flex-wrap: wrap;
   }
   .stat-item { display: flex; flex-direction: column; gap: 2px; }
@@ -436,15 +494,27 @@
     color: var(--text-muted); border-radius: 8px; font-size: 14px;
     cursor: pointer; font-family: 'Noto Sans JP', sans-serif;
   }
-  .btn-edit {
-    background: none; border: none; color: var(--text-faint);
-    cursor: pointer; font-size: 13px; padding: 4px 6px; border-radius: 4px;
-    line-height: 1; transition: color .15s; font-family: 'DM Mono', monospace;
+
+  /* インポート確認用スタイル */
+  .import-note {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+    line-height: 1.7;
+    margin-bottom: 1rem;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border-radius: 8px;
+    border: 1px solid var(--border);
   }
-  .btn-edit:hover { color: var(--accent); }
+  .import-note strong { color: var(--loss); }
+
+  #import-file-input { display: none; }
 
   @media (max-width: 700px) {
-    header { padding: 1rem; }
+    header { padding: 1rem; gap: 8px; }
+    .header-actions { gap: 6px; }
+    .btn-io { padding: 5px 10px; font-size: 11px; }
     .ver-selector { padding: 0.75rem 1rem 0; }
     .ver-selector-btns { flex-direction: column; gap: 6px; }
     .ver-range-btn { width: 100%; text-align: center; }
@@ -470,7 +540,13 @@
   <div class="logo-mark">ZZZ</div>
   <h1>ガチャ記録</h1>
   <span>/ Zenless Zone Zero</span>
+  <div class="header-actions">
+    <button class="btn-io" onclick="triggerImport()">↑ インポート</button>
+    <button class="btn-io" onclick="exportData()">↓ エクスポート</button>
+  </div>
 </header>
+
+<input type="file" id="import-file-input" accept=".json" onchange="handleImportFile(event)">
 
 <!-- バージョン選択 -->
 <div class="ver-selector">
@@ -631,6 +707,22 @@
   </div>
 </div>
 
+<!-- インポート確認モーダル -->
+<div class="modal-overlay" id="import-modal">
+  <div class="modal">
+    <div class="modal-title">データをインポート</div>
+    <div class="import-note">
+      <strong>⚠ 現在のデータはすべて上書きされます。</strong><br>
+      インポート前にエクスポートしてバックアップを取ることをおすすめします。
+    </div>
+    <div style="font-size:13px; color: var(--text-muted); margin-bottom: 0.5rem;" id="import-preview"></div>
+    <div class="modal-actions">
+      <button class="btn-save" onclick="confirmImport()" style="background:var(--loss);color:#fff;">上書きしてインポート</button>
+      <button class="btn-cancel" onclick="closeImport()">キャンセル</button>
+    </div>
+  </div>
+</div>
+
 <script>
 
 // キャラ名 → 属性マッピング（日本語名・英語名両対応）
@@ -762,6 +854,7 @@ const KEY = 'zzz_gacha_v4';
 let records = [];
 let currentVer   = '1';
 let bannerFilter = '';
+let pendingImport = null;
 
 function load() {
   try { records = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch(e) { records = []; }
@@ -855,6 +948,7 @@ function renderList() {
     el.innerHTML = '<div class="empty-state"><div class="e-icon">◇</div><div>記録がありません</div></div>';
     document.getElementById('count-label').textContent = '0 件';
     document.getElementById('s-count').textContent = '';
+    document.getElementById('stats-bar').style.display = 'none';
     return;
   }
 
@@ -891,7 +985,7 @@ function renderList() {
         <div class="record-name">${attrIcon} ${r.name} ${rareBadge}${consBadge}${losePart}</div>
         <div class="record-sub">${bannerLbl}</div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+      <div class="item-actions">
         <button class="btn-edit" onclick="openEdit(${r.id})" title="編集">✎</button>
         <button class="btn-del" onclick="deleteRecord(${r.id})" title="削除">×</button>
       </div>
@@ -1002,6 +1096,65 @@ document.getElementById('edit-modal').addEventListener('click', function(e) {
       btn.classList.add('on');
     });
   });
+});
+
+// ★★★ エクスポート/インポート機能
+function exportData() {
+  if (!records.length) {
+    alert('記録がありません');
+    return;
+  }
+  const blob = new Blob([JSON.stringify(records, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `zzz-gacha-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  flash('エクスポートしました', 'ok');
+}
+
+function triggerImport() {
+  document.getElementById('import-file-input').click();
+}
+
+function handleImportFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!Array.isArray(data)) throw new Error('Invalid format');
+      pendingImport = data;
+      document.getElementById('import-preview').textContent = `${data.length} 件のデータが見つかりました`;
+      document.getElementById('import-modal').classList.add('open');
+    } catch (err) {
+      alert('ファイルの読み込みに失敗しました。正しいJSONファイルを選択してください。');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+function confirmImport() {
+  if (!pendingImport) return;
+  records = pendingImport;
+  pendingImport = null;
+  save();
+  closeImport();
+  renderList();
+  flash('インポートしました', 'ok');
+}
+
+function closeImport() {
+  pendingImport = null;
+  document.getElementById('import-modal').classList.remove('open');
+}
+
+document.getElementById('import-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeImport();
 });
 
 load();
