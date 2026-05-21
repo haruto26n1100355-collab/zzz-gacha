@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZZZ ガチャ記録</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0e0f11;
+    --surface: #16181c;
+    --surface2: #1e2026;
+    --border: rgba(255,255,255,0.08);
+    --border-hover: rgba(255,255,255,0.15);
+    --text: #e8eaf0;
+    --text-muted: #7a7f8e;
+    --text-faint: #404550;
+    --accent: #c8a84b;
+    --accent-dim: rgba(200,168,75,0.12);
+    --s-rank: #e8b84b;
+    --a-rank: #7aa2e8;
+    --win: #4bba7a;
+    --loss: #e8604b;
+    --win-bg: rgba(75,186,122,0.1);
+    --loss-bg: rgba(232,96,75,0.1);
+  }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 1.25rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo-mark {
+    width: 32px; height: 32px;
+    border: 1.5px solid var(--accent);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+  header h1 { font-size: 15px; font-weight: 500; letter-spacing: 0.02em; }
+  header span { font-size: 12px; color: var(--text-muted); font-family: 'DM Mono', monospace; }
+
+  /* バージョン選択バー（ヘッダー直下） */
+  .ver-selector {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 1rem 2rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .ver-selector-label {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-faint);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .ver-selector-btns {
+    display: flex;
+    gap: 8px;
+  }
+  .ver-range-btn {
+    padding: 7px 22px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-family: 'DM Mono', monospace;
+    cursor: pointer;
+    transition: all .15s;
+    letter-spacing: 0.02em;
+  }
+  .ver-range-btn:hover { border-color: var(--border-hover); color: var(--text); }
+  .ver-range-btn.on {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 1.25rem 2rem 2rem;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .panel-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-family: 'DM Mono', monospace;
+  }
+  .panel-body { padding: 1.25rem; }
+
+  .field { margin-bottom: 1rem; }
+  .field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    font-family: 'DM Mono', monospace;
+  }
+  input[type=text], input[type=number] {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 14px;
+    padding: 8px 12px;
+    height: 38px;
+    outline: none;
+    transition: border-color .15s;
+  }
+  input[type=text]:focus, input[type=number]:focus { border-color: var(--accent); }
+  input::placeholder { color: var(--text-faint); }
+
+  .toggle-group { display: flex; gap: 6px; flex-wrap: wrap; }
+  .toggle-btn {
+    padding: 5px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 13px;
+    cursor: pointer;
+    font-family: 'Noto Sans JP', sans-serif;
+    transition: all .15s;
+  }
+  .toggle-btn:hover { border-color: var(--border-hover); color: var(--text); }
+  .toggle-btn.on {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .btn-submit {
+    width: 100%;
+    padding: 10px;
+    background: var(--accent);
+    color: #0e0f11;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Noto Sans JP', sans-serif;
+    letter-spacing: 0.04em;
+    transition: opacity .15s, transform .1s;
+    margin-top: 1.25rem;
+  }
+  .btn-submit:hover { opacity: 0.9; }
+  .btn-submit:active { transform: scale(0.98); }
+
+  #flash {
+    font-size: 12px;
+    text-align: center;
+    margin-top: 8px;
+    height: 16px;
+    font-family: 'DM Mono', monospace;
+    transition: opacity .3s;
+    opacity: 0;
+  }
+  #flash.show { opacity: 1; }
+  #flash.ok { color: var(--win); }
+  #flash.err { color: var(--loss); }
+
+  .history-panel { grid-column: 2; }
+
+  .filter-row {
+    display: flex;
+    gap: 8px;
+    padding: 0.6rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+  }
+  .filter-label { font-size: 11px; color: var(--text-faint); font-family: 'DM Mono', monospace; }
+  .filter-btn {
+    padding: 3px 10px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    transition: all .15s;
+  }
+  .filter-btn:hover { color: var(--text); border-color: var(--border-hover); }
+  .filter-btn.on { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+  #record-list { padding: 0.75rem 1.25rem; display: flex; flex-direction: column; gap: 6px; min-height: 200px; }
+
+  .empty-state {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 8px; color: var(--text-faint); font-size: 13px; padding: 3rem 0;
+    font-family: 'DM Mono', monospace;
+  }
+  .empty-state .e-icon { font-size: 24px; opacity: 0.3; }
+
+  .record-item {
+    display: grid;
+    grid-template-columns: 48px 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    animation: slideIn .2s ease;
+    transition: border-color .15s;
+  }
+  .record-item:hover { border-color: var(--border-hover); }
+  @keyframes slideIn {
+    from { opacity:0; transform: translateY(-4px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+
+  .pull-count {
+    text-align: right;
+    font-family: 'DM Mono', monospace;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--text-muted);
+    line-height: 1;
+  }
+  .pull-count .unit { font-size: 10px; color: var(--text-faint); display: block; text-align: right; margin-top: 2px; }
+
+  .record-name {
+    font-size: 14px; font-weight: 500; color: var(--text);
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  }
+  .record-sub { font-size: 11px; color: var(--text-muted); margin-top: 3px; font-family: 'DM Mono', monospace; }
+
+  .badge {
+    font-size: 10px; font-weight: 700; padding: 1px 6px;
+    border-radius: 4px; font-family: 'DM Mono', monospace; letter-spacing: 0.04em;
+  }
+  .badge-s { background: rgba(232,184,75,0.15); color: var(--s-rank); }
+  .badge-a { background: rgba(122,162,232,0.15); color: var(--a-rank); }
+  .badge-win { background: var(--win-bg); color: var(--win); }
+  .badge-loss { background: var(--loss-bg); color: var(--loss); }
+  .badge-wpn { background: rgba(255,255,255,0.05); color: var(--text-muted); }
+  .badge-cons { background: rgba(180,140,255,0.15); color: #b48cff; border: 1px solid rgba(180,140,255,0.25); }
+  .badge-75 {
+    position: relative;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    background-image: linear-gradient(90deg, #c084a0, #a07cc8, #7ca8c8, #7cc8a8, #c8b87c, #c084a0);
+    background-size: 200% auto;
+    animation: rainbow-shift 4s linear infinite;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .badge-50 {
+    position: relative;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    background-image: linear-gradient(90deg, #c084a0, #a07cc8, #7ca8c8, #7cc8a8, #c8b87c, #c084a0);
+    background-size: 200% auto;
+    animation: rainbow-shift 4s linear infinite;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  @keyframes rainbow-shift {
+    0%   { background-position: 0% center; }
+    100% { background-position: 200% center; }
+  }
+
+  .btn-del {
+    background: none; border: none; color: var(--text-faint);
+    cursor: pointer; font-size: 16px; padding: 4px; border-radius: 4px;
+    line-height: 1; transition: color .15s;
+  }
+  .btn-del:hover { color: var(--loss); }
+
+  .divider {
+    font-size: 10px; color: var(--text-faint); font-family: 'DM Mono', monospace;
+    letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 0 2px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .count-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.6rem 1.25rem; border-top: 1px solid var(--border);
+    font-size: 11px; color: var(--text-faint); font-family: 'DM Mono', monospace;
+  }
+
+  @media (max-width: 700px) {
+    header { padding: 1rem; }
+    .ver-selector { padding: 0.75rem 1rem 0; }
+    .ver-selector-btns { flex-direction: column; gap: 6px; }
+    .ver-range-btn { width: 100%; text-align: center; }
+    .container { grid-template-columns: 1fr; padding: 0.75rem 1rem 2rem; gap: 1rem; }
+    .history-panel { grid-column: 1; }
+    .panel-body { padding: 1rem; }
+    .toggle-group { gap: 5px; }
+    .toggle-btn { padding: 5px 10px; font-size: 12px; }
+    .filter-row { flex-wrap: wrap; gap: 6px; padding: 0.5rem 1rem; }
+    #record-list { padding: 0.5rem 1rem; }
+    .record-item { padding: 8px 10px; gap: 8px; }
+    .pull-count { font-size: 17px; min-width: 36px; }
+    .record-name { font-size: 13px; gap: 4px; }
+    .record-sub { font-size: 10px; }
+    .badge { font-size: 9px; padding: 1px 5px; }
+    .btn-submit { padding: 12px; font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-mark">ZZZ</div>
+  <h1>ガチャ記録</h1>
+  <span>/ Zenless Zone Zero</span>
+</header>
+
+<!-- バージョン選択 -->
+<div class="ver-selector">
+  <div class="ver-selector-label">version</div>
+  <div class="ver-selector-btns">
+    <button class="ver-range-btn on" data-ver="1" onclick="selectVer(this,'1')">1.0 〜 1.7</button>
+    <button class="ver-range-btn" data-ver="2" onclick="selectVer(this,'2')">2.0 〜 2.8</button>
+    <button class="ver-range-btn" data-ver="3" onclick="selectVer(this,'3')">3.0 〜</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 入力フォーム -->
+  <div class="panel">
+    <div class="panel-header">新しく記録する</div>
+    <div class="panel-body">
+
+      <div class="field">
+        <label>バナー種別</label>
+        <div class="toggle-group" id="grp-banner">
+          <button class="toggle-btn on" data-val="agent">エージェント</button>
+          <button class="toggle-btn" data-val="weapon">邦ドラム（武器）</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>キャラ / 武器名</label>
+        <input type="text" id="inp-name" placeholder="例：アンビー、ディープシー">
+      </div>
+
+      <div class="field">
+        <label>何連目で出たか</label>
+        <input type="number" id="inp-pull" min="1" max="80" placeholder="例：34">
+      </div>
+
+      <div class="field">
+        <label>レア度</label>
+        <div class="toggle-group" id="grp-rarity">
+          <button class="toggle-btn on" data-val="S">Sランク</button>
+          <button class="toggle-btn" data-val="A">Aランク</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>凸数</label>
+        <div class="toggle-group" id="grp-cons">
+          <button class="toggle-btn on" data-val="0">0凸</button>
+          <button class="toggle-btn" data-val="1">1凸</button>
+          <button class="toggle-btn" data-val="2">2凸</button>
+          <button class="toggle-btn" data-val="3">3凸</button>
+          <button class="toggle-btn" data-val="4">4凸</button>
+          <button class="toggle-btn" data-val="5">5凸</button>
+          <button class="toggle-btn" data-val="6">6凸</button>
+        </div>
+      </div>
+
+      <div class="field" id="field-lose">
+        <label>すり抜け</label>
+        <div class="toggle-group" id="grp-lose">
+          <button class="toggle-btn on" data-val="win">確定</button>
+          <button class="toggle-btn" data-val="loss">すり抜け</button>
+          <button class="toggle-btn" data-val="-">50%</button>
+        </div>
+      </div>
+
+      <div class="field" id="field-wpn-lose" style="display:none">
+        <label>すり抜け</label>
+        <div class="toggle-group" id="grp-wpn-lose">
+          <button class="toggle-btn on" data-val="win">確定</button>
+          <button class="toggle-btn" data-val="loss">すり抜け</button>
+          <button class="toggle-btn" data-val="-">75%</button>
+        </div>
+      </div>
+
+      <button class="btn-submit" onclick="addRecord()">記録する</button>
+      <div id="flash"></div>
+    </div>
+  </div>
+
+  <!-- 履歴 -->
+  <div class="panel history-panel">
+    <div class="panel-header">履歴</div>
+
+    <div class="filter-row">
+      <span class="filter-label">バナー：</span>
+      <button class="filter-btn on" data-val="" onclick="setBannerFilter(this,'')">すべて</button>
+      <button class="filter-btn" data-val="agent" onclick="setBannerFilter(this,'agent')">エージェント</button>
+      <button class="filter-btn" data-val="weapon" onclick="setBannerFilter(this,'weapon')">邦ドラム</button>
+    </div>
+
+    <div id="record-list"></div>
+    <div class="count-bar">
+      <span id="count-label">0 件</span>
+      <span id="s-count"></span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const KEY = 'zzz_gacha_v4';
+let records = [];
+let currentVer   = '1';
+let bannerFilter = '';
+
+function load() {
+  try { records = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch(e) { records = []; }
+}
+function save() {
+  localStorage.setItem(KEY, JSON.stringify(records));
+}
+
+function selectVer(el, ver) {
+  document.querySelectorAll('.ver-range-btn').forEach(b => b.classList.remove('on'));
+  el.classList.add('on');
+  currentVer = ver;
+  renderList();
+}
+
+function setBannerFilter(el, val) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('on'));
+  el.classList.add('on');
+  bannerFilter = val;
+  renderList();
+}
+
+function initToggle(groupId) {
+  const grp = document.getElementById(groupId);
+  grp.querySelectorAll('.toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      grp.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      if (groupId === 'grp-banner') onBannerChange(btn.dataset.val);
+    });
+  });
+}
+
+function getVal(groupId) {
+  const btn = document.querySelector('#' + groupId + ' .toggle-btn.on');
+  return btn ? btn.dataset.val : '';
+}
+
+function onBannerChange(val) {
+  document.getElementById('field-lose').style.display     = val === 'agent' ? '' : 'none';
+  document.getElementById('field-wpn-lose').style.display = val === 'weapon' ? '' : 'none';
+}
+
+function addRecord() {
+  const name   = document.getElementById('inp-name').value.trim();
+  const pull   = parseInt(document.getElementById('inp-pull').value);
+  const banner = getVal('grp-banner');
+  const rarity = getVal('grp-rarity');
+  const cons   = getVal('grp-cons');
+  const lose    = getVal('grp-lose');
+  const wpnLose = getVal('grp-wpn-lose');
+
+  if (!name)             { flash('名前を入力してください', 'err'); return; }
+  if (!pull || pull < 1) { flash('連数を入力してください', 'err'); return; }
+
+  records.unshift({
+    id: Date.now(),
+    ver: currentVer,
+    banner, name, pull, rarity, cons,
+    lose:    banner === 'agent'  ? lose    : '-',
+    wpnLose: banner === 'weapon' ? wpnLose : '-',
+  });
+  save();
+  flash('記録しました', 'ok');
+  document.getElementById('inp-name').value = '';
+  document.getElementById('inp-pull').value = '';
+  renderList();
+}
+
+function deleteRecord(id) {
+  records = records.filter(r => r.id !== id);
+  save();
+  renderList();
+}
+
+function flash(msg, type) {
+  const el = document.getElementById('flash');
+  el.textContent = msg;
+  el.className = 'show ' + type;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+function renderList() {
+  let list = records.filter(r => r.ver === currentVer);
+  if (bannerFilter) list = list.filter(r => r.banner === bannerFilter);
+
+  const el = document.getElementById('record-list');
+
+  if (!list.length) {
+    el.innerHTML = '<div class="empty-state"><div class="e-icon">◇</div><div>記録がありません</div></div>';
+    document.getElementById('count-label').textContent = '0 件';
+    document.getElementById('s-count').textContent = '';
+    return;
+  }
+
+  const agentRecs  = list.filter(r => r.banner === 'agent');
+  const weaponRecs = list.filter(r => r.banner === 'weapon');
+
+  function makeItem(r) {
+    const rareBadge = r.rarity === 'S'
+      ? '<span class="badge badge-s">S</span>'
+      : '<span class="badge badge-a">A</span>';
+    const loseBadge = r.lose === 'win'
+      ? '<span class="badge badge-win">確定</span>'
+      : r.lose === 'loss'
+        ? '<span class="badge badge-loss">すり抜け</span>'
+        : r.lose === '-'
+          ? '<span class="badge badge-50">50%</span>'
+          : '';
+    const wpnLoseBadge = r.wpnLose === 'win'
+      ? '<span class="badge badge-win">確定</span>'
+      : r.wpnLose === 'loss'
+        ? '<span class="badge badge-loss">すり抜け</span>'
+        : r.wpnLose === '-'
+          ? '<span class="badge badge-75">75%</span>'
+          : '';
+    const consBadge = (r.cons !== undefined && r.cons !== '0')
+      ? `<span class="badge badge-cons">${r.cons}凸</span>` : '';
+    const bannerLbl = r.banner === 'agent' ? 'エージェント' : '邦ドラム';
+    const losePart  = r.banner === 'agent' ? loseBadge : wpnLoseBadge;
+
+    return `<div class="record-item">
+      <div class="pull-count">${r.pull}<span class="unit">連</span></div>
+      <div class="record-info">
+        <div class="record-name">${r.name} ${rareBadge}${consBadge}${losePart}</div>
+        <div class="record-sub">${bannerLbl}</div>
+      </div>
+      <button class="btn-del" onclick="deleteRecord(${r.id})" title="削除">×</button>
+    </div>`;
+  }
+
+  let html = '';
+  if (!bannerFilter) {
+    if (agentRecs.length) {
+      html += `<div class="divider">エージェント</div>`;
+      html += agentRecs.map(makeItem).join('');
+    }
+    if (weaponRecs.length) {
+      html += `<div class="divider">邦ドラム</div>`;
+      html += weaponRecs.map(makeItem).join('');
+    }
+  } else {
+    html = list.map(makeItem).join('');
+  }
+
+  el.innerHTML = html;
+
+  const sCount = list.filter(r => r.rarity === 'S').length;
+  document.getElementById('count-label').textContent = list.length + ' 件';
+  document.getElementById('s-count').textContent = sCount ? `Sランク ${sCount} 件` : '';
+}
+
+load();
+initToggle('grp-banner');
+initToggle('grp-rarity');
+initToggle('grp-cons');
+initToggle('grp-lose');
+initToggle('grp-wpn-lose');
+renderList();
+</script>
+</body>
+</html>
