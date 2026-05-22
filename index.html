@@ -873,7 +873,7 @@
 // キャラ名 → 属性マッピング（日本語名・英語名両対応）
 const CHAR_ATTR = {
   // Electric
-  'アンビー':1,'anby':1,
+  'アンビー':1,'安比':1,'anby':1,
   'セス':1,'seth':1,
   'チンイー':1,'qingyi':1,'青衣':1,
   'リナ':1,'rina':1,
@@ -891,6 +891,8 @@ const CHAR_ATTR = {
   'ルーシー':2,'lucy':2,
   'ソルジャー11':2,'soldier 11':2,'ソルジャー１１':2,'11号':2,
   'バーニス':2,'burnice':2,
+  'ライター':2,'ライト':2,'lighter':2,
+  'エヴリン':2,'イヴリン':2,'evelyn':2,
   'クレタ':2,'claret':2,
   '盤岳':2,'banyue':2,
   '狛野真斗':2,'真斗':2,'狛野':2,'まなと':2,'manato':2,
@@ -909,16 +911,18 @@ const CHAR_ATTR = {
   // Physical
   'ネコマタ':4,'nekomata':4,'猫又':4,
   'パイパー':4,'piper':4,
+  'コリン':4,'カリン':4,'corin':4,
   'ビリー':4,'billy':4,
   'ジェーン':4,'jane':4,'ジェーン・ドゥ':4,'jane doe':4,
   'シーザー':4,'caesar':4,
-  'S級ビリー':2,'starlight billy':2,'billy starlight':2,
+  'スターライトビリー':2,'S級ビリー':2,'Ｓ級ビリー':2,'starlight billy':2,'billy starlight':2,
   'プルクラ':4,'pulchra':4,
   '千夏':4,'chinatsu':4,
   'ダイアリン':4,'dialyn':4,
   'アリス':4,'alice':4,
   '柚葉':4,'yuzuha2':4,
   '潘引壺':4,'パンダ':4,'パン':4,'pan yinhu':4,
+  'ナンゴンユー':4,'南宮羽':4,'南宫羽':4,'nangong yu':4,
   '瞬光':8,'trigger2':8,'shunguang':8,
   // Ether
   'ニコール':5,'ニコ':5,'nicole':5,
@@ -927,7 +931,7 @@ const CHAR_ATTR = {
   'イーシュアン':5,'yixuan':5,
   'イェシュングァン':5,'ye shunguang':5,
   'スナ':5,'sunna':5,
-  'イーシェン':6,'yixuan':6,'羽':5,'ゆう':5,
+  'イーシェン':6,'儀玄':6,'yixuan':6,'羽':5,'ゆう':5,
   'アリア':5,'aria':5,
   'リュシア':5,'lucia':5,
   'ビビアン':5,'vivian':5,
@@ -944,9 +948,21 @@ const ATTR_INFO = {
   8: { cls: 'attr-trigger',  icon: '✦',  label: '物理（瞬光）' },
 };
 
+function resolveAttrId(name) {
+  const raw = name.trim();
+  if (!raw) return null;
+  if (CHAR_ATTR[raw]) return CHAR_ATTR[raw];
+  const lower = raw.toLowerCase();
+  if (CHAR_ATTR[lower]) return CHAR_ATTR[lower];
+  const norm = raw.replace(/\s+/g, '').toLowerCase();
+  for (const [k, id] of Object.entries(CHAR_ATTR)) {
+    if (k.replace(/\s+/g, '').toLowerCase() === norm) return id;
+  }
+  return null;
+}
+
 function getAttrIcon(name) {
-  const key = name.trim().toLowerCase();
-  const attrId = CHAR_ATTR[key] || CHAR_ATTR[name.trim()];
+  const attrId = resolveAttrId(name);
   if (!attrId) return '<span class="attr-icon attr-unknown">？</span>';
   const a = ATTR_INFO[attrId];
   if (attrId === 8) {
