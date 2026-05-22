@@ -436,12 +436,16 @@
     border-radius: 50%;
     font-size: 11px;
     flex-shrink: 0;
+    -webkit-text-fill-color: currentColor;
+    background-image: none;
+    background-clip: border-box;
   }
+  .record-name .attr-icon { isolation: isolate; }
   .attr-electric { background: rgba(122,162,232,0.2); color: #7aa2e8; border: 1px solid rgba(122,162,232,0.3); }
   .attr-fire     { background: rgba(232,120,75,0.2);  color: #e8784b; border: 1px solid rgba(232,120,75,0.3); }
-  .attr-ice      { background: rgba(100,200,240,0.2); color: #64c8f0; border: 1px solid rgba(100,200,240,0.3); }
-  .attr-physical { background: rgba(200,168,75,0.2);  color: #c8a84b; border: 1px solid rgba(200,168,75,0.3); }
-  .attr-ether    { background: rgba(180,140,255,0.2); color: #b48cff; border: 1px solid rgba(180,140,255,0.3); }
+  .attr-ice      { background: rgba(100,200,240,0.2); color: #64c8f0; border: 1px solid rgba(100,200,240,0.3); padding-bottom: 1px; }
+  .attr-physical { background: rgba(200,168,75,0.2);  color: #c8a84b; border: 1px solid rgba(200,168,75,0.3); padding-bottom: 3px; }
+  .attr-ether    { background: rgba(180,140,255,0.2); color: #b48cff; border: 1px solid rgba(180,140,255,0.3); padding-bottom: 1px; }
   .attr-unknown  { background: rgba(255,255,255,0.05); color: var(--text-faint); border: 1px solid var(--border); }
   .attr-trigger {
     background: rgba(180,140,255,0.12);
@@ -931,7 +935,8 @@ const CHAR_ATTR = {
   'イーシュアン':5,'yixuan':5,
   'イェシュングァン':5,'ye shunguang':5,
   'スナ':5,'sunna':5,
-  'イーシェン':6,'儀玄':6,'yixuan':6,'羽':5,'ゆう':5,
+  'イーシェン':6,'儀玄':6,'yixuan':6,
+  '南宮羽':5,'ゆう':5,
   'アリア':5,'aria':5,
   'リュシア':5,'lucia':5,
   'ビビアン':5,'vivian':5,
@@ -948,17 +953,34 @@ const ATTR_INFO = {
   8: { cls: 'attr-trigger',  icon: '✦',  label: '物理（瞬光）' },
 };
 
+function normalizeAttrName(name) {
+  return name.trim().normalize('NFKC').replace(/^[「『(（\s]+|[」』)）\s]+$/g, '');
+}
+
 function resolveAttrId(name) {
-  const raw = name.trim();
+  const raw = normalizeAttrName(name);
   if (!raw) return null;
-  if (CHAR_ATTR[raw]) return CHAR_ATTR[raw];
+
+  if (CHAR_ATTR[raw] != null) return CHAR_ATTR[raw];
   const lower = raw.toLowerCase();
-  if (CHAR_ATTR[lower]) return CHAR_ATTR[lower];
-  const norm = raw.replace(/\s+/g, '').toLowerCase();
-  for (const [k, id] of Object.entries(CHAR_ATTR)) {
-    if (k.replace(/\s+/g, '').toLowerCase() === norm) return id;
+  if (CHAR_ATTR[lower] != null) return CHAR_ATTR[lower];
+
+  for (const item of [...AGENT_ROSTER, ...WEAPON_ROSTER]) {
+    if (item.name === raw) return item.attr;
+    if ((item.aliases || []).some(a => a === raw || a.toLowerCase() === lower)) return item.attr;
   }
-  return null;
+
+  const norm = raw.replace(/\s+/g, '').toLowerCase();
+  let exactId = null;
+  let exactKeyLen = 0;
+  for (const [k, id] of Object.entries(CHAR_ATTR)) {
+    const kn = k.replace(/\s+/g, '').toLowerCase();
+    if (kn === norm && k.length >= exactKeyLen) {
+      exactId = id;
+      exactKeyLen = k.length;
+    }
+  }
+  return exactId;
 }
 
 function getAttrIcon(name) {
@@ -1079,6 +1101,15 @@ const WEAPON_ROSTER = [
   { name: '激昂', attr: 2 },
   { name: 'テイルズ・オブ・ウォリン', attr: 4 },
 ];
+
+/** 候補リストの属性を CHAR_ATTR に同期（表記ゆれ・別名も含む） */
+function syncCharAttrFromRosters() {
+  for (const item of [...AGENT_ROSTER, ...WEAPON_ROSTER]) {
+    CHAR_ATTR[item.name] = item.attr;
+    (item.aliases || []).forEach(a => { CHAR_ATTR[a] = item.attr; });
+  }
+}
+syncCharAttrFromRosters();
 
 const ATTR_FILTERS = [
   { val: '', label: 'すべて' },
