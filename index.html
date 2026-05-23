@@ -650,6 +650,62 @@
     .record-sub { font-size: 10px; }
     .badge { font-size: 9px; padding: 1px 5px; }
     .btn-submit { padding: 12px; font-size: 15px; }
+    /* --- 追加：ゲーム切り替えドロップダウンのスタイル --- */
+  .game-selector-container {
+    position: relative;
+    display: inline-block;
+    margin-left: 12px;
+  }
+  .game-selector-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 500;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .game-selector-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--border-hover);
+  }
+  .chevron-icon { transition: transform 0.2s; }
+  .game-selector-container.open .chevron-icon { transform: rotate(180deg); }
+  .game-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    min-width: 160px;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+  }
+  .game-selector-container.open .game-dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  .game-dropdown-item {
+    padding: 10px 14px;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 13px;
+    transition: background 0.15s, color 0.15s;
+  }
+  .game-dropdown-item:hover { background: var(--surface2); color: var(--accent); }
+  html[data-game="genshin"] { --accent: #4ba8c8; --accent-dim: rgba(75,168,200,0.12); }
   }
 </style>
 </head>
@@ -672,6 +728,16 @@
 
 <header>
   <div class="logo-mark">ZZZ</div>
+  <div class="game-selector-container">
+    <button id="btn-game-selector" class="game-selector-btn">
+      <span id="current-game-label">ZZZ</span>
+      <svg class="chevron-icon" viewBox="0 0 24 24" width="14" height="14"><path d="M7 10l5 5 5-5H7z" fill="currentColor"/></svg>
+    </button>
+    <div id="game-dropdown" class="game-dropdown-menu">
+      <div class="game-dropdown-item" data-game="zzz">zzz</div>
+      <div class="game-dropdown-item" data-game="genshin">原神</div>
+    </div>
+  </div>
   <h1>ガチャ記録</h1>
   <span>/ Zenless Zone Zero</span>
   <div class="header-actions">
@@ -1935,6 +2001,205 @@ if (typeof firebase !== 'undefined') {
   initFirebaseAuth();
 } else {
   console.error('Firebase SDK が読み込めません（広告ブロック等）');
+  // --- 追加：原神用の簡易マスターデータ（サジェスト用） ---
+const GENSHIN_MASTER = {
+  character: [
+    { name: '神里綾華', attr: '氷' }, { name: '鍾離', attr: '岩' }, { name: '雷電将軍', attr: '雷' },
+    { name: 'ナヒーダ', attr: '草' }, { name: 'フリーナ', attr: '水' }, { name: 'ヌヴィレット', attr: '水' },
+    { name: '楓原万葉', attr: '風' }, { name: '夜蘭', attr: '水' }
+  ],
+  wpn: [
+    { name: '霧切の廻光', attr: '全て' }, { name: '護摩の杖', attr: '全て' }, { name: '草薙の稲光', attr: '全て' }
+  ]
+};
+
+let currentGame = 'zzz';
+const selectorContainer = document.querySelector('.game-selector-container');
+const btnGameSelector = document.getElementById('btn-game-selector');
+const currentGameLabel = document.getElementById('current-game-label');
+
+// ドロップダウンの開閉制御
+btnGameSelector.addEventListener('click', (e) => { e.stopPropagation(); selectorContainer.classList.toggle('open'); });
+document.addEventListener('click', () => selectorContainer.classList.remove('open'));
+
+document.querySelectorAll('.game-dropdown-item').forEach(item => {
+  item.addEventListener('click', (e) => {
+    const selectedGame = e.target.getAttribute('data-game');
+    if (selectedGame !== currentGame) switchGame(selectedGame);
+    selectorContainer.classList.remove('open');
+  });
+});
+
+// ゲーム切り替えコア処理
+function switchGame(game) {
+  currentGame = game;
+  document.documentElement.setAttribute('data-game', game);
+  currentGameLabel.textContent = game === 'zzz' ? 'ZZZ' : '原神';
+  document.querySelector('header h1').textContent = game === 'zzz' ? 'ZZZ ガチャ記録' : '原神 ガチャ記録';
+
+  const b1 = document.getElementById('btn-banner-1');
+  const b2 = document.getElementById('btn-banner-2');
+  const b3 = document.getElementById('btn-banner-3');
+  const r1 = document.getElementById('btn-rarity-1');
+  const r2 = document.getElementById('btn-rarity-2');
+  const r3 = document.getElementById('btn-rarity-3');
+
+  if (game === 'zzz') {
+    b1.textContent = 'エージェント'; b1.setAttribute('data-val', 'agent');
+    b2.textContent = '音動機'; b2.setAttribute('data-val', 'wpn');
+    if (b3) b3.style.display = 'inline-block';
+    r1.textContent = 'Sランク';
+    r2.textContent = 'Aランク';
+    if (r3) r3.style.display = 'none'; // Bランクは元々非表示方針
+    document.getElementById('lbl-stat-s').textContent = 'Sランク合計';
+    document.getElementById('lbl-stat-a').textContent = 'Aランク合計';
+    document.getElementById('lbl-wpn-lose').textContent = '状態（音動機）';
+  } else {
+    b1.textContent = 'キャラクター'; b1.setAttribute('data-val', 'character');
+    b2.textContent = '武器'; b2.setAttribute('data-val', 'wpn');
+    if (b3) b3.style.display = 'none';
+    if (getVal('grp-banner') === 'bangboo') setActive('grp-banner', b1);
+    r1.textContent = '★5';
+    r2.textContent = '★4';
+    if (r3) r3.style.display = 'none';
+    document.getElementById('lbl-stat-s').textContent = '★5合計';
+    document.getElementById('lbl-stat-a').textContent = '★4合計';
+    document.getElementById('lbl-wpn-lose').textContent = '状態（武器）';
+  }
+
+  // 状態ボタンの文言更新
+  updateStateLabels();
+
+  // データの再読み込みと再描画
+  if (typeof user !== 'undefined' && user) {
+    fetchFirebase();
+  } else {
+    loadLocal();
+    renderList();
+  }
+}
+
+function updateStateLabels() {
+  const banner = getVal('grp-banner');
+  const l1 = document.getElementById('btn-lose-1');
+  const l2 = document.getElementById('btn-lose-2');
+  const l3 = document.getElementById('btn-lose-3');
+  const wl1 = document.getElementById('btn-wpn-lose-1');
+  const wl2 = document.getElementById('btn-wpn-lose-2');
+  const wl3 = document.getElementById('btn-wpn-lose-3');
+
+  if (currentGame === 'zzz') {
+    if (l1) { l1.textContent = '確定'; l1.setAttribute('data-val', '確定'); }
+    if (l2) { l2.textContent = 'すり抜け'; l2.setAttribute('data-val', 'すり抜け'); }
+    if (l3) { l3.textContent = '50%'; l3.setAttribute('data-val', '50%'); }
+    if (wl1) { wl1.textContent = '確定'; wl1.setAttribute('data-val', '確定'); }
+    if (wl2) { wl2.textContent = 'すり抜け'; wl2.setAttribute('data-val', 'すり抜け'); }
+    if (wl3) { wl3.textContent = '75%'; wl3.setAttribute('data-val', '75%'); }
+  } else {
+    if (l1) { l1.textContent = '確定'; l1.setAttribute('data-val', '確定'); }
+    if (l2) { l2.textContent = 'すり抜け'; l2.setAttribute('data-val', 'すり抜け'); }
+    if (l3) { l3.textContent = '50%'; l3.setAttribute('data-val', '50%'); }
+    if (wl1) { wl1.textContent = '限定'; wl1.setAttribute('data-val', '限定'); }
+    if (wl2) { wl2.textContent = '恒常'; wl2.setAttribute('data-val', '恒常'); }
+    if (wl3) { wl3.textContent = '命定値1'; wl3.setAttribute('data-val', '命定値1'); }
+  }
+}
+
+// 既存の関数をフックして原神用ストレージ・コレクション・サジェストに自動対応させる
+const _loadLocal = loadLocal;
+loadLocal = function() {
+  const key = currentGame === 'zzz' ? 'gacha_records' : 'gacha_records_genshin';
+  const s = localStorage.getItem(key);
+  records = s ? JSON.parse(s) : [];
+};
+
+const _saveLocal = saveLocal;
+saveLocal = function() {
+  const key = currentGame === 'zzz' ? 'gacha_records' : 'gacha_records_genshin';
+  localStorage.setItem(key, JSON.stringify(records));
+};
+
+// Firebaseのコレクション名切り替え対応
+if (typeof db !== 'undefined') {
+  const _fetchFirebase = fetchFirebase;
+  fetchFirebase = async function() {
+    if (!user) return;
+    try {
+      const col = currentGame === 'zzz' ? 'records' : 'genshin_records';
+      const snap = await db.collection('users').doc(user.uid).collection(col).get();
+      records = snap.docs.map(d => d.data());
+      renderList();
+    } catch(e) {
+      console.error(e);
+      loadLocal();
+      renderList();
+    }
+  };
+
+  const _syncSave = syncSave;
+  syncSave = async function() {
+    if (!user) { saveLocal(); renderList(); return; }
+    try {
+      const col = currentGame === 'zzz' ? 'records' : 'genshin_records';
+      const b = db.collection('users').doc(user.uid).collection(col);
+      const snap = await b.get();
+      const batch = db.batch();
+      snap.docs.forEach(d => batch.delete(d.ref));
+      records.forEach(r => { const ref = b.doc(r.id); batch.set(ref, r); });
+      await batch.commit();
+      renderList();
+    } catch (e) { console.error(e); alert('Cloud Sync Error'); }
+  };
+}
+
+// ガチャタイプ切り替え時に状態文言を連動させる
+document.getElementById('grp-banner').querySelectorAll('.btn-toggle').forEach(b => {
+  b.addEventListener('click', () => { setTimeout(updateStateLabels, 10); });
+});
+
+// サジェスト機能を原神データにも対応させる
+const _initNamePicker = initNamePicker;
+initNamePicker = function(cfg) {
+  const inp = document.getElementById(cfg.inputId);
+  const sug = document.getElementById(cfg.suggestId);
+  const flt = document.getElementById(cfg.filterId);
+
+  function update() {
+    const b = cfg.getBanner();
+    let list = [];
+    if (currentGame === 'zzz') {
+      if (b === 'agent') list = AGENT_ROSTER || [];
+      if (b === 'wpn') list = WEAPON_ROSTER || [];
+      if (b === 'bangboo') list = (typeof BANGBOO_ROSTER !== 'undefined') ? BANGBOO_ROSTER : [];
+    } else {
+      list = GENSHIN_MASTER[b] || [];
+    }
+    const f = flt ? flt.querySelector('.btn-toggle.active').getAttribute('data-val') : '';
+    const v = inp.value.toLowerCase();
+
+    const res = list.filter(x => {
+      if (f && x.attr !== '全て' && x.attr !== f && currentGame === 'zzz') return false;
+      if (v && !x.name.toLowerCase().includes(v)) return false;
+      return true;
+    });
+
+    if (res.length === 0) { sug.style.display = 'none'; return; }
+    sug.innerHTML = res.map(x => `<div class="suggest-item">${x.name}</div>`).join('');
+    sug.style.display = 'block';
+  }
+
+  inp.addEventListener('focus', update);
+  inp.addEventListener('input', update);
+  if (flt) {
+    flt.querySelectorAll('.btn-toggle').forEach(btn => {
+      btn.addEventListener('click', () => setTimeout(update, 50));
+    });
+  }
+};
+
+// 初回バインドの上書き適用
+initNamePicker({ inputId: 'inp-name', suggestId: 'inp-suggest', filterId: 'inp-attr-filter', getBanner: () => getVal('grp-banner') });
+initNamePicker({ inputId: 'edit-name', suggestId: 'edit-suggest', filterId: 'inp-attr-filter', getBanner: () => { const r = records.find(x => x.id === editingId); return r ? r.banner : 'agent'; } });
 }
 </script>
 </body>
