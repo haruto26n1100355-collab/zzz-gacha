@@ -727,10 +727,10 @@
 </div>
 
 <header>
-  <div class="logo-mark">ZZZ</div>
   <div class="game-selector-container">
-    <button id="btn-game-selector" class="game-selector-btn">
-      <span id="current-game-label">ZZZ</span>
+    <button id="btn-game-selector" class="game-selector-btn" style="padding:0;border:none;background:transparent;display:flex;align-items:center;gap:8px;cursor:pointer;">
+      <div class="logo-mark" style="margin:0;">ZZZ</div>
+      <span id="current-game-label" style="font-size:14px;font-family:'DM Mono',monospace;color:var(--text-muted);">ZZZ</span>
       <svg class="chevron-icon" viewBox="0 0 24 24" width="14" height="14"><path d="M7 10l5 5 5-5H7z" fill="currentColor"/></svg>
     </button>
     <div id="game-dropdown" class="game-dropdown-menu">
@@ -2035,6 +2035,8 @@ function switchGame(game) {
   currentGame = game;
   document.documentElement.setAttribute('data-game', game);
   currentGameLabel.textContent = game === 'zzz' ? 'ZZZ' : '原神';
+  const logoMark = document.querySelector('.logo-mark');
+  if (logoMark) logoMark.textContent = game === 'zzz' ? 'ZZZ' : '原神';
   document.querySelector('header h1').textContent = game === 'zzz' ? 'ZZZ ガチャ記録' : '原神 ガチャ記録';
 
   const b1 = document.getElementById('btn-banner-1');
