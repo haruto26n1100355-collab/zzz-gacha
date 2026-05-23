@@ -1330,7 +1330,8 @@ document.addEventListener('click', (e) => {
   });
 });
 
-const KEY = 'zzz_gacha_v4';
+let _currentGame = 'zzz';
+const KEY = () => _currentGame === 'zzz' ? 'zzz_gacha_v4' : 'genshin_gacha_v1';
 let records = [];
 let currentVer   = '1';
 let recordVer    = '1';
@@ -1345,10 +1346,10 @@ let cloudReady = false;
 let cloudSaving = false;
 
 function loadLocal() {
-  try { records = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch(e) { records = []; }
+  try { records = JSON.parse(localStorage.getItem(KEY()) || '[]'); } catch(e) { records = []; }
 }
 function saveLocal() {
-  localStorage.setItem(KEY, JSON.stringify(records));
+  localStorage.setItem(KEY(), JSON.stringify(records));
 }
 
 function load() { loadLocal(); }
@@ -2011,6 +2012,7 @@ document.querySelectorAll('.game-dropdown-item').forEach(item => {
 // ゲーム切り替えコア処理
 function switchGame(game) {
   currentGame = game;
+  _currentGame = game; // KEY()でストレージキーを切り替えるために同期
   document.documentElement.setAttribute('data-game', game);
   currentGameLabel.textContent = game === 'zzz' ? 'ZZZ' : '原神';
   const logoMark = document.querySelector('.logo-mark');
