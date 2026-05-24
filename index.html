@@ -2017,6 +2017,30 @@ const firebaseConfig = {
   measurementId: 'G-7LZBKQ2N1Q',
 };
 if (typeof firebase !== 'undefined') {
+  // ゲームセレクターのドロップダウン制御（Firebase の外に置く）
+const selectorContainer = document.querySelector('.game-selector-container');
+const btnGameSelector   = document.getElementById('btn-game-selector');
+
+btnGameSelector.addEventListener('click', (e) => {
+  e.stopPropagation();
+  selectorContainer.classList.toggle('open');
+});
+
+document.addEventListener('click', () => selectorContainer.classList.remove('open'));
+
+document.querySelectorAll('.game-dropdown-item').forEach(item => {
+  item.addEventListener('click', (e) => {
+    const selectedGame = e.target.getAttribute('data-game');
+    _currentGame = selectedGame;
+    // ロゴ文字を更新
+    document.querySelector('.logo-mark').textContent = selectedGame === 'zzz' ? 'ZZZ' : '原神';
+    document.querySelector('header span').textContent =
+      selectedGame === 'zzz' ? '/ Zenless Zone Zero' : '/ Genshin Impact';
+    selectorContainer.classList.remove('open');
+    loadLocal();
+    renderList();
+  });
+});
   initFirebaseAuth();
 } else {
   console.error('Firebase SDK が読み込めません（広告ブロック等）');
