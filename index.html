@@ -812,11 +812,11 @@
 <!-- バージョン選択 -->
 <div class="ver-selector">
   <div class="ver-selector-label">version</div>
-  <div class="ver-selector-btns">
-    <button class="ver-range-btn" data-ver="all" onclick="selectVer(this,'all')">ALL</button>
-    <button class="ver-range-btn on" data-ver="1" onclick="selectVer(this,'1')">1.0 〜 1.7</button>
-    <button class="ver-range-btn" data-ver="2" onclick="selectVer(this,'2')">2.0 〜 2.8</button>
-    <button class="ver-range-btn" data-ver="3" onclick="selectVer(this,'3')">3.0 〜</button>
+  <div class="ver-selector-btns" id="ver-selector-btns">
+    <button class="ver-range-btn" id="ver-btn-all" data-ver="all" onclick="selectVer(this,'all')">ALL</button>
+    <button class="ver-range-btn on" id="ver-btn-1" data-ver="1" onclick="selectVer(this,'1')">1.0 〜 1.7</button>
+    <button class="ver-range-btn" id="ver-btn-2" data-ver="2" onclick="selectVer(this,'2')">2.0 〜 2.8</button>
+    <button class="ver-range-btn" id="ver-btn-3" data-ver="3" onclick="selectVer(this,'3')">3.0 〜</button>
   </div>
 </div>
 
@@ -839,7 +839,7 @@
         <label>キャラ / 武器名</label>
         <div class="attr-filter-row" id="inp-attr-filter"></div>
         <div class="name-picker-wrap">
-          <input type="text" id="inp-name" placeholder="例：雅、青衣、朱鳶（一部入力で候補表示）" autocomplete="off">
+          <input type="text" id="inp-name" placeholder="例：雅、青衣、朱鳶（一部入力で候補表示）" autocomplete="off" data-placeholder-zzz="例：雅、青衣、朱鳶（一部入力で候補表示）" data-placeholder-genshin="例：楓原万葉、胡桃、ヌヴィレット（一部入力で候補表示）">
           <div class="name-suggest-list" id="inp-suggest"></div>
         </div>
       </div>
@@ -2241,6 +2241,33 @@ function switchGameUI(game) {
   if (btnAgent) { btnAgent.classList.add('on'); }
   if (btnWeapon) { btnWeapon.classList.remove('on'); }
   onBannerChange(currentBanner);
+
+  // プレースホルダーを切り替え
+  const inpName = document.getElementById('inp-name');
+  if (inpName) {
+    inpName.placeholder = isG
+      ? (inpName.dataset.placeholderGenshin || '例：楓原万葉、胡桃、ヌヴィレット（一部入力で候補表示）')
+      : (inpName.dataset.placeholderZzz    || '例：雅、青衣、朱鳶（一部入力で候補表示）');
+  }
+
+  // バージョンボタンを切り替え
+  const v1 = document.getElementById('ver-btn-1');
+  const v2 = document.getElementById('ver-btn-2');
+  const v3 = document.getElementById('ver-btn-3');
+  if (isG) {
+    if (v1) v1.textContent = '5.0 〜 5.8';
+    if (v2) v2.textContent = 'Luna1 〜 Luna4';
+    if (v3) v3.textContent = 'Luna5 〜';
+  } else {
+    if (v1) v1.textContent = '1.0 〜 1.7';
+    if (v2) v2.textContent = '2.0 〜 2.8';
+    if (v3) v3.textContent = '3.0 〜';
+  }
+  // バージョン選択をリセット（ALL に戻す）
+  document.querySelectorAll('.ver-range-btn').forEach(b => b.classList.remove('on'));
+  const allBtn = document.getElementById('ver-btn-all');
+  if (allBtn) allBtn.classList.add('on');
+  currentVer = 'all';
 }
 
 // ===== テーマ切り替え =====
