@@ -29,6 +29,42 @@
     --loss-bg: rgba(232,96,75,0.1);
   }
 
+  html[data-theme="light"] {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface2: #eef0f4;
+    --border: rgba(0,0,0,0.09);
+    --border-hover: rgba(0,0,0,0.18);
+    --text: #1a1c22;
+    --text-muted: #5a6070;
+    --text-faint: #aab0be;
+    --accent: #b8922a;
+    --accent-dim: rgba(184,146,42,0.10);
+    --s-rank: #b07010;
+    --a-rank: #2a5ab8;
+    --win: #1a8a4a;
+    --loss: #c83020;
+    --win-bg: rgba(26,138,74,0.10);
+    --loss-bg: rgba(200,48,32,0.10);
+  }
+
+  .btn-theme {
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .btn-theme:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
+
   body {
     font-family: 'Noto Sans JP', sans-serif;
     background: var(--bg);
@@ -757,8 +793,9 @@
     </div>
   </div>
   <h1>ガチャ記録</h1>
-  <span>/ Zenless Zone Zero</span>
+  <span id="header-subtitle">/ Zenless Zone Zero</span>
   <div class="header-actions">
+    <button class="btn-theme" id="btn-theme" onclick="toggleTheme()" title="ライト/ダーク切り替え">🌙</button>
     <button class="btn-io" onclick="triggerImport()">↑ インポート</button>
     <button class="btn-io" onclick="exportData()">↓ エクスポート</button>
     <div class="auth-wrap" id="auth-wrap">
@@ -793,8 +830,8 @@
       <div class="field">
         <label>バナー種別</label>
         <div class="toggle-group" id="grp-banner">
-          <button class="toggle-btn on" data-val="agent">エージェント</button>
-          <button class="toggle-btn" data-val="weapon">音動機（武器）</button>
+          <button class="toggle-btn on" id="btn-banner-agent" data-val="agent">エージェント</button>
+          <button class="toggle-btn" id="btn-banner-weapon" data-val="weapon">音動機（武器）</button>
         </div>
       </div>
 
@@ -815,8 +852,8 @@
       <div class="field">
         <label>レア度</label>
         <div class="toggle-group" id="grp-rarity">
-          <button class="toggle-btn on" data-val="S">Sランク</button>
-          <button class="toggle-btn" data-val="A">Aランク</button>
+          <button class="toggle-btn on" id="btn-rarity-s" data-val="S">Sランク</button>
+          <button class="toggle-btn" id="btn-rarity-a" data-val="A">Aランク</button>
         </div>
       </div>
 
@@ -843,11 +880,11 @@
       </div>
 
       <div class="field" id="field-wpn-lose" style="display:none">
-        <label>すり抜け</label>
+        <label id="lbl-wpn-lose">すり抜け</label>
         <div class="toggle-group" id="grp-wpn-lose">
-          <button class="toggle-btn on" data-val="win">確定</button>
-          <button class="toggle-btn" data-val="loss">すり抜け</button>
-          <button class="toggle-btn" data-val="-">75%</button>
+          <button class="toggle-btn on" id="btn-wpn-lose-win" data-val="win">確定</button>
+          <button class="toggle-btn" id="btn-wpn-lose-loss" data-val="loss">すり抜け</button>
+          <button class="toggle-btn" id="btn-wpn-lose-dash" data-val="-">75%</button>
         </div>
       </div>
 
@@ -863,8 +900,8 @@
     <div class="filter-row">
       <span class="filter-label">バナー：</span>
       <button class="filter-btn on" data-val="" onclick="setBannerFilter(this,'')">すべて</button>
-      <button class="filter-btn" data-val="agent" onclick="setBannerFilter(this,'agent')">エージェント</button>
-      <button class="filter-btn" data-val="weapon" onclick="setBannerFilter(this,'weapon')">音動機</button>
+      <button class="filter-btn" id="filter-btn-agent" data-val="agent" onclick="setBannerFilter(this,'agent')">エージェント</button>
+      <button class="filter-btn" id="filter-btn-weapon" data-val="weapon" onclick="setBannerFilter(this,'weapon')">音動機</button>
     </div>
 
     <div class="stats-bar" id="stats-bar" style="display:none">
@@ -1852,8 +1889,10 @@ function getVal(groupId) {
 }
 
 function onBannerChange(val) {
-  document.getElementById('field-lose').style.display     = val === 'agent' ? '' : 'none';
-  document.getElementById('field-wpn-lose').style.display = val === 'weapon' ? '' : 'none';
+  const isChar = (val === 'agent' || val === 'character');
+  const isWpn  = (val === 'weapon');
+  document.getElementById('field-lose').style.display     = isChar ? '' : 'none';
+  document.getElementById('field-wpn-lose').style.display = isWpn  ? '' : 'none';
   const st = namePickerState['inp-name'];
   if (st) {
     closeNameSuggest(st);
@@ -1885,7 +1924,7 @@ function addRecord() {
     id: Date.now(),
     ver: recordVer,
     banner, name, pull, rarity, cons,
-    lose:    banner === 'agent'  ? lose    : '-',
+    lose:    (banner === 'agent' || banner === 'character') ? lose    : '-',
     wpnLose: banner === 'weapon' ? wpnLose : '-',
   });
   save();
@@ -1923,14 +1962,14 @@ function renderList() {
     return;
   }
 
-  const agentRecs  = list.filter(r => r.banner === 'agent');
+  const agentRecs  = list.filter(r => r.banner === 'agent' || r.banner === 'character');
   const weaponRecs = list.filter(r => r.banner === 'weapon');
 
   function makeItem(r) {
     const attrIcon  = getAttrIcon(r.name);
     const rareBadge = r.rarity === 'S'
-      ? '<span class="badge badge-s">S</span>'
-      : '<span class="badge badge-a">A</span>';
+      ? `<span class="badge badge-s">${_currentGame === 'genshin' ? '★5' : 'S'}</span>`
+      : `<span class="badge badge-a">${_currentGame === 'genshin' ? '★4' : 'A'}</span>`;
     const loseBadge = r.lose === 'win'
       ? '<span class="badge badge-win">確定</span>'
       : r.lose === 'loss'
@@ -1943,12 +1982,19 @@ function renderList() {
       : r.wpnLose === 'loss'
         ? '<span class="badge badge-loss">すり抜け</span>'
         : r.wpnLose === '-'
-          ? '<span class="badge badge-75">75%</span>'
+          ? `<span class="badge badge-75">${_currentGame === 'genshin' ? '恒常' : '75%'}</span>`
+          : r.wpnLose === 'fate1'
+          ? '<span class="badge badge-75">命定値1</span>'
+          : r.wpnLose === 'limited'
+          ? '<span class="badge badge-win">限定</span>'
           : '';
     const consBadge = (r.cons !== undefined && r.cons !== '0')
       ? `<span class="badge badge-cons">${r.cons}凸</span>` : '';
-    const bannerLbl = r.banner === 'agent' ? 'エージェント' : '音動機';
-    const losePart  = r.banner === 'agent' ? loseBadge : wpnLoseBadge;
+    const bannerLbl = r.banner === 'agent' ? 'エージェント'
+      : r.banner === 'character' ? 'キャラクター'
+      : r.banner === 'weapon' ? (_currentGame === 'genshin' ? '武器' : '音動機')
+      : r.banner;
+    const losePart  = (r.banner === 'agent' || r.banner === 'character') ? loseBadge : wpnLoseBadge;
 
     return `<div class="record-item">
       <div class="pull-count">${r.pull}<span class="unit">連</span></div>
@@ -1966,11 +2012,11 @@ function renderList() {
   let html = '';
   if (!bannerFilter) {
     if (agentRecs.length) {
-      html += `<div class="divider">エージェント</div>`;
+      html += `<div class="divider">${_currentGame === 'genshin' ? 'キャラクター' : 'エージェント'}</div>`;
       html += agentRecs.map(makeItem).join('');
     }
     if (weaponRecs.length) {
-      html += `<div class="divider">音動機</div>`;
+      html += `<div class="divider">${_currentGame === 'genshin' ? '武器' : '音動機'}</div>`;
       html += weaponRecs.map(makeItem).join('');
     }
   } else {
@@ -1999,7 +2045,8 @@ function renderList() {
   }
 
   document.getElementById('count-label').textContent = list.length + ' 件';
-  document.getElementById('s-count').textContent = sCount ? `Sランク ${sCount} 件` : '';
+  const rankLabel = _currentGame === 'genshin' ? '★5' : 'Sランク';
+  document.getElementById('s-count').textContent = sCount ? `${rankLabel} ${sCount} 件` : '';
 }
 
 let editingId = null;
@@ -2041,7 +2088,7 @@ function saveEdit() {
   r.pull    = pull;
   r.rarity  = getEditVal('edit-grp-rarity');
   r.cons    = getEditVal('edit-grp-cons');
-  r.lose    = r.banner === 'agent'  ? getEditVal('edit-grp-lose')     : '-';
+  r.lose    = (r.banner === 'agent' || r.banner === 'character') ? getEditVal('edit-grp-lose')     : '-';
   r.wpnLose = r.banner === 'weapon' ? getEditVal('edit-grp-wpn-lose') : '-';
   save();
   closeEdit();
@@ -2144,6 +2191,75 @@ if (location.protocol === 'file:') {
 }
 document.getElementById('btn-login').addEventListener('click', signInGoogle);
 
+// ===== ゲームUI切り替え =====
+function switchGameUI(game) {
+  const isG = game === 'genshin';
+
+  // ロゴ・サブタイトル
+  document.querySelector('.logo-mark').textContent = isG ? '原神' : 'ZZZ';
+  document.getElementById('header-subtitle').textContent =
+    isG ? '/ Genshin Impact' : '/ Zenless Zone Zero';
+
+  // バナー種別ボタン
+  const btnAgent  = document.getElementById('btn-banner-agent');
+  const btnWeapon = document.getElementById('btn-banner-weapon');
+  if (btnAgent)  { btnAgent.textContent  = isG ? 'キャラクター' : 'エージェント'; btnAgent.dataset.val  = isG ? 'character' : 'agent'; }
+  if (btnWeapon) { btnWeapon.textContent = isG ? '武器'         : '音動機（武器）'; }
+
+  // レア度ボタン
+  const btnS = document.getElementById('btn-rarity-s');
+  const btnA = document.getElementById('btn-rarity-a');
+  if (btnS) btnS.textContent = isG ? '★5' : 'Sランク';
+  if (btnA) btnA.textContent = isG ? '★4' : 'Aランク';
+
+  // 武器すり抜けボタン（原神：限定/恒常/命定値1）
+  const wWin  = document.getElementById('btn-wpn-lose-win');
+  const wLoss = document.getElementById('btn-wpn-lose-loss');
+  const wDash = document.getElementById('btn-wpn-lose-dash');
+  if (wWin)  { wWin.textContent  = isG ? '限定'    : '確定';   wWin.dataset.val  = isG ? 'limited' : 'win'; }
+  if (wLoss) { wLoss.textContent = isG ? '恒常'    : 'すり抜け'; wLoss.dataset.val = isG ? '-'       : 'loss'; }
+  if (wDash) { wDash.textContent = isG ? '命定値1' : '75%';    wDash.dataset.val = isG ? 'fate1'   : '-'; }
+  // 選択状態をリセット
+  if (wWin) { [wWin, wLoss, wDash].forEach(b => b && b.classList.remove('on')); wWin.classList.add('on'); }
+
+  // 履歴フィルターのラベル
+  const fAgent  = document.getElementById('filter-btn-agent');
+  const fWeapon = document.getElementById('filter-btn-weapon');
+  if (fAgent)  fAgent.textContent  = isG ? 'キャラクター' : 'エージェント';
+  if (fWeapon) fWeapon.textContent = isG ? '武器'         : '音動機';
+
+  // 統計バーのSランクラベル
+  const stS = document.querySelector('#stats-bar .s-label');
+  // （シンプルにst-sのラベルを更新）
+  const stSEl = document.getElementById('st-s');
+  if (stSEl && stSEl.previousElementSibling) {
+    stSEl.previousElementSibling.textContent = isG ? '★5' : 'Sランク';
+  }
+
+  // バナー切り替え時のフィールド表示を現在の選択に合わせてリセット
+  const currentBanner = isG ? 'character' : 'agent';
+  if (btnAgent) { btnAgent.classList.add('on'); }
+  if (btnWeapon) { btnWeapon.classList.remove('on'); }
+  onBannerChange(currentBanner);
+}
+
+// ===== テーマ切り替え =====
+function toggleTheme() {
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  const next = isLight ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  document.getElementById('btn-theme').textContent = next === 'light' ? '☀️' : '🌙';
+  localStorage.setItem('gacha_theme', next);
+}
+(function() {
+  const saved = localStorage.getItem('gacha_theme');
+  if (saved === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+    const btn = document.getElementById('btn-theme');
+    if (btn) btn.textContent = '☀️';
+  }
+})();
+
 loadLocal();
 initToggle('grp-banner');
 initToggle('grp-rarity');
@@ -2198,9 +2314,7 @@ document.querySelectorAll('.game-dropdown-item').forEach(item => {
   item.addEventListener('click', (e) => {
     const selectedGame = e.target.getAttribute('data-game');
     _currentGame = selectedGame;
-    document.querySelector('.logo-mark').textContent = selectedGame === 'zzz' ? 'ZZZ' : '原神';
-    document.querySelector('header span').textContent =
-      selectedGame === 'zzz' ? '/ Zenless Zone Zero' : '/ Genshin Impact';
+    switchGameUI(selectedGame);
     selectorContainer.classList.remove('open');
     refreshNamePickers();
     loadLocal();
@@ -2210,6 +2324,22 @@ document.querySelectorAll('.game-dropdown-item').forEach(item => {
   initFirebaseAuth();
 } else {
   console.error('Firebase SDK が読み込めません（広告ブロック等）');
+
+const selectorContainer2 = document.querySelector('.game-selector-container');
+const btnGameSelector2 = document.getElementById('btn-game-selector');
+btnGameSelector2.addEventListener('click', (e) => { e.stopPropagation(); selectorContainer2.classList.toggle('open'); });
+document.addEventListener('click', () => selectorContainer2.classList.remove('open'));
+document.querySelectorAll('.game-dropdown-item').forEach(item => {
+  item.addEventListener('click', (e) => {
+    const selectedGame = e.target.getAttribute('data-game');
+    _currentGame = selectedGame;
+    switchGameUI(selectedGame);
+    selectorContainer2.classList.remove('open');
+    if (typeof refreshNamePickers === 'function') refreshNamePickers();
+    loadLocal();
+    renderList();
+  });
+});
   // --- 追加：原神用の簡易マスターデータ（サジェスト用） ---
 const GENSHIN_MASTER = {
   character: [
