@@ -29,6 +29,43 @@
     --loss-bg: rgba(232,96,75,0.1);
   }
 
+  html[data-theme="light"] {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface2: #eef0f4;
+    --border: rgba(0,0,0,0.09);
+    --border-hover: rgba(0,0,0,0.18);
+    --text: #1a1c22;
+    --text-muted: #5a6070;
+    --text-faint: #aab0be;
+    --accent: #b8922a;
+    --accent-dim: rgba(184,146,42,0.1);
+    --s-rank: #c8921a;
+    --a-rank: #3a72c8;
+    --win: #2a9a5a;
+    --loss: #d84030;
+    --win-bg: rgba(42,154,90,0.1);
+    --loss-bg: rgba(216,64,48,0.1);
+  }
+
+  /* テーマトグルボタン */
+  .btn-theme {
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all .15s;
+    line-height: 1;
+  }
+  .btn-theme:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
+
   body {
     font-family: 'Noto Sans JP', sans-serif;
     background: var(--bg);
@@ -756,9 +793,10 @@
       <div class="game-dropdown-item" data-game="genshin">原神</div>
     </div>
   </div>
-  <h1>ガチャ記録</h1>
-  <span>/ Zenless Zone Zero</span>
+  <h1 id="header-title">ガチャ記録</h1>
+  <span id="header-subtitle">/ Zenless Zone Zero</span>
   <div class="header-actions">
+    <button class="btn-theme" id="btn-theme" onclick="toggleTheme()" title="ライト／ダーク切り替え">🌙</button>
     <button class="btn-io" onclick="triggerImport()">↑ インポート</button>
     <button class="btn-io" onclick="exportData()">↓ エクスポート</button>
     <div class="auth-wrap" id="auth-wrap">
@@ -1978,6 +2016,24 @@ if (location.protocol === 'file:') {
 }
 document.getElementById('btn-login').addEventListener('click', signInGoogle);
 
+// テーマ切り替え
+function toggleTheme() {
+  const html = document.documentElement;
+  const isLight = html.getAttribute('data-theme') === 'light';
+  const next = isLight ? 'dark' : 'light';
+  html.setAttribute('data-theme', next);
+  document.getElementById('btn-theme').textContent = next === 'light' ? '☀️' : '🌙';
+  localStorage.setItem('gacha_theme', next);
+}
+(function() {
+  const saved = localStorage.getItem('gacha_theme');
+  if (saved === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+    const btn = document.getElementById('btn-theme');
+    if (btn) btn.textContent = '☀️';
+  }
+})();
+
 loadLocal();
 initToggle('grp-banner');
 initToggle('grp-rarity');
@@ -2034,7 +2090,7 @@ document.querySelectorAll('.game-dropdown-item').forEach(item => {
     _currentGame = selectedGame;
     // ロゴ文字を更新
     document.querySelector('.logo-mark').textContent = selectedGame === 'zzz' ? 'ZZZ' : '原神';
-    document.querySelector('header span').textContent =
+    document.getElementById('header-subtitle').textContent =
       selectedGame === 'zzz' ? '/ Zenless Zone Zero' : '/ Genshin Impact';
     selectorContainer.classList.remove('open');
     loadLocal();
