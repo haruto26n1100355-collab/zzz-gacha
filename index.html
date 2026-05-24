@@ -523,6 +523,15 @@
   .attr-physical { background: rgba(200,168,75,0.2);  color: #c8a84b; border: 1px solid rgba(200,168,75,0.3); padding-bottom: 3px; }
   .attr-ether    { background: rgba(180,140,255,0.2); color: #b48cff; border: 1px solid rgba(180,140,255,0.3); padding-bottom: 1px; }
   .attr-unknown  { background: rgba(255,255,255,0.05); color: var(--text-faint); border: 1px solid var(--border); }
+  /* 原神元素アイコン */
+  .attr-g_pyro    { background: rgba(232,100,60,0.18);  color: #e8644b; border: 1px solid rgba(232,100,60,0.35); }
+  .attr-g_hydro   { background: rgba(60,160,232,0.18);  color: #4ba0e8; border: 1px solid rgba(60,160,232,0.35); }
+  .attr-g_cryo    { background: rgba(140,220,255,0.18); color: #70d8ff; border: 1px solid rgba(140,220,255,0.35); }
+  .attr-g_electro { background: rgba(180,100,255,0.18); color: #c070ff; border: 1px solid rgba(180,100,255,0.35); }
+  .attr-g_dendro  { background: rgba(100,200,60,0.18);  color: #70c840; border: 1px solid rgba(100,200,60,0.35); }
+  .attr-g_geo     { background: rgba(220,180,60,0.18);  color: #ddb840; border: 1px solid rgba(220,180,60,0.35); }
+  .attr-g_anemo   { background: rgba(60,220,180,0.18);  color: #40d8b0; border: 1px solid rgba(60,220,180,0.35); }
+  .attr-g_any     { background: rgba(200,200,200,0.12); color: #b0b8c8; border: 1px solid rgba(200,200,200,0.2); }
   .attr-trigger {
     background: rgba(180,140,255,0.12);
     border: 1px solid rgba(180,140,255,0.35);
@@ -1105,7 +1114,36 @@ function resolveAttrId(name) {
   return exactId;
 }
 
+// 原神の元素→アイコン定義
+const GENSHIN_ATTR_INFO = {
+  'g_pyro':    { cls: 'attr-g_pyro',    icon: '🔥', label: '炎' },
+  'g_hydro':   { cls: 'attr-g_hydro',   icon: '💧', label: '水' },
+  'g_cryo':    { cls: 'attr-g_cryo',    icon: '❄',  label: '氷' },
+  'g_electro': { cls: 'attr-g_electro', icon: '⚡', label: '雷' },
+  'g_dendro':  { cls: 'attr-g_dendro',  icon: '🌿', label: '草' },
+  'g_geo':     { cls: 'attr-g_geo',     icon: '🪨', label: '岩' },
+  'g_anemo':   { cls: 'attr-g_anemo',   icon: '🌀', label: '風' },
+  'g_any':     { cls: 'attr-g_any',     icon: '✦',  label: '万能' },
+};
+
 function getAttrIcon(name, banner) {
+  // 原神モードの場合はGENSHIN_CHAR_ROSTER / GENSHIN_WEAPON_ROSTERを検索
+  if (_currentGame === 'genshin') {
+    const roster = (banner === 'weapon') ? GENSHIN_WEAPON_ROSTER : GENSHIN_CHAR_ROSTER;
+    const normalized = normalizeAttrName(name);
+    const lower = normalized.toLowerCase();
+    for (const item of roster) {
+      const matched = item.name === normalized || item.name.toLowerCase() === lower
+        || (item.aliases || []).some(a => a === normalized || a.toLowerCase() === lower);
+      if (matched) {
+        const g = GENSHIN_ATTR_INFO[item.attr] || { cls: 'attr-unknown', icon: '？', label: item.attr };
+        return `<span class="attr-icon ${g.cls}" title="${g.label}">${g.icon}</span>`;
+      }
+    }
+    // ロスターにない場合も汎用表示
+    return `<span class="attr-icon attr-unknown" title="${banner === 'weapon' ? '武器' : 'キャラクター'}">✦</span>`;
+  }
+
   // 音動機バナーの場合はWEAPON_ROSTERを優先して検索
   if (banner === 'weapon') {
     const normalized = normalizeAttrName(name);
@@ -1330,13 +1368,13 @@ const GENSHIN_CHAR_ROSTER = [
   { name: 'マーヴィカ', attr: 'g_pyro', aliases: ['ma-vika', 'まーゔぃか'] },
   { name: '嘉明', attr: 'g_pyro', aliases: ['gamin', 'がみん'] },
   { name: 'ニコ', attr: 'g_pyro', aliases: ['niko', 'にこ'] },
-  { name: 'ドゥリン', attr: 'g_dendro', aliases: ['durin', 'でぅりん'] },
+  { name: 'ドゥリン', attr: 'g_pyro', aliases: ['durin', 'でぅりん'] },
   // 水
   { name: 'バーバラ', attr: 'g_hydro', aliases: ['ばーばら', 'ba-bara'] },
   { name: 'モナ', attr: 'g_hydro', aliases: ['もな', 'mona'] },
   { name: 'タルタリヤ', attr: 'g_hydro', aliases: ['たるたりあ', 'tarutaria'] },
   { name: '行秋', attr: 'g_hydro', aliases: ['ゆくあき', 'yukuaki'] },
-  { name: '神里綾人', attr: 'g_dendro', aliases: ['あやと', 'ayato', 'kamisato'] },
+  { name: '神里綾人', attr: 'g_hydro', aliases: ['あやと', 'ayato', 'kamisato'] },
   { name: 'ニィロウ', attr: 'g_hydro', aliases: ['にいろう', 'niirou'] },
   { name: 'フリーナ', attr: 'g_hydro', aliases: ['ふりーな', 'furi-na'] },
   { name: 'ヌヴィレット', attr: 'g_hydro', aliases: ['ぬゔぃれっと', 'nuviretto'] },
@@ -1351,18 +1389,18 @@ const GENSHIN_CHAR_ROSTER = [
   // 氷
   { name: 'ガイア', attr: 'g_cryo', aliases: ['がいあ', 'gaia'] },
   { name: '重雲', attr: 'g_cryo', aliases: ['tyouun', 'ちょううん'] },
-  { name: '七七', attr: 'g_electro', aliases: ['nana', 'なな'] },
+  { name: '七七', attr: 'g_cryo', aliases: ['nana', 'なな'] },
   { name: '神里綾華', attr: 'g_cryo', aliases: ['ayaka', 'kamisato', 'あやか', 'かみさと'] },
-  { name: 'ディオナ', attr: 'g_electro', aliases: ['diona', 'でぃおな'] },
+  { name: 'ディオナ', attr: 'g_cryo', aliases: ['diona', 'でぃおな'] },
   { name: '甘雨', attr: 'g_cryo', aliases: ['kannu', 'かんう'] },
   { name: 'ロサリア', attr: 'g_cryo', aliases: ['rosaria', 'ろさりあ'] },
   { name: 'アーロイ', attr: 'g_cryo', aliases: ['a-roi', 'あーろい'] },
   { name: '申鶴', attr: 'g_cryo', aliases: ['sinkaku', 'しんかく'] },
-  { name: 'ミカ', attr: 'g_geo', aliases: ['mika', 'みか'] },
+  { name: 'ミカ', attr: 'g_cryo', aliases: ['mika', 'みか'] },
   { name: 'レイラ', attr: 'g_cryo', aliases: ['reira', 'れいら'] },
-  { name: 'シャルロット', attr: 'g_geo', aliases: ['syarurotto', 'しゃろっと'] },
+  { name: 'シャルロット', attr: 'g_cryo', aliases: ['syarurotto', 'しゃろっと'] },
   { name: 'フレミネ', attr: 'g_cryo', aliases: ['huremine', 'ふれみね'] },
-  { name: 'りおせすり', attr: 'g_cryo', aliases: ['riosesuri', 'りおせすり'] },
+  { name: 'リオセスリ', attr: 'g_cryo', aliases: ['riosesuri', 'りおせすり'] },
   { name: 'スカーク', attr: 'g_cryo', aliases: ['suka-ku', 'すかーく'] },
   { name: 'シトラリ', attr: 'g_cryo', aliases: ['sitorari', 'しとらり'] },
   { name: 'エスコフィエ', attr: 'g_cryo', aliases: ['esukofie', 'えすこふぃえ'] },
@@ -1375,17 +1413,17 @@ const GENSHIN_CHAR_ROSTER = [
   { name: 'セトス', attr: 'g_electro', aliases: ['setosu', 'せとす'] },
   { name: 'クロリンデ', attr: 'g_electro', aliases: ['kuronide', 'くろりんで'] },
   { name: 'セノ', attr: 'g_electro', aliases: ['seno', 'せの'] },
-  { name: 'ドリー', attr: 'g_pyro', aliases: ['dori-', 'どりー'] },
+  { name: 'ドリー', attr: 'g_electro', aliases: ['dori-', 'どりー'] },
   { name: '久岐忍', attr: 'g_electro', aliases: ['くきしのぶ', 'kukisinobu', 'sinobu'] },
   { name: '九条裟羅', attr: 'g_electro', aliases: ['くじょうさら', 'kujousara', 'sara'] },
   { name: '八重神子', attr: 'g_electro', aliases: ['やえみこ', 'yaemiko', 'miko'] },
-  { name: '刻晴', attr: 'g_dendro', aliases: ['こくせい', 'kokusei'] },
+  { name: '刻晴', attr: 'g_electro', aliases: ['こくせい', 'kokusei'] },
   { name: '北斗', attr: 'g_electro', aliases: ['ほくと', 'hokuto'] },
   { name: 'フィッシュル', attr: 'g_electro', aliases: ['fisshuru', 'ふぃっしゅる'] },
-  { name: 'オロルン', attr: 'g_cryo', aliases: ['ororunn', 'おろるん'] },
-  { name: 'ヴァレサ', attr: 'g_cryo', aliases: ['varesa', 'ゔぁれさ'] },
-  { name: 'イネファ', attr: 'g_cryo', aliases: ['inefa', 'いねふぁ'] },
-  { name: 'フリンズ', attr: 'g_cryo', aliases: ['hurinzu', 'ふりんず'] },
+  { name: 'オロルン', attr: 'g_electro', aliases: ['ororunn', 'おろるん'] },
+  { name: 'ヴァレサ', attr: 'g_electro', aliases: ['varesa', 'ゔぁれさ'] },
+  { name: 'イネファ', attr: 'g_electro', aliases: ['inefa', 'いねふぁ'] },
+  { name: 'フリンズ', attr: 'g_electro', aliases: ['hurinzu', 'ふりんず'] },
   // 草
   { name: '白朮', attr: 'g_dendro', aliases: ['びゃくじゅつ', 'byakujutu'] },
   { name: 'ティナリ', attr: 'g_dendro', aliases: ['thinari', 'てぃなり'] },
