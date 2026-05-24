@@ -1105,7 +1105,34 @@ function resolveAttrId(name) {
   return exactId;
 }
 
-function getAttrIcon(name) {
+function getAttrIcon(name, banner) {
+  // 音動機バナーの場合はWEAPON_ROSTERを優先して検索
+  if (banner === 'weapon') {
+    const normalized = normalizeAttrName(name);
+    const lower = normalized.toLowerCase();
+    for (const item of WEAPON_ROSTER) {
+      if (item.name === normalized || item.name.toLowerCase() === lower) {
+        const a = ATTR_INFO[item.attr] || ATTR_INFO[9];
+        if (item.attr === 8) {
+          const svg = `<svg width="14" height="14" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg"><g transform="translate(7,7)"><path d="M0,-1 C1,-3 4,-4 3,-1 C4,0 3,3 1,1 Z" fill="rgba(160,120,240,0.85)" stroke="#c0a0ff" stroke-width="0.3" transform="rotate(0)"/><path d="M0,-1 C1,-3 4,-4 3,-1 C4,0 3,3 1,1 Z" fill="rgba(160,120,240,0.85)" stroke="#c0a0ff" stroke-width="0.3" transform="rotate(72)"/><path d="M0,-1 C1,-3 4,-4 3,-1 C4,0 3,3 1,1 Z" fill="rgba(160,120,240,0.85)" stroke="#c0a0ff" stroke-width="0.3" transform="rotate(144)"/><path d="M0,-1 C1,-3 4,-4 3,-1 C4,0 3,3 1,1 Z" fill="rgba(160,120,240,0.85)" stroke="#c0a0ff" stroke-width="0.3" transform="rotate(216)"/><path d="M0,-1 C1,-3 4,-4 3,-1 C4,0 3,3 1,1 Z" fill="rgba(160,120,240,0.85)" stroke="#c0a0ff" stroke-width="0.3" transform="rotate(288)"/></g><circle cx="7" cy="7" r="1.5" fill="#c0a0ff" stroke="#9060d0" stroke-width="0.5"/></svg>`;
+          return `<span class="attr-icon attr-trigger" title="${a.label}" style="animation: miyabi-spin 3s linear infinite; display:inline-flex; align-items:center; justify-content:center;">${svg}</span>`;
+        }
+        if (item.attr === 7) {
+          const svg = `<svg width="14" height="14" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg"><g transform="translate(7,7)"><ellipse rx="2.2" ry="4.5" fill="rgba(100,200,240,0.7)" stroke="#a0e8ff" stroke-width="0.4" transform="rotate(0)"/><ellipse rx="2.2" ry="4.5" fill="rgba(100,200,240,0.7)" stroke="#a0e8ff" stroke-width="0.4" transform="rotate(60)"/><ellipse rx="2.2" ry="4.5" fill="rgba(100,200,240,0.7)" stroke="#a0e8ff" stroke-width="0.4" transform="rotate(120)"/></g><circle cx="7" cy="7" r="1.8" fill="#a0e8ff" stroke="#64c8f0" stroke-width="0.5"/></svg>`;
+          return `<span class="attr-icon attr-miyabi" title="${a.label}">${svg}</span>`;
+        }
+        if (item.attr === 6) {
+          const svg = `<svg width="14" height="14" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg"><path d="M7 1 L10 4 L13 7 L10 10 L7 13 L4 10 L1 7 L4 4 Z" fill="none" stroke="#c8a84b" stroke-width="1.2"/><path d="M7 3.5 L9 5.5 L11 7 L9 8.5 L7 10.5 L5 8.5 L3 7 L5 5.5 Z" fill="rgba(200,168,75,0.3)" stroke="#e8d080" stroke-width="0.6"/><circle cx="7" cy="7" r="1.2" fill="#c8a84b"/></svg>`;
+          return `<span class="attr-icon attr-yixuan" title="${a.label}">${svg}</span>`;
+        }
+        return `<span class="attr-icon ${a.cls}" title="${a.label}">${a.icon}</span>`;
+      }
+      if ((item.aliases || []).some(a => a === normalized || a.toLowerCase() === lower)) {
+        const a = ATTR_INFO[item.attr] || ATTR_INFO[9];
+        return `<span class="attr-icon ${a.cls}" title="${a.label}">${a.icon}</span>`;
+      }
+    }
+  }
   const attrId = resolveAttrId(name);
   if (!attrId) return '<span class="attr-icon attr-unknown">？</span>';
   const a = ATTR_INFO[attrId];
@@ -1554,7 +1581,7 @@ function renderNameSuggest(state) {
 
   suggest.innerHTML = list.map((item, i) =>
     `<div class="name-suggest-item${i === state.activeIdx ? ' active' : ''}" data-name="${escapeHtmlAttr(item.name)}">
-      ${getAttrIcon(item.name)}
+      ${getAttrIcon(item.name, banner)}
       <span class="s-name">${escapeHtml(item.name)}</span>
     </div>`
   ).join('');
@@ -2015,7 +2042,7 @@ function renderList() {
   const weaponRecs = list.filter(r => r.banner === 'weapon');
 
   function makeItem(r) {
-    const attrIcon  = getAttrIcon(r.name);
+    const attrIcon  = getAttrIcon(r.name, r.banner);
     const rareBadge = r.rarity === 'S'
       ? `<span class="badge badge-s">${_currentGame === 'genshin' ? '★5' : 'S'}</span>`
       : `<span class="badge badge-a">${_currentGame === 'genshin' ? '★4' : 'A'}</span>`;
