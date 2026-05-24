@@ -29,43 +29,6 @@
     --loss-bg: rgba(232,96,75,0.1);
   }
 
-  html[data-theme="light"] {
-    --bg: #f4f5f7;
-    --surface: #ffffff;
-    --surface2: #eef0f4;
-    --border: rgba(0,0,0,0.09);
-    --border-hover: rgba(0,0,0,0.18);
-    --text: #1a1c22;
-    --text-muted: #5a6070;
-    --text-faint: #aab0be;
-    --accent: #b8922a;
-    --accent-dim: rgba(184,146,42,0.1);
-    --s-rank: #c8921a;
-    --a-rank: #3a72c8;
-    --win: #2a9a5a;
-    --loss: #d84030;
-    --win-bg: rgba(42,154,90,0.1);
-    --loss-bg: rgba(216,64,48,0.1);
-  }
-
-  /* テーマトグルボタン */
-  .btn-theme {
-    padding: 6px 10px;
-    border: 1px solid var(--border);
-    border-radius: 7px;
-    background: transparent;
-    color: var(--text-muted);
-    font-size: 14px;
-    cursor: pointer;
-    transition: all .15s;
-    line-height: 1;
-  }
-  .btn-theme:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-dim);
-  }
-
   body {
     font-family: 'Noto Sans JP', sans-serif;
     background: var(--bg);
@@ -793,10 +756,9 @@
       <div class="game-dropdown-item" data-game="genshin">原神</div>
     </div>
   </div>
-  <h1 id="header-title">ガチャ記録</h1>
-  <span id="header-subtitle">/ Zenless Zone Zero</span>
+  <h1>ガチャ記録</h1>
+  <span>/ Zenless Zone Zero</span>
   <div class="header-actions">
-    <button class="btn-theme" id="btn-theme" onclick="toggleTheme()" title="ライト／ダーク切り替え">🌙</button>
     <button class="btn-io" onclick="triggerImport()">↑ インポート</button>
     <button class="btn-io" onclick="exportData()">↓ エクスポート</button>
     <div class="auth-wrap" id="auth-wrap">
@@ -1233,7 +1195,145 @@ function syncCharAttrFromRosters() {
 }
 syncCharAttrFromRosters();
 
-const ATTR_FILTERS = [
+// ===== 原神キャラ・武器ロスター =====
+const GENSHIN_CHAR_ROSTER = [
+  { name: '空', attr: 'g_any' },
+  { name: '蛍', attr: 'g_any' },
+  // 炎
+  { name: 'アンバー', attr: 'g_pyro' },
+  { name: 'ベネット', attr: 'g_pyro' },
+  { name: 'シャンリン', attr: 'g_pyro' },
+  { name: '煙緋', attr: 'g_pyro' },
+  { name: 'ディルック', attr: 'g_pyro' },
+  { name: 'クレー', attr: 'g_pyro' },
+  { name: '胡桃', attr: 'g_pyro' },
+  { name: 'トーマ', attr: 'g_pyro' },
+  { name: 'ヨイミヤ', attr: 'g_pyro' },
+  { name: 'アーロイ', attr: 'g_pyro' },
+  { name: 'ゴロー', attr: 'g_pyro' },
+  { name: '辛炎', attr: 'g_pyro' },
+  { name: '夜蘭', attr: 'g_hydro', aliases: ['やらん'] },
+  { name: 'リネ', attr: 'g_pyro' },
+  { name: 'リネット', attr: 'g_anemo' },
+  { name: 'アルレッキーノ', attr: 'g_pyro' },
+  { name: 'シグウィン', attr: 'g_pyro' },
+  { name: 'ムアラニ', attr: 'g_hydro' },
+  { name: 'シトラリ', attr: 'g_pyro' },
+  // 水
+  { name: 'バーバラ', attr: 'g_hydro' },
+  { name: 'モナ', attr: 'g_hydro' },
+  { name: 'タルタリヤ', attr: 'g_hydro', aliases: ['チャイルド', 'tartaglia'] },
+  { name: 'シン・丘', attr: 'g_hydro', aliases: ['行秋'] },
+  { name: '行秋', attr: 'g_hydro' },
+  { name: 'コレイ', attr: 'g_dendro' },
+  { name: 'ニィロウ', attr: 'g_hydro' },
+  { name: 'カーヴェ', attr: 'g_dendro' },
+  { name: 'フリーナ', attr: 'g_hydro' },
+  { name: 'ヌヴィレット', attr: 'g_hydro' },
+  { name: 'フォンテーヌ神の目', attr: 'g_hydro' },
+  // 氷
+  { name: '重雲', attr: 'g_cryo' },
+  { name: 'キャラ', attr: 'g_cryo' },
+  { name: '神里綾華', attr: 'g_cryo', aliases: ['あやか'] },
+  { name: 'ディオナ', attr: 'g_cryo' },
+  { name: 'ガニュ', attr: 'g_cryo' },
+  { name: 'エウルア', attr: 'g_cryo' },
+  { name: 'ロサリア', attr: 'g_cryo' },
+  { name: '甘雨', attr: 'g_cryo' },
+  { name: 'スノーハルヒ', attr: 'g_cryo' },
+  { name: 'フィッシュル', attr: 'g_electro' },
+  { name: 'セノ', attr: 'g_electro' },
+  { name: 'レイラ', attr: 'g_cryo' },
+  { name: 'ミカ', attr: 'g_cryo' },
+  { name: 'シュヴルーズ', attr: 'g_pyro' },
+  { name: 'シロネン', attr: 'g_cryo' },
+  { name: 'チャスカ', attr: 'g_cryo' },
+  { name: 'マーヴィカ', attr: 'g_pyro' },
+  // 雷
+  { name: 'リサ', attr: 'g_electro' },
+  { name: 'ベイドウ', attr: 'g_electro' },
+  { name: '雷電将軍', attr: 'g_electro', aliases: ['らいでんしょうぐん', 'ei'] },
+  { name: 'サラ', attr: 'g_electro' },
+  { name: 'ヤエミコ', attr: 'g_electro', aliases: ['八重神子'] },
+  { name: 'シカイン', attr: 'g_electro' },
+  { name: 'キリン', attr: 'g_electro' },
+  { name: 'デヒャ', attr: 'g_pyro' },
+  { name: 'バレット', attr: 'g_electro' },
+  { name: 'クロリンデ', attr: 'g_electro' },
+  { name: 'オロルン', attr: 'g_electro' },
+  { name: 'エミリエ', attr: 'g_dendro' },
+  { name: 'シャロワ', attr: 'g_electro' },
+  // 草
+  { name: 'ティナリ', attr: 'g_dendro' },
+  { name: 'ナヒーダ', attr: 'g_dendro', aliases: ['なひーだ', 'nahida'] },
+  { name: 'バウ', attr: 'g_dendro' },
+  { name: 'ヤオヨウ', attr: 'g_dendro' },
+  { name: 'アルハイゼン', attr: 'g_dendro' },
+  { name: 'キャベジ', attr: 'g_dendro' },
+  { name: 'ライオス', attr: 'g_dendro' },
+  { name: 'キャシャー', attr: 'g_dendro' },
+  // 岩
+  { name: 'ノエル', attr: 'g_geo' },
+  { name: '鍾離', attr: 'g_geo', aliases: ['zhongli'] },
+  { name: 'アルベド', attr: 'g_geo' },
+  { name: 'ゴロー', attr: 'g_geo' },
+  { name: 'イット', attr: 'g_geo' },
+  { name: '荒瀧一斗', attr: 'g_geo', aliases: ['いとう'] },
+  { name: 'ニン・クアン', attr: 'g_geo' },
+  { name: 'キンニチ', attr: 'g_geo' },
+  { name: 'シーア', attr: 'g_geo' },
+  // 風
+  { name: 'スクロース', attr: 'g_anemo' },
+  { name: '旅人（風）', attr: 'g_anemo' },
+  { name: 'ウェンティ', attr: 'g_anemo', aliases: ['venti'] },
+  { name: 'ジン', attr: 'g_anemo' },
+  { name: 'カズハ', attr: 'g_anemo', aliases: ['楓原万葉', 'かずは'] },
+  { name: '楓原万葉', attr: 'g_anemo', aliases: ['かずは', 'kazuha'] },
+  { name: 'サユ', attr: 'g_anemo' },
+  { name: 'シン・クウ', attr: 'g_anemo' },
+  { name: 'ファルザン', attr: 'g_anemo' },
+  { name: 'ウェンドリン', attr: 'g_anemo' },
+  { name: 'シアターメイカー', attr: 'g_anemo' },
+  { name: 'シューフー', attr: 'g_anemo' },
+  { name: 'ランプ', attr: 'g_anemo' },
+];
+
+const GENSHIN_WEAPON_ROSTER = [
+  { name: '天空の刃', attr: 'g_any' },
+  { name: '天空の誇り', attr: 'g_any' },
+  { name: '天空の翼', attr: 'g_any' },
+  { name: '天空の巻', attr: 'g_any' },
+  { name: '天空の脊', attr: 'g_any' },
+  { name: '霧切の廻光', attr: 'g_cryo' },
+  { name: '護摩の杖', attr: 'g_pyro' },
+  { name: '草薙の稲光', attr: 'g_electro' },
+  { name: '松籟の響く頃', attr: 'g_cryo' },
+  { name: '飛雷の鳴弦', attr: 'g_electro' },
+  { name: '冬極の白星', attr: 'g_cryo' },
+  { name: '赤角石華', attr: 'g_geo' },
+  { name: '波乱月白経津', attr: 'g_hydro' },
+  { name: '裁判の時', attr: 'g_electro' },
+  { name: 'カリバーン', attr: 'g_hydro' },
+  { name: '猟人の道', attr: 'g_any' },
+  { name: '千岩古剣', attr: 'g_geo' },
+  { name: '断浪長鎧', attr: 'g_hydro' },
+  { name: '神楽の真影', attr: 'g_electro' },
+  { name: '落霞と孤鶩の剣', attr: 'g_any' },
+];
+
+// 原神の元素フィルター
+const GENSHIN_ATTR_FILTERS = [
+  { val: '', label: 'すべて' },
+  { val: 'g_pyro',    label: '🔥 炎' },
+  { val: 'g_hydro',   label: '💧 水' },
+  { val: 'g_cryo',    label: '❄ 氷' },
+  { val: 'g_electro', label: '⚡ 雷' },
+  { val: 'g_dendro',  label: '🌿 草' },
+  { val: 'g_geo',     label: '🪨 岩' },
+  { val: 'g_anemo',   label: '🌀 風' },
+];
+
+const ZZZ_ATTR_FILTERS = [
   { val: '', label: 'すべて' },
   { val: '1', label: '⚡ 電気' },
   { val: '2', label: '🔥 炎' },
@@ -1242,10 +1342,17 @@ const ATTR_FILTERS = [
   { val: '5', label: '✦ エーテル' },
 ];
 
+const ATTR_FILTERS = ZZZ_ATTR_FILTERS; // 後方互換
+
 const namePickerState = {};
 
 function attrMatchesFilter(itemAttr, filterVal) {
   if (!filterVal) return true;
+  // 原神の場合：文字列マッチ
+  if (typeof itemAttr === 'string' && itemAttr.startsWith('g_')) {
+    return itemAttr === filterVal || filterVal === '';
+  }
+  // ZZZの場合：数値マッチ
   const a = Number(itemAttr);
   const f = Number(filterVal);
   if (f === 3) return a === 3 || a === 7;
@@ -1271,6 +1378,9 @@ function itemMatchesQuery(item, query) {
 }
 
 function getRoster(banner) {
+  if (_currentGame === 'genshin') {
+    return banner === 'weapon' ? GENSHIN_WEAPON_ROSTER : GENSHIN_CHAR_ROSTER;
+  }
   return banner === 'weapon' ? WEAPON_ROSTER : AGENT_ROSTER;
 }
 
@@ -1279,6 +1389,10 @@ function getFilteredRoster(banner, attrFilter, query) {
     .filter(item => attrMatchesFilter(item.attr, attrFilter))
     .filter(item => itemMatchesQuery(item, query))
     .slice(0, 40);
+}
+
+function getActiveAttrFilters() {
+  return _currentGame === 'genshin' ? GENSHIN_ATTR_FILTERS : ZZZ_ATTR_FILTERS;
 }
 
 function initNamePicker(cfg) {
@@ -1297,19 +1411,25 @@ function initNamePicker(cfg) {
   };
   namePickerState[cfg.inputId] = state;
 
-  filterRow.innerHTML = ATTR_FILTERS.map(f =>
-    `<button type="button" class="attr-filter-btn${f.val === '' ? ' on' : ''}" data-attr="${f.val}">${f.label}</button>`
-  ).join('');
-
-  filterRow.querySelectorAll('.attr-filter-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      filterRow.querySelectorAll('.attr-filter-btn').forEach(b => b.classList.remove('on'));
-      btn.classList.add('on');
-      state.attrFilter = btn.dataset.attr;
-      renderNameSuggest(state);
-      input.focus();
+  function buildFilterButtons() {
+    const filters = getActiveAttrFilters();
+    filterRow.innerHTML = filters.map(f =>
+      `<button type="button" class="attr-filter-btn${f.val === '' ? ' on' : ''}" data-attr="${f.val}">${f.label}</button>`
+    ).join('');
+    state.attrFilter = '';
+    filterRow.querySelectorAll('.attr-filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterRow.querySelectorAll('.attr-filter-btn').forEach(b => b.classList.remove('on'));
+        btn.classList.add('on');
+        state.attrFilter = btn.dataset.attr;
+        renderNameSuggest(state);
+        input.focus();
+      });
     });
-  });
+  }
+
+  buildFilterButtons();
+  state._rebuildFilters = buildFilterButtons;
 
   input.addEventListener('input', () => {
     state.activeIdx = -1;
@@ -1323,6 +1443,14 @@ function initNamePicker(cfg) {
       e.preventDefault();
       pickNameSuggest(state, item.dataset.name);
     }
+  });
+}
+
+// ゲーム切り替え時にフィルターボタンと候補を更新する
+function refreshNamePickers() {
+  Object.values(namePickerState).forEach(state => {
+    if (state._rebuildFilters) state._rebuildFilters();
+    closeNameSuggest(state);
   });
 }
 
@@ -2016,24 +2144,6 @@ if (location.protocol === 'file:') {
 }
 document.getElementById('btn-login').addEventListener('click', signInGoogle);
 
-// テーマ切り替え
-function toggleTheme() {
-  const html = document.documentElement;
-  const isLight = html.getAttribute('data-theme') === 'light';
-  const next = isLight ? 'dark' : 'light';
-  html.setAttribute('data-theme', next);
-  document.getElementById('btn-theme').textContent = next === 'light' ? '☀️' : '🌙';
-  localStorage.setItem('gacha_theme', next);
-}
-(function() {
-  const saved = localStorage.getItem('gacha_theme');
-  if (saved === 'light') {
-    document.documentElement.setAttribute('data-theme', 'light');
-    const btn = document.getElementById('btn-theme');
-    if (btn) btn.textContent = '☀️';
-  }
-})();
-
 loadLocal();
 initToggle('grp-banner');
 initToggle('grp-rarity');
@@ -2088,11 +2198,11 @@ document.querySelectorAll('.game-dropdown-item').forEach(item => {
   item.addEventListener('click', (e) => {
     const selectedGame = e.target.getAttribute('data-game');
     _currentGame = selectedGame;
-    // ロゴ文字を更新
     document.querySelector('.logo-mark').textContent = selectedGame === 'zzz' ? 'ZZZ' : '原神';
-    document.getElementById('header-subtitle').textContent =
+    document.querySelector('header span').textContent =
       selectedGame === 'zzz' ? '/ Zenless Zone Zero' : '/ Genshin Impact';
     selectorContainer.classList.remove('open');
+    refreshNamePickers();
     loadLocal();
     renderList();
   });
