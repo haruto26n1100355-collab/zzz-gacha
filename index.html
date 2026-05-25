@@ -656,6 +656,23 @@
     border-bottom: 1px solid var(--border);
     padding: 0.6rem 1.25rem;
     flex-wrap: wrap;
+    align-items: center;
+  }
+  .stats-bar:last-child { border-bottom: none; }
+  .stat-section-label {
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    padding-right: 8px;
+    border-right: 1px solid var(--border);
+    margin-right: 4px;
+    white-space: nowrap;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
   }
   .stat-item { display: flex; flex-direction: column; gap: 2px; }
   .stat-item .s-label { font-size: 10px; color: var(--text-faint); font-family: 'DM Mono', monospace; letter-spacing: 0.06em; }
@@ -789,6 +806,19 @@
   .game-dropdown-item[data-game="zzz"]:hover     { color: #c8a84b; }
   .game-dropdown-item[data-game="genshin"]:hover { color: #4ba8c8; }
   html[data-game="genshin"] { --accent: #4ba8c8; --accent-dim: rgba(75,168,200,0.12); }
+  /* ゲームセレクターボタンを角丸枠で囲む */
+  .game-selector-btn {
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
+    padding: 5px 10px !important;
+    background: var(--surface2) !important;
+    transition: border-color 0.15s, background 0.15s, opacity 0.15s !important;
+  }
+  .game-selector-btn:hover {
+    border-color: var(--border-hover) !important;
+    background: var(--surface) !important;
+    opacity: 1 !important;
+  }
   /* ゲームラベルの固有カラー */
   html[data-game="zzz"]     .game-selector-btn { color: #c8a84b; }
   html[data-game="genshin"] .game-selector-btn { color: #4ba8c8; }
@@ -936,11 +966,23 @@
       <button class="filter-btn" id="filter-btn-weapon" data-val="weapon" onclick="setBannerFilter(this,'weapon')">音動機</button>
     </div>
 
-    <div class="stats-bar" id="stats-bar" style="display:none">
-      <div class="stat-item"><div class="s-label">記録数</div><div class="s-val" id="st-total">0<span>件</span></div></div>
-      <div class="stat-item"><div class="s-label">Sランク</div><div class="s-val" id="st-s">0<span>件</span></div></div>
-      <div class="stat-item"><div class="s-label">平均連数</div><div class="s-val" id="st-avg">-<span>連</span></div></div>
-      <div class="stat-item"><div class="s-label">すり抜け率</div><div class="s-val" id="st-loss">-<span>%</span></div></div>
+    <div id="stats-wrap" style="display:none">
+      <!-- エージェント / キャラクター統計 -->
+      <div class="stats-bar" id="stats-bar-agent">
+        <div class="stat-section-label" id="st-agent-title">エージェント</div>
+        <div class="stat-item"><div class="s-label">記録数</div><div class="s-val" id="st-agent-total">0<span>件</span></div></div>
+        <div class="stat-item"><div class="s-label" id="st-agent-s-label">Sランク</div><div class="s-val" id="st-agent-s">0<span>件</span></div></div>
+        <div class="stat-item"><div class="s-label">平均連数</div><div class="s-val" id="st-agent-avg">-<span>連</span></div></div>
+        <div class="stat-item"><div class="s-label">すり抜け率</div><div class="s-val" id="st-agent-loss">-<span>%</span></div></div>
+      </div>
+      <!-- 音動機 / 武器統計 -->
+      <div class="stats-bar" id="stats-bar-weapon">
+        <div class="stat-section-label" id="st-weapon-title">音動機</div>
+        <div class="stat-item"><div class="s-label">記録数</div><div class="s-val" id="st-weapon-total">0<span>件</span></div></div>
+        <div class="stat-item"><div class="s-label" id="st-weapon-s-label">Sランク</div><div class="s-val" id="st-weapon-s">0<span>件</span></div></div>
+        <div class="stat-item"><div class="s-label">平均連数</div><div class="s-val" id="st-weapon-avg">-<span>連</span></div></div>
+        <div class="stat-item"><div class="s-label">すり抜け率</div><div class="s-val" id="st-weapon-loss">-<span>%</span></div></div>
+      </div>
     </div>
     <div id="record-list"></div>
     <div class="count-bar">
@@ -1737,8 +1779,20 @@ document.addEventListener('click', (e) => {
 let _currentGame = 'zzz';
 const KEY = () => _currentGame === 'zzz' ? 'zzz_gacha_v4' : 'genshin_gacha_v1';
 let records = [];
-let currentVer   = '1';
-let recordVer    = '1';
+// ゲームごとにverの選択状態を独立して管理
+const _verState = {
+  zzz:     { currentVer: '1', recordVer: '1' },
+  genshin: { currentVer: '1', recordVer: '1' },
+};
+// 後方互換：currentVer / recordVer は現在のゲームのstateへのプロキシ
+Object.defineProperty(window, 'currentVer', {
+  get() { return _verState[_currentGame].currentVer; },
+  set(v) { _verState[_currentGame].currentVer = v; },
+});
+Object.defineProperty(window, 'recordVer', {
+  get() { return _verState[_currentGame].recordVer; },
+  set(v) { _verState[_currentGame].recordVer = v; },
+});
 
 function recordsForView() {
   return currentVer === 'all' ? records : records.filter(r => r.ver === currentVer);
@@ -1902,20 +1956,24 @@ function userDocRef(uid) {
   return firebase.firestore().collection('users').doc(uid);
 }
 
+// ゲームごとにFirestoreのフィールドキーを使い分ける
+const CLOUD_KEY = () => _currentGame === 'zzz' ? 'zzz_records' : 'genshin_records';
+
 async function loadFromCloud(uid) {
   cloudReady = false;
   setSyncStatus('busy');
   const snap = await userDocRef(uid).get();
-  const cloudRecords = snap.exists ? (snap.data().records || []) : [];
+  const cloudKey = CLOUD_KEY();
+  const cloudRecords = snap.exists ? (snap.data()[cloudKey] || []) : [];
   loadLocal();
   const localRecords = records.slice();
 
   if (!cloudRecords.length && localRecords.length) {
     records = localRecords;
     await userDocRef(uid).set({
-      records,
+      [cloudKey]: records,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-    });
+    }, { merge: true });
   } else if (cloudRecords.length && !localRecords.length) {
     records = cloudRecords;
     saveLocal();
@@ -1924,9 +1982,9 @@ async function loadFromCloud(uid) {
     saveLocal();
     if (records !== cloudRecords) {
       await userDocRef(uid).set({
-        records,
+        [cloudKey]: records,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      });
+      }, { merge: true });
     }
   } else {
     records = cloudRecords;
@@ -1944,11 +2002,12 @@ function persistCloud() {
   persistTimer = setTimeout(async () => {
     cloudSaving = true;
     setSyncStatus('busy');
+    const cloudKey = CLOUD_KEY();
     try {
       await userDocRef(firebaseUser.uid).set({
-        records,
+        [cloudKey]: records,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      });
+      }, { merge: true });
       setSyncStatus('on');
     } catch (e) {
       console.error(e);
@@ -2119,7 +2178,7 @@ function renderList() {
     el.innerHTML = '<div class="empty-state"><div class="e-icon">◇</div><div>記録がありません</div></div>';
     document.getElementById('count-label').textContent = '0 件';
     document.getElementById('s-count').textContent = '';
-    document.getElementById('stats-bar').style.display = 'none';
+    document.getElementById('stats-wrap').style.display = 'none';
     return;
   }
 
@@ -2186,24 +2245,62 @@ function renderList() {
 
   el.innerHTML = html;
 
-  const allVer  = recordsForView();
-  const sRanks  = allVer.filter(r => r.rarity === 'S');
-  const sCount  = list.filter(r => r.rarity === 'S').length;
-  const avgPull = sRanks.length ? Math.round(sRanks.reduce((a,r)=>a+r.pull,0)/sRanks.length) : null;
-  const agentS  = allVer.filter(r => r.banner === 'agent' && r.rarity === 'S');
-  const lossCount = agentS.filter(r => r.lose === 'loss').length;
-  const lossRate  = agentS.length ? Math.round(lossCount/agentS.length*100) : null;
+  const allVer = recordsForView();
+  const isG    = _currentGame === 'genshin';
+  const sLabel = isG ? '★5' : 'Sランク';
 
-  const sb = document.getElementById('stats-bar');
-  if (allVer.length) {
-    sb.style.display = '';
-    document.getElementById('st-total').innerHTML = allVer.length + '<span>件</span>';
-    document.getElementById('st-s').innerHTML     = sRanks.length + '<span>件</span>';
-    document.getElementById('st-avg').innerHTML   = (avgPull ?? '-') + '<span>連</span>';
-    document.getElementById('st-loss').innerHTML  = (lossRate !== null ? lossRate : '-') + '<span>%</span>';
-  } else {
-    sb.style.display = 'none';
+  // ── エージェント / キャラクター統計 ──
+  const agentBanners = ['agent', 'character'];
+  const agentAll  = allVer.filter(r => agentBanners.includes(r.banner));
+  const agentSAll = agentAll.filter(r => r.rarity === 'S');
+  const agentAvg  = agentSAll.length ? Math.round(agentSAll.reduce((a,r)=>a+r.pull,0)/agentSAll.length) : null;
+  const agentLoss = agentSAll.filter(r => r.lose === 'loss').length;
+  const agentLossRate = agentSAll.length ? Math.round(agentLoss/agentSAll.length*100) : null;
+
+  // ── 音動機 / 武器統計 ──
+  const weaponAll  = allVer.filter(r => r.banner === 'weapon');
+  const weaponSAll = weaponAll.filter(r => r.rarity === 'S');
+  const weaponAvg  = weaponSAll.length ? Math.round(weaponSAll.reduce((a,r)=>a+r.pull,0)/weaponSAll.length) : null;
+  const weaponLoss = weaponSAll.filter(r => r.wpnLose === 'loss').length;
+  const weaponLossRate = weaponSAll.length ? Math.round(weaponLoss/weaponSAll.length*100) : null;
+
+  // ── 表示するブロックをフィルターに合わせて出し分け ──
+  const wrap       = document.getElementById('stats-wrap');
+  const barAgent   = document.getElementById('stats-bar-agent');
+  const barWeapon  = document.getElementById('stats-bar-weapon');
+
+  const showAgent  = !bannerFilter || agentBanners.includes(bannerFilter);
+  const showWeapon = !bannerFilter || bannerFilter === 'weapon';
+
+  const hasAny = (showAgent && agentAll.length) || (showWeapon && weaponAll.length);
+  wrap.style.display = hasAny ? '' : 'none';
+
+  // セクションラベル切り替え
+  document.getElementById('st-agent-title').textContent  = isG ? 'キャラクター' : 'エージェント';
+  document.getElementById('st-weapon-title').textContent = isG ? '武器' : '音動機';
+  document.getElementById('st-agent-s-label').textContent  = sLabel;
+  document.getElementById('st-weapon-s-label').textContent = sLabel;
+
+  // エージェントブロック
+  barAgent.style.display = (showAgent && agentAll.length) ? '' : 'none';
+  if (showAgent && agentAll.length) {
+    document.getElementById('st-agent-total').innerHTML = agentAll.length + '<span>件</span>';
+    document.getElementById('st-agent-s').innerHTML     = agentSAll.length + '<span>件</span>';
+    document.getElementById('st-agent-avg').innerHTML   = (agentAvg ?? '-') + '<span>連</span>';
+    document.getElementById('st-agent-loss').innerHTML  = (agentLossRate !== null ? agentLossRate : '-') + '<span>%</span>';
   }
+
+  // 音動機ブロック
+  barWeapon.style.display = (showWeapon && weaponAll.length) ? '' : 'none';
+  if (showWeapon && weaponAll.length) {
+    document.getElementById('st-weapon-total').innerHTML = weaponAll.length + '<span>件</span>';
+    document.getElementById('st-weapon-s').innerHTML     = weaponSAll.length + '<span>件</span>';
+    document.getElementById('st-weapon-avg').innerHTML   = (weaponAvg ?? '-') + '<span>連</span>';
+    document.getElementById('st-weapon-loss').innerHTML  = (weaponLossRate !== null ? weaponLossRate : '-') + '<span>%</span>';
+  }
+
+  // count-label / s-count は表示中リストベース
+  const sCount = list.filter(r => r.rarity === 'S').length;
 
   document.getElementById('count-label').textContent = list.length + ' 件';
   const rankLabel = _currentGame === 'genshin' ? '★5' : 'Sランク';
@@ -2392,13 +2489,7 @@ function switchGameUI(game) {
   if (fAgent)  fAgent.textContent  = isG ? 'キャラクター' : 'エージェント';
   if (fWeapon) fWeapon.textContent = isG ? '武器'         : '音動機';
 
-  // 統計バーのSランクラベル
-  const stS = document.querySelector('#stats-bar .s-label');
-  // （シンプルにst-sのラベルを更新）
-  const stSEl = document.getElementById('st-s');
-  if (stSEl && stSEl.previousElementSibling) {
-    stSEl.previousElementSibling.textContent = isG ? '★5' : 'Sランク';
-  }
+  // 統計バーのSランクラベルは renderList() 内で更新
 
   // バナー切り替え時のフィールド表示を現在の選択に合わせてリセット
   const currentBanner = isG ? 'character' : 'agent';
@@ -2427,11 +2518,16 @@ function switchGameUI(game) {
     if (v2) v2.textContent = '2.0 〜 2.8';
     if (v3) v3.textContent = '3.0 〜';
   }
-  // バージョン選択をリセット（ALL に戻す）
+  // バージョン選択：そのゲームで最後に選んでいた状態を復元
+  const savedVer = _verState[game].currentVer;
   document.querySelectorAll('.ver-range-btn').forEach(b => b.classList.remove('on'));
-  const allBtn = document.getElementById('ver-btn-all');
-  if (allBtn) allBtn.classList.add('on');
-  currentVer = 'all';
+  const targetBtn = document.querySelector(`.ver-range-btn[data-ver="${savedVer}"]`);
+  if (targetBtn) targetBtn.classList.add('on');
+  else {
+    const allBtn = document.getElementById('ver-btn-all');
+    if (allBtn) allBtn.classList.add('on');
+    _verState[game].currentVer = 'all';
+  }
 }
 
 // ===== テーマ切り替え =====
@@ -2508,8 +2604,13 @@ document.querySelectorAll('.game-dropdown-item').forEach(item => {
     switchGameUI(selectedGame);
     selectorContainer.classList.remove('open');
     refreshNamePickers();
-    loadLocal();
-    renderList();
+    // ゲームごとに別データをロード（Firebase優先、なければローカル）
+    if (firebaseUser && cloudReady) {
+      loadFromCloud(firebaseUser.uid).catch(() => { loadLocal(); renderList(); });
+    } else {
+      loadLocal();
+      renderList();
+    }
   });
 });
   initFirebaseAuth();
