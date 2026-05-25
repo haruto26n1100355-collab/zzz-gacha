@@ -130,6 +130,34 @@
     color: var(--accent);
     letter-spacing: -0.5px;
   }
+  .game-selector-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    cursor: pointer;
+    padding: 4px 6px !important;
+    border-radius: 8px !important;
+    transition: background 0.15s;
+  }
+  .game-selector-btn:hover { background: var(--accent-dim) !important; }
+  .logo-chevron {
+    font-size: 9px;
+    color: var(--accent);
+    opacity: 0.7;
+    transition: transform 0.2s;
+    margin-left: 1px;
+  }
+  .game-selector-container.open .logo-chevron { transform: rotate(180deg); }
+  .logo-hint {
+    font-size: 8px;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+    opacity: 0.55;
+    font-family: sans-serif;
+    white-space: nowrap;
+    pointer-events: none;
+  }
   header h1 { font-size: 15px; font-weight: 500; letter-spacing: 0.02em; }
   header span { font-size: 12px; color: var(--text-muted); font-family: 'DM Mono', monospace; }
   
@@ -770,6 +798,19 @@
     transition: background 0.15s, color 0.15s;
   }
   .game-dropdown-item:hover { background: var(--surface2); color: var(--accent); }
+  .game-dropdown-menu::before {
+    content: 'ゲームを選択';
+    display: block;
+    font-size: 9px;
+    color: var(--text-muted);
+    opacity: 0.5;
+    padding: 8px 14px 4px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-family: sans-serif;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2px;
+  }
   html[data-game="genshin"] { --accent: #4ba8c8; --accent-dim: rgba(75,168,200,0.12); }
   html[data-game="genshin"][data-theme="light"] { --accent: #1a88b0; --accent-dim: rgba(26,136,176,0.12); }
 </style>
@@ -793,13 +834,14 @@
 
 <header>
   <div class="game-selector-container">
-    <button id="btn-game-selector" class="game-selector-btn" style="background:transparent;border:none;padding:0;">
-      <div class="logo-mark" style="margin:0;">ZZZ</div>
+    <button id="btn-game-selector" class="game-selector-btn" style="background:transparent;border:none;padding:0;" title="ゲームを切り替える">
+      <div class="logo-mark" style="margin:0;" id="logo-mark-text">ZZZ<span class="logo-chevron">▾</span></div>
+      <span class="logo-hint">ゲーム切替</span>
       <span id="current-game-label" style="display:none;">ZZZ</span>
     </button>
     <div id="game-dropdown" class="game-dropdown-menu">
-      <div class="game-dropdown-item" data-game="zzz">ZZZ</div>
-      <div class="game-dropdown-item" data-game="genshin">原神</div>
+      <div class="game-dropdown-item" data-game="zzz" id="dropdown-item-zzz">ZZZ</div>
+      <div class="game-dropdown-item" data-game="genshin" id="dropdown-item-genshin">原神</div>
     </div>
   </div>
   <h1>ガチャ記録</h1>
@@ -2338,7 +2380,26 @@ function switchGameUI(game) {
   document.documentElement.setAttribute('data-game', game);
 
   // ロゴ・サブタイトル
-  document.querySelector('.logo-mark').textContent = isG ? '原神' : 'ZZZ';
+  // ロゴマーク更新（チェブロンを保持しつつテキストを差し替え）
+  const logoMark = document.querySelector('.logo-mark');
+  if (logoMark) {
+    logoMark.innerHTML = (isG ? '原神' : 'ZZZ') + '<span class="logo-chevron">▾</span>';
+  }
+  // ドロップダウンの選択中アイテムにチェックマークを表示
+  document.querySelectorAll('.game-dropdown-item').forEach(item => {
+    const active = item.getAttribute('data-game') === game;
+    item.style.color = active ? 'var(--accent)' : '';
+    item.style.fontWeight = active ? '600' : '';
+    const prev = item.querySelector('.dropdown-check');
+    if (prev) prev.remove();
+    if (active) {
+      const check = document.createElement('span');
+      check.className = 'dropdown-check';
+      check.textContent = ' ✓';
+      check.style.cssText = 'font-size:11px; margin-left:6px; opacity:0.8;';
+      item.appendChild(check);
+    }
+  });
   document.getElementById('header-subtitle').textContent =
     isG ? '/ Genshin Impact' : '/ Zenless Zone Zero';
 
