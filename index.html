@@ -771,6 +771,7 @@
   }
   .game-dropdown-item:hover { background: var(--surface2); color: var(--accent); }
   html[data-game="genshin"] { --accent: #4ba8c8; --accent-dim: rgba(75,168,200,0.12); }
+  html[data-game="genshin"][data-theme="light"] { --accent: #1a88b0; --accent-dim: rgba(26,136,176,0.12); }
 </style>
 </head>
 <body>
@@ -2332,6 +2333,9 @@ document.getElementById('btn-login').addEventListener('click', signInGoogle);
 // ===== ゲームUI切り替え =====
 function switchGameUI(game) {
   const isG = game === 'genshin';
+
+  // data-game属性をセット（CSSのアクセントカラー切り替えに使用）
+  document.documentElement.setAttribute('data-game', game);
 
   // ロゴ・サブタイトル
   document.querySelector('.logo-mark').textContent = isG ? '原神' : 'ZZZ';
