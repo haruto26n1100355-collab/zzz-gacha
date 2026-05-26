@@ -272,7 +272,7 @@
     overflow: hidden;
   }
   .panel-header {
-    padding: 1rem 1.25rem;
+    padding: 0.6rem 1.25rem;
     border-bottom: 1px solid var(--border);
     font-size: 12px;
     font-weight: 500;
@@ -280,6 +280,30 @@
     color: var(--text-muted);
     text-transform: uppercase;
     font-family: 'DM Mono', monospace;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 42px;
+  }
+  .header-search {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .header-search .search-icon {
+    font-size: 12px;
+  }
+  .header-search .search-input {
+    height: 26px;
+    font-size: 12px;
+    padding: 3px 8px;
+    width: 160px;
+    border-radius: 5px;
+  }
+  .header-search .search-clear {
+    font-size: 12px;
+    padding: 0 2px;
   }
   .panel-body { padding: 1.25rem; }
 
@@ -649,6 +673,74 @@
     font-size: 11px; color: var(--text-faint); font-family: 'DM Mono', monospace;
   }
 
+  /* メモ */
+  .search-input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    outline: none;
+    transition: border-color .15s;
+  }
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--text-faint); }
+  .search-icon {
+    color: var(--text-faint);
+    flex-shrink: 0;
+  }
+  .search-clear {
+    background: none;
+    border: none;
+    color: var(--text-faint);
+    cursor: pointer;
+    line-height: 1;
+    transition: color .15s;
+    flex-shrink: 0;
+    display: none;
+  }
+  .search-clear:hover { color: var(--text); }
+  .search-clear.visible { display: block; }
+  .record-memo {
+    font-size: 11px;
+    color: var(--text-faint);
+    margin-top: 3px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-style: italic;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+  .memo-highlight {
+    background: var(--accent-dim);
+    color: var(--accent);
+    border-radius: 2px;
+    padding: 0 1px;
+  }
+  .search-highlight {
+    background: var(--accent-dim);
+    color: var(--accent);
+    border-radius: 2px;
+    padding: 0 1px;
+  }
+  textarea.memo-textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 13px;
+    padding: 8px 12px;
+    outline: none;
+    transition: border-color .15s;
+    resize: vertical;
+    min-height: 60px;
+    box-sizing: border-box;
+    line-height: 1.6;
+  }
+  textarea.memo-textarea:focus { border-color: var(--accent); }
+  textarea.memo-textarea::placeholder { color: var(--text-faint); }
+
   /* 統計バー */
   .stats-bar {
     display: flex;
@@ -950,6 +1042,11 @@
         </div>
       </div>
 
+      <div class="field">
+        <label>メモ（任意）</label>
+        <textarea class="memo-textarea" id="inp-memo" placeholder="例：石50個消費、リセマラ分、フェス限など…" rows="2"></textarea>
+      </div>
+
       <button class="btn-submit" onclick="addRecord()">記録する</button>
       <div id="flash"></div>
     </div>
@@ -957,7 +1054,14 @@
 
   <!-- 履歴 -->
   <div class="panel history-panel">
-    <div class="panel-header">履歴</div>
+    <div class="panel-header">
+      <span>履歴</span>
+      <div class="header-search">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" id="search-input" placeholder="名前・メモで検索…" autocomplete="off" oninput="onSearchInput(this)">
+        <button class="search-clear" id="search-clear" onclick="clearSearch()" title="クリア">✕</button>
+      </div>
+    </div>
 
     <div class="filter-row">
       <span class="filter-label">バナー：</span>
@@ -1043,6 +1147,10 @@
         <button class="toggle-btn" data-val="loss">すり抜け</button>
         <button class="toggle-btn" data-val="-">75%</button>
       </div>
+    </div>
+    <div class="field">
+      <label>メモ（任意）</label>
+      <textarea class="memo-textarea" id="edit-memo" placeholder="例：石50個消費、リセマラ分など…" rows="2"></textarea>
     </div>
     <div class="modal-actions">
       <button class="btn-save" onclick="saveEdit()">保存する</button>
@@ -1798,6 +1906,7 @@ function recordsForView() {
   return currentVer === 'all' ? records : records.filter(r => r.ver === currentVer);
 }
 let bannerFilter = '';
+let searchQuery = '';
 let pendingImport = null;
 let firebaseUser = null;
 let cloudReady = false;
@@ -2092,6 +2201,29 @@ function setBannerFilter(el, val) {
   renderList();
 }
 
+function onSearchInput(el) {
+  searchQuery = el.value.trim();
+  const clearBtn = document.getElementById('search-clear');
+  if (clearBtn) clearBtn.classList.toggle('visible', searchQuery.length > 0);
+  renderList();
+}
+
+function clearSearch() {
+  const inp = document.getElementById('search-input');
+  if (inp) inp.value = '';
+  searchQuery = '';
+  const clearBtn = document.getElementById('search-clear');
+  if (clearBtn) clearBtn.classList.remove('visible');
+  renderList();
+}
+
+function highlightText(text, query) {
+  if (!query || !text) return escapeHtml(text || '');
+  const escaped = escapeHtml(text);
+  const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return escaped.replace(new RegExp(escapedQuery, 'gi'), m => `<span class="search-highlight">${m}</span>`);
+}
+
 function initToggle(groupId) {
   const grp = document.getElementById(groupId);
   grp.querySelectorAll('.toggle-btn').forEach(btn => {
@@ -2136,6 +2268,7 @@ function addRecord() {
   const cons   = getVal('grp-cons');
   const lose    = getVal('grp-lose');
   const wpnLose = getVal('grp-wpn-lose');
+  const memo    = (document.getElementById('inp-memo').value || '').trim();
 
   if (!name)             { flash('名前を入力してください', 'err'); return; }
   if (!pull || pull < 1) { flash('連数を入力してください', 'err'); return; }
@@ -2146,11 +2279,13 @@ function addRecord() {
     banner, name, pull, rarity, cons,
     lose:    (banner === 'agent' || banner === 'character') ? lose    : '-',
     wpnLose: banner === 'weapon' ? wpnLose : '-',
+    memo,
   });
   save();
   flash('記録しました', 'ok');
   document.getElementById('inp-name').value = '';
   document.getElementById('inp-pull').value = '';
+  document.getElementById('inp-memo').value = '';
   renderList();
 }
 
@@ -2171,11 +2306,20 @@ function flash(msg, type) {
 function renderList() {
   let list = recordsForView();
   if (bannerFilter) list = list.filter(r => r.banner === bannerFilter);
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    list = list.filter(r =>
+      (r.name && r.name.toLowerCase().includes(q)) ||
+      (r.memo && r.memo.toLowerCase().includes(q))
+    );
+  }
 
   const el = document.getElementById('record-list');
 
   if (!list.length) {
-    el.innerHTML = '<div class="empty-state"><div class="e-icon">◇</div><div>記録がありません</div></div>';
+    el.innerHTML = searchQuery
+      ? `<div class="empty-state"><div class="e-icon">🔍</div><div>「${escapeHtml(searchQuery)}」は見つかりませんでした</div></div>`
+      : '<div class="empty-state"><div class="e-icon">◇</div><div>記録がありません</div></div>';
     document.getElementById('count-label').textContent = '0 件';
     document.getElementById('s-count').textContent = '';
     document.getElementById('stats-wrap').style.display = 'none';
@@ -2215,12 +2359,16 @@ function renderList() {
       : r.banner === 'weapon' ? (_currentGame === 'genshin' ? '武器' : '音動機')
       : r.banner;
     const losePart  = (r.banner === 'agent' || r.banner === 'character') ? loseBadge : wpnLoseBadge;
+    const displayName = searchQuery ? highlightText(r.name, searchQuery) : escapeHtml(r.name);
+    const memoPart = r.memo
+      ? `<div class="record-memo">${searchQuery ? highlightText(r.memo, searchQuery) : escapeHtml(r.memo)}</div>`
+      : '';
 
     return `<div class="record-item">
       <div class="pull-count">${r.pull}<span class="unit">連</span></div>
       <div class="record-info">
-        <div class="record-name">${attrIcon} ${r.name} ${rareBadge}${consBadge}${losePart}</div>
-        <div class="record-sub">${bannerLbl}</div>
+        <div class="record-name">${attrIcon} ${displayName} ${rareBadge}${consBadge}${losePart}</div>
+        <div class="record-sub">${bannerLbl}</div>${memoPart}
       </div>
       <div class="item-actions">
         <button class="btn-edit" onclick="openEdit(${r.id})" title="編集">✎</button>
@@ -2315,6 +2463,7 @@ function openEdit(id) {
   editingId = id;
   document.getElementById('edit-name').value = r.name;
   document.getElementById('edit-pull').value = r.pull;
+  document.getElementById('edit-memo').value = r.memo || '';
   setToggle('edit-grp-rarity', r.rarity);
   setToggle('edit-grp-cons', r.cons || '0');
   setToggle('edit-grp-lose', r.lose || 'win');
@@ -2348,6 +2497,7 @@ function saveEdit() {
   r.cons    = getEditVal('edit-grp-cons');
   r.lose    = (r.banner === 'agent' || r.banner === 'character') ? getEditVal('edit-grp-lose')     : '-';
   r.wpnLose = r.banner === 'weapon' ? getEditVal('edit-grp-wpn-lose') : '-';
+  r.memo    = (document.getElementById('edit-memo').value || '').trim();
   save();
   closeEdit();
   renderList();
