@@ -563,6 +563,14 @@
   .attr-physical { background: rgba(200,168,75,0.2);  color: #c8a84b; border: 1px solid rgba(200,168,75,0.3); padding-bottom: 3px; }
   .attr-ether    { background: rgba(180,140,255,0.2); color: #b48cff; border: 1px solid rgba(180,140,255,0.3); padding-bottom: 1px; }
   .attr-unknown  { background: rgba(255,255,255,0.05); color: var(--text-faint); border: 1px solid var(--border); }
+  /* スタレ属性アイコン */
+  .attr-s_fire      { background: rgba(232,100,60,0.18);  color: #e8644b; border: 1px solid rgba(232,100,60,0.35); }
+  .attr-s_ice       { background: rgba(140,220,255,0.18); color: #70d8ff; border: 1px solid rgba(140,220,255,0.35); }
+  .attr-s_thunder   { background: rgba(122,162,232,0.18); color: #7aa2e8; border: 1px solid rgba(122,162,232,0.35); }
+  .attr-s_wind      { background: rgba(60,220,180,0.18);  color: #40d8b0; border: 1px solid rgba(60,220,180,0.35); }
+  .attr-s_quantum   { background: rgba(180,100,255,0.18); color: #c070ff; border: 1px solid rgba(180,100,255,0.35); }
+  .attr-s_imaginary { background: rgba(220,180,60,0.18);  color: #ddb840; border: 1px solid rgba(220,180,60,0.35); }
+  .attr-s_physical  { background: rgba(200,168,75,0.18);  color: #c8a84b; border: 1px solid rgba(200,168,75,0.35); }
   /* 原神元素アイコン */
   .attr-g_pyro    { background: rgba(232,100,60,0.18);  color: #e8644b; border: 1px solid rgba(232,100,60,0.35); }
   .attr-g_hydro   { background: rgba(60,160,232,0.18);  color: #4ba0e8; border: 1px solid rgba(60,160,232,0.35); }
@@ -860,6 +868,97 @@
     .record-sub { font-size: 10px; }
     .badge { font-size: 9px; padding: 1px 5px; }
   }
+
+  /* ===== グラフセクション（ページ下部独立） ===== */
+  .chart-outer {
+    display: none;
+    max-width: 960px;
+    margin: 0 auto 2.5rem;
+    padding: 0 2rem;
+  }
+  .chart-outer.visible { display: block; }
+  .chart-outer-inner {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .chart-outer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.65rem 1.25rem;
+    cursor: pointer;
+    border-bottom: 1px solid transparent;
+    transition: background .15s, border-color .15s;
+    gap: 12px;
+  }
+  .chart-outer-header:hover { background: var(--surface2); }
+  .chart-outer.open .chart-outer-header { border-bottom-color: var(--border); }
+  .chart-outer-title { display: flex; align-items: baseline; gap: 10px; }
+  .chart-outer-label {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+  }
+  .chart-outer-sub {
+    font-size: 11px;
+    color: var(--text-faint);
+    font-family: 'DM Mono', monospace;
+  }
+  .chart-toggle-arrow {
+    font-size: 10px;
+    color: var(--text-faint);
+    transition: transform .2s;
+    flex-shrink: 0;
+  }
+  .chart-outer.open .chart-toggle-arrow { transform: rotate(180deg); }
+  .chart-tab-btn {
+    padding: 4px 12px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .chart-tab-btn:hover { border-color: var(--border-hover); color: var(--text); }
+  .chart-tab-btn.on { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+  .chart-body { display: none; padding: 1.25rem; }
+  .chart-outer.open .chart-body { display: block; }
+  .chart-pane { display: none; }
+  .chart-pane.on { display: block; }
+  .chart-two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+  .chart-col-label {
+    font-size: 11px;
+    color: var(--text-faint);
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 8px;
+    letter-spacing: 0.04em;
+  }
+  .chart-canvas-wrap { position: relative; height: 200px; }
+  .chart-canvas-tall { height: 240px; }
+  .chart-empty {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-faint);
+    font-family: 'DM Mono', monospace;
+    padding: 2.5rem 0;
+  }
+  @media (max-width: 700px) {
+    .chart-outer { padding: 0 1rem; }
+    .chart-two-col { grid-template-columns: 1fr; gap: 1rem; }
+    .chart-outer-header { flex-wrap: wrap; gap: 8px; }
+  }
 </style>
 <style>
   /* ゲーム切り替えドロップダウン */
@@ -898,6 +997,7 @@
   .game-dropdown-item[data-game="zzz"]:hover     { color: #c8a84b; }
   .game-dropdown-item[data-game="genshin"]:hover { color: #4ba8c8; }
   html[data-game="genshin"] { --accent: #4ba8c8; --accent-dim: rgba(75,168,200,0.12); }
+  html[data-game="stare"]   { --accent: #a06cd5; --accent-dim: rgba(160,108,213,0.12); }
   /* ゲームセレクターボタンを角丸枠で囲む */
   .game-selector-btn {
     border: 1px solid var(--border) !important;
@@ -914,9 +1014,12 @@
   /* ゲームラベルの固有カラー */
   html[data-game="zzz"]     .game-selector-btn { color: #c8a84b; }
   html[data-game="genshin"] .game-selector-btn { color: #4ba8c8; }
+  html[data-game="stare"]   .game-selector-btn { color: #a06cd5; }
   html[data-game="zzz"]     .game-selector-btn::after { color: #c8a84b; }
   html[data-game="genshin"] .game-selector-btn::after { color: #4ba8c8; }
+  html[data-game="stare"]   .game-selector-btn::after { color: #a06cd5; }
   html[data-game="genshin"][data-theme="light"] { --accent: #1a88b0; --accent-dim: rgba(26,136,176,0.12); }
+  html[data-game="stare"][data-theme="light"]   { --accent: #7a44b0; --accent-dim: rgba(122,68,176,0.12); }
 </style>
 </head>
 <body>
@@ -944,6 +1047,7 @@
     <div id="game-dropdown" class="game-dropdown-menu">
       <div class="game-dropdown-item" data-game="zzz" style="color:#c8a84b;">ZZZ</div>
       <div class="game-dropdown-item" data-game="genshin" style="color:#4ba8c8;">原神</div>
+      <div class="game-dropdown-item" data-game="stare" style="color:#a06cd5;">スタレ</div>
     </div>
   </div>
   <h1>ガチャ記録</h1>
@@ -1070,6 +1174,47 @@
       <button class="filter-btn" id="filter-btn-weapon" data-val="weapon" onclick="setBannerFilter(this,'weapon')">音動機</button>
     </div>
 
+    <!-- ===== グラフセクション（バナー下・エージェント上） ===== -->
+    <div class="chart-outer" id="chart-section" style="max-width:100%; margin:0; padding:0; border-bottom:1px solid var(--border);">
+      <div class="chart-outer-inner" style="border:none; border-radius:0;">
+        <div class="chart-outer-header" onclick="toggleChartSection()">
+          <div class="chart-outer-title">
+            <span class="chart-outer-label">📊 統計グラフ</span>
+            <span class="chart-outer-sub" id="chart-outer-sub"></span>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <button class="chart-tab-btn on" data-tab="dist" onclick="event.stopPropagation();switchChartTab(this,'dist')">連数分布</button>
+            <button class="chart-tab-btn" data-tab="ver" onclick="event.stopPropagation();switchChartTab(this,'ver')">バージョン別推移</button>
+            <span class="chart-toggle-arrow">▾</span>
+          </div>
+        </div>
+
+        <div class="chart-body" id="chart-body">
+          <!-- 連数分布タブ -->
+          <div class="chart-pane on" id="chart-pane-dist">
+            <div class="chart-two-col">
+              <div class="chart-col">
+                <div class="chart-col-label" id="chart-dist-label-agent"></div>
+                <div class="chart-canvas-wrap"><canvas id="chart-dist-agent"></canvas></div>
+                <div class="chart-empty" id="chart-dist-agent-empty" style="display:none">記録がありません</div>
+              </div>
+              <div class="chart-col">
+                <div class="chart-col-label" id="chart-dist-label-weapon"></div>
+                <div class="chart-canvas-wrap"><canvas id="chart-dist-weapon"></canvas></div>
+                <div class="chart-empty" id="chart-dist-weapon-empty" style="display:none">記録がありません</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- バージョン別推移タブ -->
+          <div class="chart-pane" id="chart-pane-ver">
+            <div class="chart-canvas-wrap chart-canvas-tall"><canvas id="chart-ver"></canvas></div>
+            <div class="chart-empty" id="chart-ver-empty" style="display:none">複数バージョンの記録がありません</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="stats-wrap" style="display:none">
       <!-- エージェント / キャラクター統計 -->
       <div class="stats-bar" id="stats-bar-agent">
@@ -1088,6 +1233,7 @@
         <div class="stat-item"><div class="s-label">すり抜け率</div><div class="s-val" id="st-weapon-loss">-<span>%</span></div></div>
       </div>
     </div>
+
     <div id="record-list"></div>
     <div class="count-bar">
       <span id="count-label">0 件</span>
@@ -1096,6 +1242,8 @@
   </div>
 
 </div>
+
+
 
 <!-- 編集モーダル -->
 <div class="modal-overlay" id="edit-modal">
@@ -1300,6 +1448,22 @@ const GENSHIN_ATTR_INFO = {
 };
 
 function getAttrIcon(name, banner) {
+  // スタレモードの場合
+  if (_currentGame === 'stare') {
+    const roster = banner === 'weapon' ? STARE_WEAPON_ROSTER : STARE_CHAR_ROSTER;
+    const normalized = normalizeAttrName(name);
+    const lower = normalized.toLowerCase();
+    for (const item of roster) {
+      const matched = item.name === normalized || item.name.toLowerCase() === lower
+        || (item.aliases || []).some(a => a === normalized || a.toLowerCase() === lower);
+      if (matched) {
+        const g = STARE_ATTR_INFO[item.attr] || { cls: 'attr-unknown', icon: '？', label: item.attr };
+        return `<span class="attr-icon ${g.cls}" title="${g.label}">${g.icon}</span>`;
+      }
+    }
+    return `<span class="attr-icon attr-unknown" title="${banner === 'weapon' ? '光円錐' : 'キャラクター'}">✦</span>`;
+  }
+
   // 原神モードの場合はGENSHIN_CHAR_ROSTER / GENSHIN_WEAPON_ROSTERを検索
   if (_currentGame === 'genshin') {
     const roster = (banner === 'weapon') ? GENSHIN_WEAPON_ROSTER : GENSHIN_CHAR_ROSTER;
@@ -1669,6 +1833,136 @@ const GENSHIN_WEAPON_ROSTER = [
   { name: '落霞と孤鶩の剣', attr: 'g_any' },
 ];
 
+// ===== 崩壊：スターレイル マスターデータ =====
+const STARE_CHAR_ROSTER = [
+  // 炎
+  { name: '姫子・旅立ち', attr: 's_fire', aliases: ['himeko','ひめこ', 'tabidati', 'たびだち'] },
+  { name: '千冶・刃',     attr: 's_fire',     aliases: ['senyajin','せんやじん'] },
+  { name: '火花',       attr: 's_fire',     aliases: ['hibana','ひばな'] },
+  { name: 'ダリア',         attr: 's_fire',     aliases: ['daria','だりあ'] },
+  { name: '帰忘の流離人', attr: 's_fire', aliases: ['kibounosasuraibito','きぼうのさすらいびと'] },
+  { name: '霊砂',   attr: 's_fire', aliases: ['reisa','れいさ'] },
+  { name: '椒丘',   attr: 's_fire',   aliases: ['syoukyuu','しょうきゅう'] },
+  { name: 'ホタル',     attr: 's_fire',   aliases: ['hotaru','ほたる'] },
+  { name: 'ギャラガー',     attr: 's_fire',   aliases: ['gyaraga-','ぎゃらがー'] },
+  { name: '桂乃芬', attr: 's_fire',   aliases: ['keinaifun', 'けいないふん'] },
+  { name: 'トパーズ', attr: 's_fire',   aliases: ['topa-zu','とぱーず'] },
+  { name: 'フック',     attr: 's_fire',   aliases: ['hukku','ふっく'] },
+  { name: 'アスター', attr: 's_fire',   aliases: ['asuta-','あすたー'] },
+  { name: '姫子', attr: 's_fire',   aliases: ['himeko','ひめこ'] },
+  // 氷
+  { name: 'キュレネ',     attr: 's_ice',     aliases: ['kyurene','きゅれね'] },
+  { name: '長夜月',     attr: 's_ice',     aliases: ['nagayoduki','nagayozuki', 'ながよづき'] },
+  { name: 'マダム・ヘルタ',         attr: 's_ice',     aliases: ['madamuheruta','まだむへるた'] },
+  { name: 'ミーシャ',         attr: 's_ice',     aliases: ['mi-sya','みーしゃ',] },
+  { name: 'ルアン・メェイ', attr: 's_ice',   aliases: ['ruanmei','るあんめぇい'] },
+  { name: '鏡流',   attr: 's_ice',     aliases: ['keiryuu','けいりゅう'] },
+  { name: '彦卿',       attr: 's_ice',     aliases: ['genkyou','げんきょう'] },
+  { name: 'ペラ',     attr: 's_ice',     aliases: ['pera','ぺら'] },
+  { name: 'ジェパード',     attr: 's_ice',     aliases: ['shepa-do','しぇぱーど'] },
+  { name: 'ヘルタ',         attr: 's_ice',     aliases: ['heruta','へるた',] },
+  { name: '三月なのか',       attr: 's_ice',     aliases: ['mitukinanoka','みつきなのか'] },
+  // 雷
+  { name: 'ギルガメッシュ',       attr: 's_thunder', aliases: ['girugamessyu','ぎるがめっしゅ'] },
+  { name: '不死途',     attr: 's_thunder', aliases: ['sinazu','しなず'] },
+  { name: 'アグライア',     attr: 's_thunder', aliases: ['aguraia','あぐらいあ'] },
+  { name: 'モゼ',     attr: 's_thunder', aliases: ['moze','もぜ'] },
+  { name: '黄泉',       attr: 's_thunder', aliases: ['yomi','よみ'] },
+  { name: 'カフカ', attr: 's_thunder', aliases: ['kahuka','かふか'] },
+  { name: '白露',         attr: 's_thunder', aliases: ['byakuro','びゃくろ'] },
+  { name: '景元',   attr: 's_thunder', aliases: ['keigenn','けいげん'] },
+  { name: '停雲',   attr: 's_thunder', aliases: ['teiunn','ていうん'] },
+  { name: 'セーバル',   attr: 's_thunder', aliases: ['se-baru','せーばる'] },
+  { name: 'アーラン',   attr: 's_thunder', aliases: ['a-rann','あーらん'] },
+  // 風
+  { name: 'ケリュドラ', attr: 's_wind',    aliases: ['keryudora','けりゅどら'] },
+  { name: 'セイバー',     attr: 's_wind',    aliases: ['seiba-','せいばー'] },
+  { name: 'ヒアンシー', attr: 's_wind',    aliases: ['hiansi-','ひあんしー'] },
+  { name: 'アナイクス',       attr: 's_wind',    aliases: ['anaikusu','あないくす'] },
+  { name: '飛霄',     attr: 's_wind',    aliases: ['hisyou','ひしょう'] },
+  { name: 'ブラックスワン',       attr: 's_wind',    aliases: ['burakkusuwann','ぶらっくすわん'] },
+  { name: 'フォフォ',       attr: 's_wind',    aliases: ['fofo','ふぉふぉ'] },
+  { name: '刃', attr: 's_wind',    aliases: ['jinn','じん'] },
+  { name: 'サンポ', attr: 's_wind',    aliases: ['sanpo','さんぽ'] },
+  { name: 'ブローニャ', attr: 's_wind',    aliases: ['buro-nya','ぶろーにゃ'] },
+  { name: '丹恒', attr: 's_wind',    aliases: ['tankou','たんこう'] },
+  // 量子
+  { name: '遠坂凛', attr: 's_quantum', aliases: ['toosakarinn','とおさかりん'] },
+  { name: 'アーチャー',   attr: 's_quantum', aliases: ['a-tya-','アーチャー'] },
+  { name: 'サフェル', attr: 's_quantum', aliases: ['saferu','さふぇる'] },
+  { name: 'キャストリス', attr: 's_quantum', aliases: ['kyasutorisu','きゃすとりす'] },
+  { name: 'トリビー', attr: 's_quantum', aliases: ['toribi-','とりびー'] },
+  { name: 'ジェイド', attr: 's_quantum', aliases: ['jeido','じぇいど'] },
+  { name: '花火', attr: 's_quantum', aliases: ['hanabi','はなび'] },
+  { name: '雪衣', attr: 's_quantum', aliases: ['setui','せつい'] },
+  { name: 'リンクス', attr: 's_quantum', aliases: ['rinkusu','りんくす'] },
+  { name: '符玄', attr: 's_quantum', aliases: ['hugenn','ふげん','fugenn'] },
+  { name: '銀狼', attr: 's_quantum', aliases: ['ginrou','ぎんろう'] },
+  { name: '青雀', attr: 's_quantum', aliases: ['seijaku','せいじゃく'] },
+  { name: 'ゼーレ', attr: 's_quantum', aliases: ['ze-re','ぜれ'] },
+
+  // 虚数
+  { name: '銀狼LV.999',   attr: 's_imaginary', aliases: ['ginrou999','ぎんろう999'] },
+  { name: 'モーディス',   attr: 's_imaginary', aliases: ['mo-disu','もーでぃす'] },
+  { name: 'サンデー',   attr: 's_imaginary', aliases: ['sande-','さんでー'] },
+  { name: '乱破',   attr: 's_imaginary', aliases: ['ranha','らんは'] },
+  { name: '三月なのか（巡狩）',   attr: 's_imaginary', aliases: ['mitukinanoka','みつきなのか'] },
+  { name: 'アベンチュリン',   attr: 's_imaginary', aliases: ['abentyurinn','あべんちゅりん'] },
+  { name: 'Dr.レイシオ',   attr: 's_imaginary', aliases: ['dr.reisio','どる・れいしお'] },
+  { name: '飲月',   attr: 's_imaginary', aliases: ['ingetu','いんげつ'] },
+  { name: '御空',   attr: 's_imaginary', aliases: ['gyokuu','ぎょくう'] },
+  { name: '羅刹',   attr: 's_imaginary', aliases: ['rasetu','らせつ'] },
+  { name: 'ヴェルト',   attr: 's_imaginary', aliases: ['beruto','べると','veruto'] },
+  // 物理
+  { name: '緋英',attr: 's_physical', aliases: ['hiei','ひえい'] },
+  { name: '爻光',attr: 's_physical', aliases: ['koukou','こうこう'] },
+  { name: '丹恒・騰荒',attr: 's_physical', aliases: ['tankou','たんこう'] },
+  { name: 'セイレンス',attr: 's_physical', aliases: ['seirensu','せいれんす'] },
+  { name: 'ファイノン',attr: 's_physical',aliases: ['fainon','ふぁいのん'] },
+  { name: 'マルコシアス',attr: 's_physical', aliases: ['marukosiasu','まるこしあす'] },
+  { name: '雲璃',attr: 's_physical',aliases: ['unri','うんり'] },
+  { name: 'ブートヒル',attr: 's_physical',aliases: ['bu-tohiru','ぶーとひる']   },
+  { name: 'ロビン',attr: 's_physical',aliases: ['robin','ろびん']   },
+  { name: '寒鴉',attr: 's_physical',aliases: ['kanna','かんあ']   },
+  { name: 'アルジェンティ',attr: 's_physical',aliases: ['arujenti','あるじぇんてぃ']   },
+  { name: 'ルカ',attr: 's_physical',aliases: ['ruka','るか']   },
+  { name: '素裳',attr: 's_physical',aliases: ['susyou','すしょう']   },
+  { name: 'クラーラ',attr: 's_physical',aliases: ['kura-ra','くらーら']   },
+  { name: 'ナターシャ',attr: 's_physical',alertas: ['nata-sya','なたーしゃ']   },
+];
+const STARE_WEAPON_ROSTER = [
+  { name: '銀河鉄道の夜', attr: 's_any' },
+  { name: '記念すべき夜', attr: 's_any' },
+  { name: '世界の始まり',  attr: 's_any' },
+  { name: '煙霞旅逃',     attr: 's_any' },
+  { name: '精神不覚',     attr: 's_any' },
+  { name: '今ここにある永遠', attr: 's_any' },
+  { name: '開拓者（光円錐）', attr: 's_any' },
+  { name: '流浪する光',   attr: 's_any' },
+];
+
+const STARE_ATTR_INFO = {
+  's_fire':      { cls: 'attr-s_fire',      icon: '🔥', label: '炎' },
+  's_ice':       { cls: 'attr-s_ice',       icon: '❄',  label: '氷' },
+  's_thunder':   { cls: 'attr-s_thunder',   icon: '⚡', label: '雷' },
+  's_wind':      { cls: 'attr-s_wind',      icon: '🌀', label: '風' },
+  's_quantum':   { cls: 'attr-s_quantum',   icon: '✦',  label: '量子' },
+  's_imaginary': { cls: 'attr-s_imaginary', icon: '⧖',  label: '虚数' },
+  's_physical':  { cls: 'attr-s_physical',  icon: '⚔',  label: '物理' },
+  's_any':       { cls: 'attr-unknown',     icon: '✦',  label: '万能' },
+};
+
+const STARE_ATTR_FILTERS = [
+  { val: '',             label: 'すべて' },
+  { val: 's_fire',      label: '🔥 炎' },
+  { val: 's_ice',       label: '❄ 氷' },
+  { val: 's_thunder',   label: '⚡ 雷' },
+  { val: 's_wind',      label: '🌀 風' },
+  { val: 's_quantum',   label: '✦ 量子' },
+  { val: 's_imaginary', label: '⧖ 虚数' },
+  { val: 's_physical',  label: '⚔ 物理' },
+];
+
 // 原神の元素フィルター
 const GENSHIN_ATTR_FILTERS = [
   { val: '', label: 'すべて' },
@@ -1696,8 +1990,8 @@ const namePickerState = {};
 
 function attrMatchesFilter(itemAttr, filterVal) {
   if (!filterVal) return true;
-  // 原神の場合：文字列マッチ
-  if (typeof itemAttr === 'string' && itemAttr.startsWith('g_')) {
+  // 原神・スタレの場合：文字列マッチ
+  if (typeof itemAttr === 'string' && (itemAttr.startsWith('g_') || itemAttr.startsWith('s_'))) {
     return itemAttr === filterVal || filterVal === '';
   }
   // ZZZの場合：数値マッチ
@@ -1729,6 +2023,9 @@ function getRoster(banner) {
   if (_currentGame === 'genshin') {
     return banner === 'weapon' ? GENSHIN_WEAPON_ROSTER : GENSHIN_CHAR_ROSTER;
   }
+  if (_currentGame === 'stare') {
+    return banner === 'weapon' ? STARE_WEAPON_ROSTER : STARE_CHAR_ROSTER;
+  }
   return banner === 'weapon' ? WEAPON_ROSTER : AGENT_ROSTER;
 }
 
@@ -1740,7 +2037,9 @@ function getFilteredRoster(banner, attrFilter, query) {
 }
 
 function getActiveAttrFilters() {
-  return _currentGame === 'genshin' ? GENSHIN_ATTR_FILTERS : ZZZ_ATTR_FILTERS;
+  if (_currentGame === 'genshin') return GENSHIN_ATTR_FILTERS;
+  if (_currentGame === 'stare')   return STARE_ATTR_FILTERS;
+  return ZZZ_ATTR_FILTERS;
 }
 
 function initNamePicker(cfg) {
@@ -1885,12 +2184,13 @@ document.addEventListener('click', (e) => {
 });
 
 let _currentGame = 'zzz';
-const KEY = () => _currentGame === 'zzz' ? 'zzz_gacha_v4' : 'genshin_gacha_v1';
+const KEY = () => _currentGame === 'zzz' ? 'zzz_gacha_v4' : _currentGame === 'genshin' ? 'genshin_gacha_v1' : 'stare_gacha_v1';
 let records = [];
 // ゲームごとにverの選択状態を独立して管理
 const _verState = {
   zzz:     { currentVer: '1', recordVer: '1' },
   genshin: { currentVer: '1', recordVer: '1' },
+  stare:   { currentVer: '1', recordVer: '1' },
 };
 // 後方互換：currentVer / recordVer は現在のゲームのstateへのプロキシ
 Object.defineProperty(window, 'currentVer', {
@@ -2332,8 +2632,8 @@ function renderList() {
   function makeItem(r) {
     const attrIcon  = getAttrIcon(r.name, r.banner);
     const rareBadge = r.rarity === 'S'
-      ? `<span class="badge badge-s">${_currentGame === 'genshin' ? '★5' : 'S'}</span>`
-      : `<span class="badge badge-a">${_currentGame === 'genshin' ? '★4' : 'A'}</span>`;
+      ? `<span class="badge badge-s">${(_currentGame === 'genshin' || _currentGame === 'stare') ? '★5' : 'S'}</span>`
+      : `<span class="badge badge-a">${(_currentGame === 'genshin' || _currentGame === 'stare') ? '★4' : 'A'}</span>`;
     const loseBadge = r.lose === 'win'
       ? '<span class="badge badge-win">確定</span>'
       : r.lose === 'loss'
@@ -2356,7 +2656,7 @@ function renderList() {
       ? `<span class="badge badge-cons">${r.cons}凸</span>` : '';
     const bannerLbl = r.banner === 'agent' ? 'エージェント'
       : r.banner === 'character' ? 'キャラクター'
-      : r.banner === 'weapon' ? (_currentGame === 'genshin' ? '武器' : '音動機')
+      : r.banner === 'weapon' ? (_currentGame === 'genshin' ? '武器' : _currentGame === 'stare' ? '光円錐' : '音動機')
       : r.banner;
     const losePart  = (r.banner === 'agent' || r.banner === 'character') ? loseBadge : wpnLoseBadge;
     const displayName = searchQuery ? highlightText(r.name, searchQuery) : escapeHtml(r.name);
@@ -2384,7 +2684,7 @@ function renderList() {
       html += agentRecs.map(makeItem).join('');
     }
     if (weaponRecs.length) {
-      html += `<div class="divider">${_currentGame === 'genshin' ? '武器' : '音動機'}</div>`;
+      html += `<div class="divider">${_currentGame === 'genshin' ? '武器' : _currentGame === 'stare' ? '光円錐' : '音動機'}</div>`;
       html += weaponRecs.map(makeItem).join('');
     }
   } else {
@@ -2395,9 +2695,13 @@ function renderList() {
 
   const allVer = recordsForView();
   const isG    = _currentGame === 'genshin';
-  const sLabel = isG ? '★5' : 'Sランク';
-
-  // ── エージェント / キャラクター統計 ──
+  const isS    = _currentGame === 'stare';
+  const sLabel = (isG || isS) ? '★5' : 'Sランク';
+  // セクションラベル切り替え
+  document.getElementById('st-agent-title').textContent  = (isG || isS) ? 'キャラクター' : 'エージェント';
+  document.getElementById('st-weapon-title').textContent = isG ? '武器' : isS ? '光円錐' : '音動機';
+  document.getElementById('st-agent-s-label').textContent  = sLabel;
+  document.getElementById('st-weapon-s-label').textContent = sLabel;
   const agentBanners = ['agent', 'character'];
   const agentAll  = allVer.filter(r => agentBanners.includes(r.banner));
   const agentSAll = agentAll.filter(r => r.rarity === 'S');
@@ -2423,12 +2727,6 @@ function renderList() {
   const hasAny = (showAgent && agentAll.length) || (showWeapon && weaponAll.length);
   wrap.style.display = hasAny ? '' : 'none';
 
-  // セクションラベル切り替え
-  document.getElementById('st-agent-title').textContent  = isG ? 'キャラクター' : 'エージェント';
-  document.getElementById('st-weapon-title').textContent = isG ? '武器' : '音動機';
-  document.getElementById('st-agent-s-label').textContent  = sLabel;
-  document.getElementById('st-weapon-s-label').textContent = sLabel;
-
   // エージェントブロック
   barAgent.style.display = (showAgent && agentAll.length) ? '' : 'none';
   if (showAgent && agentAll.length) {
@@ -2451,8 +2749,15 @@ function renderList() {
   const sCount = list.filter(r => r.rarity === 'S').length;
 
   document.getElementById('count-label').textContent = list.length + ' 件';
-  const rankLabel = _currentGame === 'genshin' ? '★5' : 'Sランク';
+  const rankLabel = _currentGame === 'genshin' || _currentGame === 'stare' ? '★5' : 'Sランク';
   document.getElementById('s-count').textContent = sCount ? `${rankLabel} ${sCount} 件` : '';
+
+  // データがある場合はグラフセクションを表示可能にし、開いていれば再描画
+  const chartSection = document.getElementById('chart-section');
+  if (chartSection) {
+    chartSection.classList.toggle('visible', recordsForView().some(r => r.rarity === 'S'));
+    if (typeof renderCharts === 'function') renderCharts();
+  }
 }
 
 let editingId = null;
@@ -2602,47 +2907,64 @@ document.getElementById('btn-login').addEventListener('click', signInGoogle);
 // ===== ゲームUI切り替え =====
 function switchGameUI(game) {
   const isG = game === 'genshin';
+  const isS = game === 'stare';
 
   // data-game属性をセット（CSSのアクセントカラー切り替えに使用）
   document.documentElement.setAttribute('data-game', game);
 
   // ロゴ・サブタイトル
-  document.getElementById('current-game-label').textContent = isG ? '原神' : 'ZZZ';
-  document.getElementById('header-subtitle').textContent =
-    isG ? '/ Genshin Impact' : '/ Zenless Zone Zero';
+  const gameLabel = isG ? '原神' : isS ? 'スタレ' : 'ZZZ';
+  const gameSubtitle = isG ? '/ Genshin Impact' : isS ? '/ Honkai: Star Rail' : '/ Zenless Zone Zero';
+  document.getElementById('current-game-label').textContent = gameLabel;
+  document.getElementById('header-subtitle').textContent = gameSubtitle;
 
   // バナー種別ボタン
   const btnAgent  = document.getElementById('btn-banner-agent');
   const btnWeapon = document.getElementById('btn-banner-weapon');
-  if (btnAgent)  { btnAgent.textContent  = isG ? 'キャラクター' : 'エージェント'; btnAgent.dataset.val  = isG ? 'character' : 'agent'; }
-  if (btnWeapon) { btnWeapon.textContent = isG ? '武器'         : '音動機（武器）'; }
+  if (btnAgent) {
+    btnAgent.textContent = isG ? 'キャラクター' : isS ? 'キャラクター' : 'エージェント';
+    btnAgent.dataset.val  = (isG || isS) ? 'character' : 'agent';
+  }
+  if (btnWeapon) {
+    btnWeapon.textContent = isG ? '武器' : isS ? '光円錐' : '音動機（武器）';
+  }
 
   // レア度ボタン
   const btnS = document.getElementById('btn-rarity-s');
   const btnA = document.getElementById('btn-rarity-a');
-  if (btnS) btnS.textContent = isG ? '★5' : 'Sランク';
-  if (btnA) btnA.textContent = isG ? '★4' : 'Aランク';
+  if (btnS) btnS.textContent = isG ? '★5' : isS ? '★5' : 'Sランク';
+  if (btnA) btnA.textContent = isG ? '★4' : isS ? '★4' : 'Aランク';
 
-  // 武器すり抜けボタン（原神：限定/恒常/命定値1）
+  // 武器すり抜けボタン
   const wWin  = document.getElementById('btn-wpn-lose-win');
   const wLoss = document.getElementById('btn-wpn-lose-loss');
   const wDash = document.getElementById('btn-wpn-lose-dash');
-  if (wWin)  { wWin.textContent  = isG ? '限定'    : '確定';   wWin.dataset.val  = isG ? 'limited' : 'win'; }
-  if (wLoss) { wLoss.textContent = isG ? '恒常'    : 'すり抜け'; wLoss.dataset.val = isG ? '-'       : 'loss'; }
-  if (wDash) { wDash.textContent = isG ? '命定値1' : '75%';    wDash.dataset.val = isG ? 'fate1'   : '-'; }
+  if (isS) {
+    if (wWin)  { wWin.textContent  = '確定';   wWin.dataset.val  = 'win'; }
+    if (wLoss) { wLoss.textContent = 'すり抜け'; wLoss.dataset.val = 'loss'; }
+    if (wDash) { wDash.textContent = '75%';    wDash.dataset.val = '-'; }
+  } else if (isG) {
+    if (wWin)  { wWin.textContent  = '限定';    wWin.dataset.val  = 'limited'; }
+    if (wLoss) { wLoss.textContent = '恒常';    wLoss.dataset.val = '-'; }
+    if (wDash) { wDash.textContent = '命定値1'; wDash.dataset.val = 'fate1'; }
+  } else {
+    if (wWin)  { wWin.textContent  = '確定';   wWin.dataset.val  = 'win'; }
+    if (wLoss) { wLoss.textContent = 'すり抜け'; wLoss.dataset.val = 'loss'; }
+    if (wDash) { wDash.textContent = '75%';    wDash.dataset.val = '-'; }
+  }
   // 選択状態をリセット
   if (wWin) { [wWin, wLoss, wDash].forEach(b => b && b.classList.remove('on')); wWin.classList.add('on'); }
 
   // 履歴フィルターのラベル
   const fAgent  = document.getElementById('filter-btn-agent');
   const fWeapon = document.getElementById('filter-btn-weapon');
-  if (fAgent)  fAgent.textContent  = isG ? 'キャラクター' : 'エージェント';
-  if (fWeapon) fWeapon.textContent = isG ? '武器'         : '音動機';
+  if (fAgent)  fAgent.textContent  = (isG || isS) ? 'キャラクター' : 'エージェント';
+  if (fWeapon) fWeapon.textContent = isG ? '武器' : isS ? '光円錐' : '音動機';
 
   // 統計バーのSランクラベルは renderList() 内で更新
 
   // バナー切り替え時のフィールド表示を現在の選択に合わせてリセット
-  const currentBanner = isG ? 'character' : 'agent';
+  const currentBanner = (isG || isS) ? 'character' : 'agent';
   if (btnAgent) { btnAgent.classList.add('on'); }
   if (btnWeapon) { btnWeapon.classList.remove('on'); }
   onBannerChange(currentBanner);
@@ -2652,6 +2974,8 @@ function switchGameUI(game) {
   if (inpName) {
     inpName.placeholder = isG
       ? (inpName.dataset.placeholderGenshin || '例：楓原万葉、胡桃、ヌヴィレット（一部入力で候補表示）')
+      : isS
+      ? '例：セーバル、鏡流、カフカ（一部入力で候補表示）'
       : (inpName.dataset.placeholderZzz    || '例：雅、青衣、朱鳶（一部入力で候補表示）');
   }
 
@@ -2663,6 +2987,10 @@ function switchGameUI(game) {
     if (v1) v1.textContent = '5.0 〜 5.8';
     if (v2) v2.textContent = 'Luna1 〜 Luna4';
     if (v3) v3.textContent = 'Luna5 〜';
+  } else if (isS) {
+    if (v1) v1.textContent = '3.0 〜 3.8';
+    if (v2) v2.textContent = '4.0 〜  ';
+    if (v3) v3.textContent = '5.0 〜';
   } else {
     if (v1) v1.textContent = '1.0 〜 1.7';
     if (v2) v2.textContent = '2.0 〜 2.8';
@@ -2697,6 +3025,338 @@ function toggleTheme() {
   }
 })();
 
+// ===== グラフ機能 =====
+let _chartDistAgent  = null;
+let _chartDistWeapon = null;
+let _chartVer        = null;
+let _chartSectionOpen = false;
+let _activeChartTab   = 'dist';
+
+function toggleChartSection() {
+  _chartSectionOpen = !_chartSectionOpen;
+  const sec = document.getElementById('chart-section');
+  sec.classList.toggle('open', _chartSectionOpen);
+  if (_chartSectionOpen) renderCharts();
+}
+
+function switchChartTab(btn, tab) {
+  document.querySelectorAll('.chart-tab-btn').forEach(b => b.classList.remove('on'));
+  // ヘッダー内のタブボタンも同期
+  document.querySelectorAll(`[data-tab="${tab}"]`).forEach(b => b.classList.add('on'));
+  document.querySelectorAll('.chart-pane').forEach(p => p.classList.remove('on'));
+  document.getElementById('chart-pane-' + tab).classList.add('on');
+  _activeChartTab = tab;
+  renderCharts();
+}
+
+function getChartColors() {
+  const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+  return {
+    accent:        isDark ? '#c8a84b' : '#b8922a',
+    accentAlpha:   isDark ? 'rgba(200,168,75,0.18)' : 'rgba(184,146,42,0.12)',
+    loss:          isDark ? '#e8604b' : '#c83020',
+    lossAlpha:     isDark ? 'rgba(232,96,75,0.18)'  : 'rgba(200,48,32,0.12)',
+    blue:          isDark ? '#7aa2e8' : '#3a70c8',
+    blueAlpha:     isDark ? 'rgba(122,162,232,0.18)' : 'rgba(58,112,200,0.12)',
+    text:          isDark ? '#7a7f8e' : '#5a6070',
+    grid:          isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
+    tooltipBg:     isDark ? '#16181c' : '#ffffff',
+    tooltipBorder: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+  };
+}
+
+function axisOpts(c, extra) {
+  return {
+    ticks: { color: c.text, font: { family: "'DM Mono', monospace", size: 10 } },
+    grid: { color: c.grid, drawBorder: false },
+    border: { display: false },
+    ...extra,
+  };
+}
+
+function tooltipOpts(c, cb) {
+  return {
+    backgroundColor: c.tooltipBg,
+    borderColor: c.tooltipBorder,
+    borderWidth: 1,
+    titleColor: c.text,
+    bodyColor: c.text,
+    padding: 10,
+    cornerRadius: 6,
+    callbacks: cb,
+  };
+}
+
+function renderCharts() {
+  if (!_chartSectionOpen) return;
+  if (typeof Chart === 'undefined') return;
+  if (_activeChartTab === 'dist') renderDistCharts();
+  if (_activeChartTab === 'ver')  renderVerChart();
+  updateChartSub();
+}
+
+function updateChartSub() {
+  const recs = recordsForView().filter(r => r.rarity === 'S');
+  const sub  = document.getElementById('chart-outer-sub');
+  if (!sub) return;
+  const isG = _currentGame === 'genshin';
+  sub.textContent = recs.length
+    ? `${isG ? '★5' : 'Sランク'} ${recs.length}件のデータ`
+    : '';
+}
+
+// ---- 連数分布（エージェント・武器 2列） ----
+function renderDistCharts() {
+  const c   = getChartColors();
+  const isG = _currentGame === 'genshin';
+  const isS = _currentGame === 'stare';
+  const sLabel     = (isG || isS) ? '★5' : 'Sランク';
+  const agentLabel = (isG || isS) ? 'キャラクター' : 'エージェント';
+  const weaponLabel= isG ? '武器' : isS ? '光円錐' : '音動機';
+  const agentBanners = ['agent', 'character'];
+  const allRecs = recordsForView();
+
+  _chartDistAgent  = renderSingleDist({
+    recs:      allRecs.filter(r => agentBanners.includes(r.banner) && r.rarity === 'S' && r.pull),
+    canvasId:  'chart-dist-agent',
+    emptyId:   'chart-dist-agent-empty',
+    labelId:   'chart-dist-label-agent',
+    labelText: agentLabel + ' — ' + sLabel + '連数分布',
+    barColor:  c.accentAlpha,
+    barBorder: c.accent,
+    hiColor:   c.lossAlpha,
+    hiBorder:  c.loss,
+    sLabel,
+    chartRef:  _chartDistAgent,
+    c,
+  });
+
+  _chartDistWeapon = renderSingleDist({
+    recs:      allRecs.filter(r => r.banner === 'weapon' && r.rarity === 'S' && r.pull),
+    canvasId:  'chart-dist-weapon',
+    emptyId:   'chart-dist-weapon-empty',
+    labelId:   'chart-dist-label-weapon',
+    labelText: weaponLabel + ' — ' + sLabel + '連数分布',
+    barColor:  c.blueAlpha,
+    barBorder: c.blue,
+    hiColor:   c.lossAlpha,
+    hiBorder:  c.loss,
+    sLabel,
+    chartRef:  _chartDistWeapon,
+    c,
+  });
+}
+
+function renderSingleDist({ recs, canvasId, emptyId, labelId, labelText, barColor, barBorder, hiColor, hiBorder, sLabel, chartRef, c }) {
+  document.getElementById(labelId).textContent = labelText;
+  const emptyEl    = document.getElementById(emptyId);
+  const canvasWrap = document.getElementById(canvasId)?.parentElement;
+
+  if (recs.length < 2) {
+    emptyEl.style.display = '';
+    if (canvasWrap) canvasWrap.style.display = 'none';
+    if (chartRef) { chartRef.destroy(); }
+    return null;
+  }
+  emptyEl.style.display = 'none';
+  if (canvasWrap) canvasWrap.style.display = '';
+
+  const buckets = Array(8).fill(0);
+  recs.forEach(r => { buckets[Math.min(Math.floor((r.pull - 1) / 10), 7)]++; });
+  const labels = ['1–10','11–20','21–30','31–40','41–50','51–60','61–70','71–80'];
+
+  if (chartRef) { chartRef.destroy(); }
+  const ctx = document.getElementById(canvasId)?.getContext('2d');
+  if (!ctx) return null;
+
+  return new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: sLabel,
+        data: buckets,
+        backgroundColor: buckets.map((_, i) => i >= 4 ? hiColor  : barColor),
+        borderColor:     buckets.map((_, i) => i >= 4 ? hiBorder : barBorder),
+        borderWidth: 1.5,
+        borderRadius: 3,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: tooltipOpts(c, {
+          label: ctx => ' ' + ctx.parsed.y + '件',
+          afterLabel: ctx => {
+            const pct = recs.length ? Math.round(ctx.parsed.y / recs.length * 100) : 0;
+            return ' 全体の ' + pct + '%';
+          }
+        })
+      },
+      scales: {
+        x: axisOpts(c),
+        y: axisOpts(c, { beginAtZero: true, ticks: { color: c.text, font: { family: "'DM Mono', monospace", size: 10 }, stepSize: 1 } }),
+      }
+    }
+  });
+}
+
+// ---- バージョン別推移 ----
+function renderVerChart() {
+  const c       = getChartColors();
+  const emptyEl = document.getElementById('chart-ver-empty');
+  const cw      = document.getElementById('chart-ver')?.parentElement;
+  const isG     = _currentGame === 'genshin';
+  const isS     = _currentGame === 'stare';
+  const agentBanners = ['agent', 'character'];
+
+  // バージョン別に集計（ALLバージョンのデータで）
+  const verMap = {};
+  records.forEach(r => {
+    if (!r.ver || r.rarity !== 'S') return;
+    if (!verMap[r.ver]) verMap[r.ver] = {
+      agentPulls: [], agentLoss: 0, agentTotal: 0,
+      weaponPulls:[], weaponLoss: 0, weaponTotal: 0,
+    };
+    const d = verMap[r.ver];
+    if (agentBanners.includes(r.banner)) {
+      if (r.pull) d.agentPulls.push(r.pull);
+      d.agentTotal++;
+      if (r.lose === 'loss') d.agentLoss++;
+    } else if (r.banner === 'weapon') {
+      if (r.pull) d.weaponPulls.push(r.pull);
+      d.weaponTotal++;
+      if (r.wpnLose === 'loss') d.weaponLoss++;
+    }
+  });
+
+  const vers = Object.keys(verMap).sort();
+  if (vers.length < 2) {
+    emptyEl.style.display = '';
+    if (cw) cw.style.display = 'none';
+    if (_chartVer) { _chartVer.destroy(); _chartVer = null; }
+    return;
+  }
+  emptyEl.style.display = 'none';
+  if (cw) cw.style.display = '';
+
+  const avg = (arr) => arr.length ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : null;
+  const rate = (loss, total) => total ? Math.round(loss / total * 100) : null;
+
+  const agentAvg   = vers.map(v => avg(verMap[v].agentPulls));
+  const weaponAvg  = vers.map(v => avg(verMap[v].weaponPulls));
+  const agentLoss  = vers.map(v => rate(verMap[v].agentLoss, verMap[v].agentTotal));
+  const weaponLoss = vers.map(v => rate(verMap[v].weaponLoss, verMap[v].weaponTotal));
+  const verLabels  = vers.map(v => 'v' + v);
+
+  const agentLabel  = (isG || isS) ? 'キャラ平均' : 'エージェント平均';
+  const weaponLabel = isG ? '武器平均' : isS ? '光円錐平均' : '音動機平均';
+  const agentLossLabel  = (isG || isS) ? 'キャラすり抜け%' : 'エージェントすり抜け%';
+  const weaponLossLabel = isG ? '武器すり抜け%' : isS ? '光円錐すり抜け%' : '音動機すり抜け%';
+
+  if (_chartVer) { _chartVer.destroy(); _chartVer = null; }
+  const ctx = document.getElementById('chart-ver')?.getContext('2d');
+  if (!ctx) return;
+
+  _chartVer = new Chart(ctx, {
+    data: {
+      labels: verLabels,
+      datasets: [
+        {
+          type: 'bar',
+          label: agentLabel,
+          data: agentAvg,
+          backgroundColor: c.accentAlpha,
+          borderColor: c.accent,
+          borderWidth: 1.5,
+          borderRadius: 3,
+          yAxisID: 'yLeft',
+        },
+        {
+          type: 'bar',
+          label: weaponLabel,
+          data: weaponAvg,
+          backgroundColor: c.blueAlpha,
+          borderColor: c.blue,
+          borderWidth: 1.5,
+          borderRadius: 3,
+          yAxisID: 'yLeft',
+        },
+        {
+          type: 'line',
+          label: agentLossLabel,
+          data: agentLoss,
+          borderColor: c.accent,
+          backgroundColor: 'transparent',
+          pointBackgroundColor: c.accent,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          tension: 0.35,
+          borderWidth: 2,
+          borderDash: [4, 3],
+          yAxisID: 'yRight',
+        },
+        {
+          type: 'line',
+          label: weaponLossLabel,
+          data: weaponLoss,
+          borderColor: c.blue,
+          backgroundColor: 'transparent',
+          pointBackgroundColor: c.blue,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          tension: 0.35,
+          borderWidth: 2,
+          borderDash: [4, 3],
+          yAxisID: 'yRight',
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          align: 'end',
+          labels: {
+            color: c.text,
+            font: { family: "'DM Mono', monospace", size: 10 },
+            boxWidth: 10, padding: 10,
+          }
+        },
+        tooltip: tooltipOpts(c, {
+          label: ctx => {
+            const v = ctx.parsed.y;
+            if (v === null || v === undefined) return null;
+            if (ctx.datasetIndex <= 1) return ' 平均 ' + v + '連';
+            return ' すり抜け ' + v + '%';
+          }
+        })
+      },
+      scales: {
+        x: axisOpts(c),
+        yLeft: axisOpts(c, {
+          position: 'left',
+          beginAtZero: true,
+          title: { display: true, text: '平均連数', color: c.accent, font: { size: 10, family: "'DM Mono', monospace" } },
+        }),
+        yRight: axisOpts(c, {
+          position: 'right',
+          beginAtZero: true,
+          max: 100,
+          grid: { display: false },
+          title: { display: true, text: 'すり抜け率 %', color: c.blue, font: { size: 10, family: "'DM Mono', monospace" } },
+        }),
+      }
+    }
+  });
+}
+
 loadLocal();
 initToggle('grp-banner');
 initToggle('grp-rarity');
@@ -2720,6 +3380,9 @@ initNamePicker({
 });
 renderList();
 </script>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 
 <!-- Firebase（設定は index.html 内に記載。別ファイルは広告ブロックで止まることがある） -->
 <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
@@ -2814,53 +3477,10 @@ document.querySelectorAll('.game-dropdown-item').forEach(item => {
 // ゲーム切り替えコア処理
 function switchGame(game) {
   currentGame = game;
-  _currentGame = game; // KEY()でストレージキーを切り替えるために同期
-  document.documentElement.setAttribute('data-game', game);
-  currentGameLabel.textContent = game === 'zzz' ? 'ZZZ' : '原神';
-  // const logoMark = document.querySelector('.logo-mark'); // 廃止
-  if (logoMark) logoMark.textContent = game === 'zzz' ? 'ZZZ' : '原神';
-  document.querySelector('header h1').textContent = game === 'zzz' ? 'ZZZ ガチャ記録' : '原神 ガチャ記録';
-
-  const b1 = document.getElementById('btn-banner-1');
-  const b2 = document.getElementById('btn-banner-2');
-  const b3 = document.getElementById('btn-banner-3');
-  const r1 = document.getElementById('btn-rarity-1');
-  const r2 = document.getElementById('btn-rarity-2');
-  const r3 = document.getElementById('btn-rarity-3');
-
-  if (game === 'zzz') {
-    b1.textContent = 'エージェント'; b1.setAttribute('data-val', 'agent');
-    b2.textContent = '音動機'; b2.setAttribute('data-val', 'wpn');
-    if (b3) b3.style.display = 'inline-block';
-    r1.textContent = 'Sランク';
-    r2.textContent = 'Aランク';
-    if (r3) r3.style.display = 'none'; // Bランクは元々非表示方針
-    document.getElementById('lbl-stat-s').textContent = 'Sランク合計';
-    document.getElementById('lbl-stat-a').textContent = 'Aランク合計';
-    document.getElementById('lbl-wpn-lose').textContent = '状態（音動機）';
-  } else {
-    b1.textContent = 'キャラクター'; b1.setAttribute('data-val', 'character');
-    b2.textContent = '武器'; b2.setAttribute('data-val', 'wpn');
-    if (b3) b3.style.display = 'none';
-    if (getVal('grp-banner') === 'bangboo') setActive('grp-banner', b1);
-    r1.textContent = '★5';
-    r2.textContent = '★4';
-    if (r3) r3.style.display = 'none';
-    document.getElementById('lbl-stat-s').textContent = '★5合計';
-    document.getElementById('lbl-stat-a').textContent = '★4合計';
-    document.getElementById('lbl-wpn-lose').textContent = '状態（武器）';
-  }
-
-  // 状態ボタンの文言更新
-  updateStateLabels();
-
-  // データの再読み込みと再描画
-  if (typeof user !== 'undefined' && user) {
-    fetchFirebase();
-  } else {
-    loadLocal();
-    renderList();
-  }
+  _currentGame = game;
+  switchGameUI(game);
+  loadLocal();
+  renderList();
 }
 
 function updateStateLabels() {
@@ -2889,17 +3509,17 @@ function updateStateLabels() {
   }
 }
 
-// 既存の関数をフックして原神用ストレージ・コレクション・サジェストに自動対応させる
+// 既存の関数をフックしてスタレ用ストレージにも対応させる
 const _loadLocal = loadLocal;
 loadLocal = function() {
-  const key = currentGame === 'zzz' ? 'gacha_records' : 'gacha_records_genshin';
+  const key = _currentGame === 'zzz' ? 'gacha_records' : _currentGame === 'genshin' ? 'gacha_records_genshin' : 'gacha_records_stare';
   const s = localStorage.getItem(key);
   records = s ? JSON.parse(s) : [];
 };
 
 const _saveLocal = saveLocal;
 saveLocal = function() {
-  const key = currentGame === 'zzz' ? 'gacha_records' : 'gacha_records_genshin';
+  const key = _currentGame === 'zzz' ? 'gacha_records' : _currentGame === 'genshin' ? 'gacha_records_genshin' : 'gacha_records_stare';
   localStorage.setItem(key, JSON.stringify(records));
 };
 
@@ -2909,7 +3529,7 @@ if (typeof db !== 'undefined') {
   fetchFirebase = async function() {
     if (!user) return;
     try {
-      const col = currentGame === 'zzz' ? 'records' : 'genshin_records';
+      const col = _currentGame === 'zzz' ? 'records' : _currentGame === 'genshin' ? 'genshin_records' : 'stare_records';
       const snap = await db.collection('users').doc(user.uid).collection(col).get();
       records = snap.docs.map(d => d.data());
       renderList();
@@ -2924,7 +3544,7 @@ if (typeof db !== 'undefined') {
   syncSave = async function() {
     if (!user) { saveLocal(); renderList(); return; }
     try {
-      const col = currentGame === 'zzz' ? 'records' : 'genshin_records';
+      const col = _currentGame === 'zzz' ? 'records' : _currentGame === 'genshin' ? 'genshin_records' : 'stare_records';
       const b = db.collection('users').doc(user.uid).collection(col);
       const snap = await b.get();
       const batch = db.batch();
