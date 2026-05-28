@@ -602,6 +602,104 @@
   .btn-submit:hover { opacity: 0.9; }
   .btn-submit:active { transform: scale(0.98); }
 
+  /* ===== 石カウンター ===== */
+  .stone-calc {
+    margin-top: 1rem;
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+  }
+  .stone-calc-title {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-faint);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .stone-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .stone-row label {
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    width: 80px;
+    flex-shrink: 0;
+  }
+  .stone-input {
+    flex: 1;
+    height: 34px;
+    padding: 0 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: 'DM Mono', monospace;
+    transition: border-color .15s;
+    width: 100%;
+  }
+  .stone-input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .stone-unit {
+    font-size: 11px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    width: 40px;
+    text-align: left;
+  }
+  .stone-result {
+    margin-top: 10px;
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: none;
+  }
+  .stone-result.show { display: block; }
+  .stone-result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .stone-result-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .stone-result-row:first-child { padding-top: 0; }
+  .stone-result-label { color: var(--text-muted); }
+  .stone-result-val {
+    font-family: 'DM Mono', monospace;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text);
+  }
+  .stone-result-val.accent { color: var(--accent); }
+  .stone-result-val.ok { color: var(--win); }
+  .stone-result-val.ng { color: var(--loss); }
+  .stone-shortage {
+    margin-top: 8px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .stone-shortage.ok {
+    background: var(--win-bg);
+    color: var(--win);
+  }
+  .stone-shortage.ng {
+    background: var(--loss-bg);
+    color: var(--loss);
+  }
+
   #flash {
     font-size: 12px;
     text-align: center;
@@ -1328,6 +1426,40 @@
 
       <button class="btn-submit" onclick="addRecord()">記録する</button>
       <div id="flash"></div>
+
+      <!-- 石カウンター -->
+      <div class="stone-calc">
+        <div class="stone-calc-title" id="stone-calc-title">💎 石カウンター</div>
+        <div class="stone-row">
+          <label>目標連数</label>
+          <input class="stone-input" type="number" id="stone-pulls" min="1" max="999" placeholder="例：10" oninput="calcStone()">
+          <span class="stone-unit">連</span>
+        </div>
+        <div class="stone-row">
+          <label id="stone-have-label">現在の石</label>
+          <input class="stone-input" type="number" id="stone-have" min="0" placeholder="0" oninput="calcStone()">
+          <span class="stone-unit" id="stone-have-unit">ポリクロ</span>
+        </div>
+        <div class="stone-result" id="stone-result">
+          <div class="stone-result-row">
+            <span class="stone-result-label">目標連数</span>
+            <span class="stone-result-val accent" id="sr-pulls">—</span>
+          </div>
+          <div class="stone-result-row">
+            <span class="stone-result-label">必要な石</span>
+            <span class="stone-result-val" id="sr-need">—</span>
+          </div>
+          <div class="stone-result-row">
+            <span class="stone-result-label">現在の石</span>
+            <span class="stone-result-val" id="sr-have">—</span>
+          </div>
+          <div class="stone-result-row">
+            <span class="stone-result-label" id="sr-diff-label">不足 / 余剰</span>
+            <span class="stone-result-val" id="sr-diff">—</span>
+          </div>
+          <div class="stone-shortage" id="sr-msg"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -3430,6 +3562,60 @@ function switchGameUI(game) {
     const allBtn = document.getElementById('ver-btn-all');
     if (allBtn) allBtn.classList.add('on');
     _verState[game].currentVer = 'all';
+  }
+  updateStoneCalcUI();
+}
+
+// ===== 石カウンター =====
+const STONE_RATE = {
+  zzz:    { perPull: 160, unit: 'ポリクロ',   title: '💎 石カウンター（ZZZ）' },
+  genshin:{ perPull: 160, unit: '原石',     title: '💎 石カウンター（原神）' },
+  stare:  { perPull: 160, unit: '星玉',     title: '💎 石カウンター（スタレ）' },
+};
+
+function updateStoneCalcUI() {
+  const cfg = STONE_RATE[_currentGame] || STONE_RATE.zzz;
+  const titleEl = document.getElementById('stone-calc-title');
+  const unitEl  = document.getElementById('stone-have-unit');
+  const haveEl  = document.getElementById('stone-have-label');
+  if (titleEl) titleEl.textContent = cfg.title;
+  if (unitEl)  unitEl.textContent  = cfg.unit;
+  if (haveEl)  haveEl.textContent  = '現在の' + cfg.unit;
+  calcStone();
+}
+
+function calcStone() {
+  const cfg      = STONE_RATE[_currentGame] || STONE_RATE.zzz;
+  const pulls    = parseInt(document.getElementById('stone-pulls')?.value) || 0;
+  const have     = parseInt(document.getElementById('stone-have')?.value)  || 0;
+  const result   = document.getElementById('stone-result');
+  if (!result) return;
+
+  if (!pulls) { result.classList.remove('show'); return; }
+  result.classList.add('show');
+
+  const need = pulls * cfg.perPull;
+  const diff = have - need;
+  const ok   = diff >= 0;
+
+  document.getElementById('sr-pulls').textContent = pulls + '連';
+  document.getElementById('sr-need').textContent  = need.toLocaleString() + ' ' + cfg.unit;
+  document.getElementById('sr-have').textContent  = have.toLocaleString() + ' ' + cfg.unit;
+
+  const diffEl  = document.getElementById('sr-diff');
+  const msgEl   = document.getElementById('sr-msg');
+  const labelEl = document.getElementById('sr-diff-label');
+
+  diffEl.textContent = (ok ? '+' : '-') + Math.abs(diff).toLocaleString() + ' ' + cfg.unit;
+  diffEl.className   = 'stone-result-val ' + (ok ? 'ok' : 'ng');
+  labelEl.textContent = ok ? '余剰' : '不足';
+
+  if (ok) {
+    msgEl.textContent = '✓ ' + diff.toLocaleString() + cfg.unit + '余る — あと' + Math.floor(diff / cfg.perPull) + '連できる！';
+    msgEl.className   = 'stone-shortage ok';
+  } else {
+    msgEl.textContent = '✗ あと' + Math.abs(diff).toLocaleString() + cfg.unit + '不足（' + Math.ceil(Math.abs(diff) / cfg.perPull) + '連分）';
+    msgEl.className   = 'stone-shortage ng';
   }
 }
 
