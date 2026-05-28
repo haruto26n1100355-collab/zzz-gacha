@@ -256,13 +256,188 @@
   }
 
   .container {
-    max-width: 960px;
+    max-width: 1280px;
     margin: 0 auto;
     padding: 1.25rem 2rem 2rem;
     display: grid;
-    grid-template-columns: 320px 1fr;
+    grid-template-columns: 300px 1fr 260px;
     gap: 1.5rem;
     align-items: start;
+  }
+
+  /* ===== 天井ガイドパネル ===== */
+  .pity-panel {}
+  .pity-game-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 0.6rem 1rem 0;
+  }
+  .pity-tab-btn {
+    flex: 1;
+    padding: 5px 8px;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all .15s;
+    letter-spacing: 0.03em;
+    text-align: center;
+  }
+  .pity-tab-btn:hover { border-color: var(--border-hover); color: var(--text); }
+  .pity-tab-btn.on {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .pity-content { display: none; padding: 0.8rem 1rem 1rem; }
+  .pity-content.on { display: block; }
+
+  .pity-section-title {
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-faint);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    margin-top: 10px;
+  }
+  .pity-section-title:first-child { margin-top: 0; }
+
+  .pity-base-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+  }
+  .pity-base-icon { font-size: 18px; line-height: 1; }
+  .pity-base-info { flex: 1; }
+  .pity-base-label { font-size: 11px; color: var(--text-muted); }
+  .pity-base-val {
+    font-size: 18px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 600;
+    color: var(--accent);
+    line-height: 1.2;
+  }
+  .pity-base-val span { font-size: 11px; font-weight: 400; color: var(--text-muted); }
+
+  .pity-soft-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+  .pity-soft-label strong { color: var(--s-rank); }
+
+  /* 確率バー */
+  .pity-bar-wrap {
+    position: relative;
+    height: 36px;
+    background: var(--surface2);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 6px;
+    cursor: default;
+  }
+  .pity-bar-fill {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    background: linear-gradient(90deg, var(--accent-dim), var(--accent-mid, rgba(200,168,75,0.35)));
+    border-right: 2px solid var(--accent);
+    transition: width 0.4s ease;
+  }
+  .pity-bar-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+  }
+  .pity-bar-pulls { color: var(--text); font-weight: 500; }
+  .pity-bar-prob { color: var(--accent); font-weight: 600; }
+
+  .pity-tick-row {
+    display: flex;
+    gap: 3px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  .pity-tick {
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    padding: 2px 5px;
+    border-radius: 4px;
+    background: var(--surface2);
+    color: var(--text-muted);
+    border: 1px solid transparent;
+  }
+  .pity-tick.soft { border-color: var(--accent-border, rgba(200,168,75,0.3)); color: var(--accent); }
+  .pity-tick.hard { border-color: var(--accent); color: var(--s-rank); background: var(--accent-dim); font-weight: 600; }
+
+  .pity-fifty-wrap {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .pity-fifty-item {
+    flex: 1;
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 7px 8px;
+    text-align: center;
+  }
+  .pity-fifty-label { font-size: 10px; color: var(--text-faint); margin-bottom: 2px; }
+  .pity-fifty-val {
+    font-size: 16px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .pity-fifty-val.accent { color: var(--accent); }
+  .pity-fifty-val.loss { color: var(--loss); }
+
+  .pity-note {
+    font-size: 10px;
+    color: var(--text-faint);
+    line-height: 1.5;
+    margin-top: 8px;
+    padding: 6px 8px;
+    border-left: 2px solid var(--border);
+  }
+  .pity-note strong { color: var(--text-muted); }
+
+  .pity-weapon-row {
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+  }
+  .pity-weapon-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+  .pity-weapon-name { font-size: 12px; font-weight: 500; color: var(--text); }
+  .pity-weapon-prob { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--accent); font-weight: 600; }
+  .pity-weapon-sub { font-size: 10px; color: var(--text-muted); }
+
+  @media (max-width: 1100px) {
+    .container {
+      grid-template-columns: 300px 1fr;
+    }
+    .pity-panel {
+      grid-column: 1 / -1;
+    }
   }
 
   .panel {
@@ -996,8 +1171,8 @@
   .game-dropdown-item:hover { background: var(--surface2); }
   .game-dropdown-item[data-game="zzz"]:hover     { color: #c8a84b; }
   .game-dropdown-item[data-game="genshin"]:hover { color: #4ba8c8; }
-  html[data-game="genshin"] { --accent: #4ba8c8; --accent-dim: rgba(75,168,200,0.12); }
-  html[data-game="stare"]   { --accent: #a06cd5; --accent-dim: rgba(160,108,213,0.12); }
+  html[data-game="genshin"] { --accent: #4ba8c8; --accent-dim: rgba(75,168,200,0.12); --accent-mid: rgba(75,168,200,0.35); --accent-border: rgba(75,168,200,0.3); }
+  html[data-game="stare"]   { --accent: #a06cd5; --accent-dim: rgba(160,108,213,0.12); --accent-mid: rgba(160,108,213,0.35); --accent-border: rgba(160,108,213,0.3); }
   /* ゲームセレクターボタンを角丸枠で囲む */
   .game-selector-btn {
     border: 1px solid var(--border) !important;
@@ -1018,8 +1193,8 @@
   html[data-game="zzz"]     .game-selector-btn::after { color: #c8a84b; }
   html[data-game="genshin"] .game-selector-btn::after { color: #4ba8c8; }
   html[data-game="stare"]   .game-selector-btn::after { color: #a06cd5; }
-  html[data-game="genshin"][data-theme="light"] { --accent: #1a88b0; --accent-dim: rgba(26,136,176,0.12); }
-  html[data-game="stare"][data-theme="light"]   { --accent: #7a44b0; --accent-dim: rgba(122,68,176,0.12); }
+  html[data-game="genshin"][data-theme="light"] { --accent: #1a88b0; --accent-dim: rgba(26,136,176,0.12); --accent-mid: rgba(26,136,176,0.35); --accent-border: rgba(26,136,176,0.3); }
+  html[data-game="stare"][data-theme="light"]   { --accent: #7a44b0; --accent-dim: rgba(122,68,176,0.12); --accent-mid: rgba(122,68,176,0.35); --accent-border: rgba(122,68,176,0.3); }
 </style>
 </head>
 <body>
@@ -1238,6 +1413,256 @@
     <div class="count-bar">
       <span id="count-label">0 件</span>
       <span id="s-count"></span>
+    </div>
+  </div>
+
+  <!-- 天井ガイドパネル -->
+  <div class="panel pity-panel">
+    <div class="panel-header">🎯 天井ガイド</div>
+    <div class="pity-game-tabs">
+      <button class="pity-tab-btn on" data-pity="zzz" onclick="switchPityTab('zzz')">ZZZ</button>
+      <button class="pity-tab-btn" data-pity="genshin" onclick="switchPityTab('genshin')">原神</button>
+      <button class="pity-tab-btn" data-pity="stare" onclick="switchPityTab('stare')">スタレ</button>
+    </div>
+
+    <!-- ZZZ -->
+    <div class="pity-content on" id="pity-zzz">
+      <div class="pity-section-title">エージェント</div>
+      <div class="pity-base-row">
+        <div class="pity-base-icon">⭐</div>
+        <div class="pity-base-info">
+          <div class="pity-base-label">基本確率</div>
+          <div class="pity-base-val">0.6<span>%</span></div>
+        </div>
+        <div class="pity-base-info">
+          <div class="pity-base-label">天井</div>
+          <div class="pity-base-val">90<span>連</span></div>
+        </div>
+      </div>
+      <div class="pity-soft-label">確率上昇（ソフト天井）: <strong>76連〜</strong></div>
+      <div class="pity-bar-wrap"><div class="pity-bar-fill" style="width:0.6%"></div><div class="pity-bar-text"><span class="pity-bar-pulls">1〜75連</span><span class="pity-bar-prob">0.6%</span></div></div>
+      <div class="pity-bar-wrap"><div class="pity-bar-fill" style="width:6%"></div><div class="pity-bar-text"><span class="pity-bar-pulls">76連〜</span><span class="pity-bar-prob">+6%/連</span></div></div>
+      <div class="pity-bar-wrap"><div class="pity-bar-fill" style="width:100%"></div><div class="pity-bar-text"><span class="pity-bar-pulls">90連</span><span class="pity-bar-prob">100%確定</span></div></div>
+      <div class="pity-tick-row">
+        <div class="pity-tick">1連 0.6%</div>
+        <div class="pity-tick">50連 ~26%</div>
+        <div class="pity-tick soft">76連 6.6%</div>
+        <div class="pity-tick soft">80連 ~30%</div>
+        <div class="pity-tick hard">90連 100%</div>
+      </div>
+      <div class="pity-fifty-wrap">
+        <div class="pity-fifty-item">
+          <div class="pity-fifty-label">50/50勝率</div>
+          <div class="pity-fifty-val accent">50%</div>
+        </div>
+        <div class="pity-fifty-item">
+          <div class="pity-fifty-label">すり抜け後</div>
+          <div class="pity-fifty-val accent">確定</div>
+        </div>
+        <div class="pity-fifty-item">
+          <div class="pity-fifty-label">最大保証</div>
+          <div class="pity-fifty-val">180連</div>
+        </div>
+      </div>
+      <div class="pity-note">
+        <strong>ソフト天井:</strong> 76連目から1連ごとに+6%上昇し、90連で100%確定。前回すり抜けた場合、次は確定。
+      </div>
+
+      <div class="pity-section-title">音動機（武器）</div>
+      <div class="pity-base-row">
+        <div class="pity-base-icon">🎵</div>
+        <div class="pity-base-info">
+          <div class="pity-base-label">基本確率</div>
+          <div class="pity-base-val">1.0<span>%</span></div>
+        </div>
+        <div class="pity-base-info">
+          <div class="pity-base-label">天井</div>
+          <div class="pity-base-val">80<span>連</span></div>
+        </div>
+      </div>
+      <div class="pity-soft-label">確率上昇: <strong>66連〜</strong></div>
+      <div class="pity-bar-wrap"><div class="pity-bar-fill" style="width:1%"></div><div class="pity-bar-text"><span class="pity-bar-pulls">1〜65連</span><span class="pity-bar-prob">1.0%</span></div></div>
+      <div class="pity-bar-wrap"><div class="pity-bar-fill" style="width:100%"></div><div class="pity-bar-text"><span class="pity-bar-pulls">80連</span><span class="pity-bar-prob">100%確定</span></div></div>
+      <div class="pity-tick-row">
+        <div class="pity-tick">1連 1.0%</div>
+        <div class="pity-tick soft">66連〜 上昇開始</div>
+        <div class="pity-tick hard">80連 100%</div>
+      </div>
+      <div class="pity-fifty-wrap">
+        <div class="pity-fifty-item">
+          <div class="pity-fifty-label">75/25</div>
+          <div class="pity-fifty-val accent">75%</div>
+        </div>
+        <div class="pity-fifty-item">
+          <div class="pity-fifty-label">すり抜け後</div>
+          <div class="pity-fifty-val accent">確定</div>
+        </div>
+        <div class="pity-fifty-item">
+          <div class="pity-fifty-label">最大保証</div>
+          <div class="pity-fifty-val">160連</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 原神 -->
+    <div class="pity-content" id="pity-genshin">
+      <div class="pity-section-title">キャラクターバナー</div>
+      <div class="pity-base-row">
+        <div class="pity-base-icon">✨</div>
+        <div class="pity-base-info">
+          <div class="pity-base-label">基本確率</div>
+          <div class="pity-base-val">0.6<span>%</span></div>
+        </div>
+        <div class="pity-base-info">
+          <div class="pity-base-label">天井</div>
+          <div class="pity-base-val">90<span>連</span></div>
+        </div>
+      </div>
+      <div class="pity-soft-label">確率上昇（ソフト天井）: <strong>74連〜</strong></div>
+      <div class="pity-bar-wrap"><div class="pity-bar-fill" style="width:0.6%"></div><div class="pity-bar-text"><span class="pity-bar-pulls">1〜73連</span><span class="pity-bar-prob">0.6%</span></div></div>
+      <div class="pity-bar-wrap"><div class="pity-bar-fill" style="width:6%"></div><div class="pity-bar-text"><span class="pity-bar-pulls">74連〜</span><span class="pity-bar-prob">+6%/連</span></div></div>
+      <div class="pity-bar-wrap"><div class="pity-bar-fill" style="width:100%"></div><div class="pity-bar-text"><span class="pity-bar-pulls">90連</span><span class="pity-bar-prob">100%確定</span></div></div>
+      <div class="pity-tick-row">
+        <div class="pity-tick">1連 0.6%</div>
+        <div class="pity-tick">50連 ~27%</div>
+        <div class="pity-tick soft">74連 6.6%</div>
+        <div class="pity-tick soft">80連 ~43%</div>
+        <div class="pity-tick hard">90連 100%</div>
+      </div>
+      <div class="pity-fifty-wrap">
+        <div class="pity-fifty-item">
+          <div class="pity-fifty-label">50/50勝率</div>
+          <div class="pity-fifty-val accent">50%</div>
+        </div>
+        <div class="pity-fifty-item">
+          <div class="pity-fifty-label">負け後</div>
+          <div class="pity-fifty-val accent">確定</div>
+        </div>
+        <div class="pity-fifty-item">
+          <div class="pity-fifty-label">最大保証</div>
+          <div class="pity-fifty-val">180連</div>
+        </div>
+      </div>
+      <div class="pity-note">
+        <strong>ソフト天井:</strong> 74連から+6%/連。天井は同一バナー種別間でのみ引継ぎあり。
+      </div>
+
+      <div class="pity-section-title">武器バナー</div>
+      <div class="pity-base-row">
+        <div class="pity-base-icon">⚔️</div>
+        <div class="pity-base-info">
+          <div class="pity-base-label">基本確率</div>
+          <div class="pity-base-val">0.7<span>%</span></div>
+        </div>
+        <div class="pity-base-info">
+          <div class="pity-base-label">天井</div>
+          <div class="pity-base-val">80<span>連</span></div>
+        </div>
+      </div>
+      <div class="pity-soft-label">確率上昇: <strong>63連〜</strong></div>
+      <div class="pity-bar-wrap"><div class="pity-bar-fill" style="width:0.7%"></div><div class="pity-bar-text"><span class="pity-bar-pulls">1〜62連</span><span class="pity-bar-prob">0.7%</span></div></div>
+      <div class="pity-bar-wrap"><div class="pity-bar-fill" style="width:100%"></div><div class="pity-bar-text"><span class="pity-bar-pulls">80連</span><span class="pity-bar-prob">100%確定</span></div></div>
+      <div class="pity-tick-row">
+        <div class="pity-tick">1連 0.7%</div>
+        <div class="pity-tick soft">63連〜 上昇開始</div>
+        <div class="pity-tick hard">80連 100%</div>
+      </div>
+      <div class="pity-fifty-wrap">
+        <div class="pity-fifty-item">
+          <div class="pity-fifty-label">確率</div>
+          <div class="pity-fifty-val accent">75%</div>
+        </div>
+        <div class="pity-fifty-item">
+          <div class="pity-fifty-label">命定値</div>
+          <div class="pity-fifty-val">1回</div>
+        </div>
+        <div class="pity-fifty-item">
+          <div class="pity-fifty-label">最大保証</div>
+          <div class="pity-fifty-val">160連</div>
+        </div>
+      </div>
+      <div class="pity-note">
+        <strong>命定値システム:</strong> 欲しい武器を事前指定。外れるたびに命定値+1外れで確定。
+      </div>
+    </div>
+
+    <!-- スタレ -->
+    <div class="pity-content" id="pity-stare">
+      <div class="pity-section-title">キャラクターバナー</div>
+      <div class="pity-base-row">
+        <div class="pity-base-icon">🌟</div>
+        <div class="pity-base-info">
+          <div class="pity-base-label">基本確率</div>
+          <div class="pity-base-val">0.6<span>%</span></div>
+        </div>
+        <div class="pity-base-info">
+          <div class="pity-base-label">天井</div>
+          <div class="pity-base-val">90<span>連</span></div>
+        </div>
+      </div>
+      <div class="pity-soft-label">確率上昇（ソフト天井）: <strong>74連〜</strong></div>
+      <div class="pity-bar-wrap"><div class="pity-bar-fill" style="width:0.6%"></div><div class="pity-bar-text"><span class="pity-bar-pulls">1〜73連</span><span class="pity-bar-prob">0.6%</span></div></div>
+      <div class="pity-bar-wrap"><div class="pity-bar-fill" style="width:6%"></div><div class="pity-bar-text"><span class="pity-bar-pulls">74連〜</span><span class="pity-bar-prob">+6%/連</span></div></div>
+      <div class="pity-bar-wrap"><div class="pity-bar-fill" style="width:100%"></div><div class="pity-bar-text"><span class="pity-bar-pulls">90連</span><span class="pity-bar-prob">100%確定</span></div></div>
+      <div class="pity-tick-row">
+        <div class="pity-tick">1連 0.6%</div>
+        <div class="pity-tick">50連 ~27%</div>
+        <div class="pity-tick soft">74連 6.6%</div>
+        <div class="pity-tick soft">80連 ~43%</div>
+        <div class="pity-tick hard">90連 100%</div>
+      </div>
+      <div class="pity-fifty-wrap">
+        <div class="pity-fifty-item">
+          <div class="pity-fifty-label">50/50勝率</div>
+          <div class="pity-fifty-val accent">50%</div>
+        </div>
+        <div class="pity-fifty-item">
+          <div class="pity-fifty-label">負け後</div>
+          <div class="pity-fifty-val accent">確定</div>
+        </div>
+        <div class="pity-fifty-item">
+          <div class="pity-fifty-label">最大保証</div>
+          <div class="pity-fifty-val">180連</div>
+        </div>
+      </div>
+      <div class="pity-note">
+        <strong>天井引継ぎ:</strong> ★5が出るまでのカウントは恒常バナー・ピックアップ間で共有。
+      </div>
+
+      <div class="pity-section-title">光円錐バナー</div>
+      <div class="pity-base-row">
+        <div class="pity-base-icon">📀</div>
+        <div class="pity-base-info">
+          <div class="pity-base-label">基本確率</div>
+          <div class="pity-base-val">0.8<span>%</span></div>
+        </div>
+        <div class="pity-base-info">
+          <div class="pity-base-label">天井</div>
+          <div class="pity-base-val">80<span>連</span></div>
+        </div>
+      </div>
+      <div class="pity-soft-label">確率上昇: <strong>66連〜</strong></div>
+      <div class="pity-bar-wrap"><div class="pity-bar-fill" style="width:0.8%"></div><div class="pity-bar-text"><span class="pity-bar-pulls">1〜65連</span><span class="pity-bar-prob">0.8%</span></div></div>
+      <div class="pity-bar-wrap"><div class="pity-bar-fill" style="width:100%"></div><div class="pity-bar-text"><span class="pity-bar-pulls">80連</span><span class="pity-bar-prob">100%確定</span></div></div>
+      <div class="pity-tick-row">
+        <div class="pity-tick">1連 0.8%</div>
+        <div class="pity-tick soft">66連〜 上昇開始</div>
+        <div class="pity-tick hard">80連 100%</div>
+      </div>
+      <div class="pity-fifty-wrap">
+        <div class="pity-fifty-item">
+          <div class="pity-fifty-label">75/25</div>
+          <div class="pity-fifty-val accent">75%</div>
+        </div>
+        <div class="pity-fifty-item">
+          <div class="pity-fifty-label">負け後</div>
+          <div class="pity-fifty-val accent">確定</div>
+        </div>
+        <div class="pity-fifty-item">
+          <div class="pity-fifty-label">最大保証</div>
+          <div class="pity-fifty-val">160連</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -3363,6 +3788,13 @@ initToggle('grp-rarity');
 initToggle('grp-cons');
 initToggle('grp-lose');
 initToggle('grp-wpn-lose');
+
+// ===== 天井ガイド タブ切り替え =====
+function switchPityTab(game) {
+  document.querySelectorAll('.pity-tab-btn').forEach(b => b.classList.toggle('on', b.dataset.pity === game));
+  document.querySelectorAll('.pity-content').forEach(c => c.classList.toggle('on', c.id === 'pity-' + game));
+}
+
 initNamePicker({
   inputId: 'inp-name',
   suggestId: 'inp-suggest',
