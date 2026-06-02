@@ -1297,69 +1297,7 @@
   html[data-game="stare"][data-theme="light"]   { --accent: #7a44b0; --accent-dim: rgba(122,68,176,0.12); --accent-mid: rgba(122,68,176,0.35); --accent-border: rgba(122,68,176,0.3); }
 
   /* ===== ページ切り替えドロップダウン ===== */
-  .page-selector-container {
-    position: relative;
-    display: inline-block;
-  }
-  .page-selector-btn {
-    font-family: 'DM Mono', monospace;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text);
-    border: 1px solid var(--border) !important;
-    border-radius: 8px !important;
-    padding: 5px 12px !important;
-    background: var(--surface2) !important;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: border-color 0.15s, background 0.15s;
-    letter-spacing: 0.03em;
-  }
-  .page-selector-btn::after {
-    content: '▾';
-    font-size: 10px;
-    opacity: 0.5;
-    transition: transform 0.2s;
-    display: inline-block;
-  }
-  .page-selector-container.open .page-selector-btn::after { transform: rotate(180deg); }
-  .page-selector-btn:hover {
-    border-color: var(--border-hover) !important;
-    background: var(--surface) !important;
-  }
-  .page-dropdown-menu {
-    position: absolute;
-    top: calc(100% + 6px);
-    left: 0;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.55);
-    min-width: 160px;
-    z-index: 2000;
-    display: none;
-    overflow: hidden;
-  }
-  .page-selector-container.open .page-dropdown-menu {
-    display: block;
-  }
-  .page-dropdown-item {
-    padding: 11px 16px;
-    color: var(--text-muted);
-    cursor: pointer;
-    font-size: 13px;
-    font-family: 'Noto Sans JP', sans-serif;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: background 0.12s, color 0.12s;
-  }
-  .page-dropdown-item:hover { background: var(--surface2); color: var(--text); }
-  .page-dropdown-item--active { color: var(--accent); font-weight: 500; }
-  .page-dropdown-item--active:hover { color: var(--accent); }
-  .page-dropdown-icon { font-size: 14px; }
+
 
   /* ===== 育成リソースページ ===== */
   .resource-container {
@@ -1718,14 +1656,9 @@
     </div>
   </div>
   <!-- ページ切り替えドロップダウン -->
-<div class="page-selector-container">
-  <button id="btn-page-selector" class="page-selector-btn">ガチャ記録</button>
-  <div class="page-dropdown-menu">
-    <div class="page-dropdown-item" data-page="gacha">ガチャ記録</div>
-    <div class="page-dropdown-item" data-page="resource">育成リソース</div>
+
   </div>
-</div>
-  </div>
+  <span style="color: var(--text-muted); font-size: 14px; margin-right: 8px;">ガチャ記録</span>
   <span id="header-subtitle">/ Zenless Zone Zero</span>
   <div class="header-actions">
     <button class="btn-theme" id="btn-theme" onclick="toggleTheme()" title="ライト/ダーク切り替え">🌙</button>
@@ -5172,21 +5105,7 @@ document.querySelectorAll('.game-dropdown-item').forEach(item => {
     }
   });
 });
-// ガチャ記録・育成リソースのドロップダウン制御（追加）
-const pageSelectorContainer = document.querySelector('.page-selector-container');
-const btnPageSelector = document.getElementById('btn-page-selector'); // ※ボタンの実際のID名に合わせてください
 
-if (btnPageSelector && pageSelectorContainer) {
-  btnPageSelector.addEventListener('click', (e) => {
-    e.stopPropagation();
-    pageSelectorContainer.classList.toggle('open');
-  });
-  
-  // メニュー以外をクリックしたときに閉じる
-  document.addEventListener('click', () => {
-    if (pageSelectorContainer) pageSelectorContainer.classList.remove('open');
-  });
-}
   initFirebaseAuth();
 } else {
   console.error('Firebase SDK が読み込めません（広告ブロック等）');
@@ -5206,6 +5125,8 @@ document.querySelectorAll('.game-dropdown-item').forEach(item => {
     renderList();
   });
 });
+
+
   // --- 追加：原神用の簡易マスターデータ（サジェスト用） ---
 const GENSHIN_MASTER = {
   character: [
