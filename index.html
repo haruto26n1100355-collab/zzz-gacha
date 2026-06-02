@@ -48,6 +48,43 @@
     --loss-bg: rgba(200,48,32,0.10);
   }
 
+  /* ヘッダー中央タブ */
+  .header-tabs {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 4px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 4px;
+  }
+  .header-tab-btn {
+    padding: 6px 22px;
+    border: none;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .15s;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+  }
+  .header-tab-btn:hover {
+    color: var(--text);
+    background: var(--border);
+  }
+  .header-tab-btn.active {
+    background: var(--accent);
+    color: #0e0f11;
+    font-weight: 700;
+  }
+  header { position: relative; }
+
   .btn-theme {
     padding: 6px 10px;
     border: 1px solid var(--border);
@@ -1323,6 +1360,46 @@
     .resource-container { grid-template-columns: 1fr; padding: 1rem; }
   }
 
+  /* ===== ガチャ育成リソースモード ===== */
+  .gacha-res-mode #ver-selector-wrap { display: none !important; }
+  .gacha-res-mode .panel:first-child { display: none !important; }
+  .gacha-res-mode .history-panel { display: none !important; }
+  .gacha-res-mode .pity-panel { display: none !important; }
+  
+  .gacha-res-left-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+  }
+  .gacha-res-mode .container {
+    grid-template-columns: 300px 1fr 260px;
+  }
+  @media (max-width: 1000px) {
+    .gacha-res-mode .container {
+      grid-template-columns: 1fr;
+    }
+    .gacha-res-left-panel {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .gacha-mode-toggle-btn {
+    margin-left: auto;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 2px 8px;
+    border-radius: 4px;
+    transition: color .15s, background .15s;
+  }
+  .gacha-mode-toggle-btn:hover {
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
+
   /* レベルセレクター */
   .res-lv-selector {
     display: flex;
@@ -1658,8 +1735,14 @@
   <!-- ページ切り替えドロップダウン -->
 
   </div>
-  <span style="color: var(--text-muted); font-size: 14px; margin-right: 8px;">ガチャ記録</span>
+  <strong style="font-size: 15px; margin-right: 8px;">ガチャ記録</strong>
   <span id="header-subtitle">/ Zenless Zone Zero</span>
+
+  <!-- ページ切り替えタブ -->
+  <div class="header-tabs" id="page-selector-container">
+    <button class="header-tab-btn active" id="tab-gacha" data-page="gacha" onclick="switchPage('gacha')">ガチャ記録</button>
+    <button class="header-tab-btn" id="tab-resource" data-page="resource" onclick="switchPage('resource')">育成リソース</button>
+  </div>
   <div class="header-actions">
     <button class="btn-theme" id="btn-theme" onclick="toggleTheme()" title="ライト/ダーク切り替え">🌙</button>
     <button class="btn-io" onclick="triggerImport()">↑ インポート</button>
@@ -1688,9 +1771,12 @@
 
 <div class="container" id="page-gacha">
 
-  <!-- 入力フォーム -->
+  <!-- 入力フォーム または リソース計算パネル -->
   <div class="panel">
-    <div class="panel-header">新しく記録する</div>
+    <div class="panel-header">
+      <span id="gacha-panel-title">新しく記録する</span>
+      <button class="gacha-mode-toggle-btn" id="gacha-mode-toggle" onclick="toggleGachaResMode()" title="育成リソース計算モードを切り替え">🔧</button>
+    </div>
     <div class="panel-body">
 
       <div class="field">
@@ -1811,6 +1897,92 @@
     </div>
   </div>
 
+  <!-- 育成リソース計算パネル（隠し状態） -->
+  <div class="panel gacha-res-left-panel" id="gacha-res-panel" style="display:none;">
+    <div class="panel-body">
+      <div class="field">
+        <label>ゲーム</label>
+        <div class="toggle-group" id="gacha-res-grp-game">
+          <button class="toggle-btn on" data-val="zzz" onclick="setGachaResGame(this)">ZZZ</button>
+          <button class="toggle-btn" data-val="genshin" onclick="setGachaResGame(this)">原神</button>
+          <button class="toggle-btn" data-val="stare" onclick="setGachaResGame(this)">スタレ</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>育成したいキャラ</label>
+        <div class="res-char-search-wrap">
+          <input type="text" id="gacha-res-char-input" placeholder="例：エレン、安比…" autocomplete="off" oninput="filterGachaResChars(this.value)" onfocus="showGachaResCharList()">
+          <div class="res-char-list" id="gacha-res-char-list"></div>
+        </div>
+      </div>
+      <div class="field" id="gacha-res-selected-char-wrap" style="display:none">
+        <label>選択中</label>
+        <div class="res-selected-char" id="gacha-res-selected-char">
+          <span id="gacha-res-char-icon">⚡</span>
+          <span id="gacha-res-char-name">—</span>
+          <button class="res-clear-btn" onclick="clearGachaResChar()">✕</button>
+        </div>
+      </div>
+
+      <div class="field" id="gacha-res-goal-wrap" style="display:none">
+        <label>育成目標</label>
+        <div class="res-goal-grid">
+
+          <!-- 1. レベル -->
+          <div class="res-goal-item" id="gacha-res-lv-section">
+            <div class="res-goal-label">レベル</div>
+            <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;">
+              <div>
+                <div style="font-size:10px;color:var(--text-faint);font-family:'DM Mono',monospace;margin-bottom:4px;letter-spacing:.06em;">現在</div>
+                <div class="res-lv-selector" id="gacha-res-lv-from-btns"></div>
+              </div>
+              <div style="font-size:18px;color:var(--text-faint);padding-top:24px;">→</div>
+              <div>
+                <div style="font-size:10px;color:var(--text-faint);font-family:'DM Mono',monospace;margin-bottom:4px;letter-spacing:.06em;">目標</div>
+                <div class="res-lv-selector" id="gacha-res-lv-to-btns"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. スキル -->
+          <div class="res-goal-item" id="gacha-res-skill-section">
+            <div class="res-goal-label">スキル</div>
+            <table class="res-skill-table">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>現在 Lv</th>
+                  <th></th>
+                  <th>目標 Lv</th>
+                </tr>
+              </thead>
+              <tbody id="gacha-res-skill-tbody">
+                <!-- JSで生成 -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- 3. コアパッシブ -->
+          <div class="res-goal-item" id="gacha-res-core-section">
+            <div class="res-goal-label">コアパッシブ</div>
+            <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-top:2px;">
+              <div>
+                <div style="font-size:10px;color:var(--text-faint);font-family:'DM Mono',monospace;margin-bottom:4px;letter-spacing:.06em;">現在</div>
+                <div class="res-core-selector" id="gacha-res-core-from-btns"></div>
+              </div>
+              <div style="font-size:18px;color:var(--text-faint);padding-top:24px;">→</div>
+              <div>
+                <div style="font-size:10px;color:var(--text-faint);font-family:'DM Mono',monospace;margin-bottom:4px;letter-spacing:.06em;">目標</div>
+                <div class="res-core-selector" id="gacha-res-core-to-btns"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- 履歴 -->
   <div class="panel history-panel">
     <div class="panel-header">
@@ -1893,6 +2065,25 @@
     <div class="count-bar">
       <span id="count-label">0 件</span>
       <span id="s-count"></span>
+    </div>
+  </div>
+
+  <!-- 育成リソース・必要素材パネル（ガチャモード用） -->
+  <div class="panel" id="gacha-res-result-panel" style="display:none">
+    <div class="panel-header">
+      <span>必要素材</span>
+      <span class="res-char-header-name" id="gacha-res-header-char">—</span>
+    </div>
+    <div class="panel-body" id="gacha-res-material-body">
+      <!-- JSで生成 -->
+    </div>
+  </div>
+
+  <!-- 育成リソース・所持数パネル（ガチャモード用） -->
+  <div class="panel" id="gacha-res-have-panel" style="display:none">
+    <div class="panel-header">所持数・不足計算</div>
+    <div class="panel-body" id="gacha-res-have-body">
+      <!-- JSで生成 -->
     </div>
   </div>
 
@@ -4538,12 +4729,16 @@ function switchPage(page) {
     gachaEl.style.display = '';
     verEl.style.display = '';
     resourceEl.style.display = 'none';
+    document.getElementById('tab-gacha').classList.add('active');
+    document.getElementById('tab-resource').classList.remove('active');
   } else {
     label.textContent = '育成リソース';
     gachaEl.style.display = 'none';
     verEl.style.display = 'none';
     resourceEl.style.display = 'block';
     initResPage();
+    document.getElementById('tab-gacha').classList.remove('active');
+    document.getElementById('tab-resource').classList.add('active');
   }
 }
 
@@ -4750,6 +4945,7 @@ document.addEventListener('click', (e) => {
   }
 });
 
+function selectResChar(name) {
   const chars = getResChars();
   _resChar = chars.find(c => c.name === name) || { name };
   document.getElementById('res-char-list').classList.remove('open');
@@ -4782,6 +4978,211 @@ function clearResChar() {
   document.getElementById('res-goal-wrap').style.display = 'none';
   document.getElementById('res-result-panel').style.display = 'none';
   document.getElementById('res-have-panel').style.display = 'none';
+}
+
+// ===== ガチャページ育成リソースモード関数 =====
+let _gachaResMode = false;
+let _gachaResGame = 'zzz';
+let _gachaResChar = null;
+let _gachaResLvFrom = 1;
+let _gachaResLvTo = 60;
+
+function toggleGachaResMode() {
+  _gachaResMode = !_gachaResMode;
+  const container = document.getElementById('page-gacha');
+  const mainPanel = container.querySelector('.panel');
+  const resPanel = document.getElementById('gacha-res-panel');
+  const resultPanel = document.getElementById('gacha-res-result-panel');
+  const havePanel = document.getElementById('gacha-res-have-panel');
+  
+  if (_gachaResMode) {
+    container.classList.add('gacha-res-mode');
+    mainPanel.style.display = 'none';
+    resPanel.style.display = 'block';
+    document.getElementById('gacha-panel-title').textContent = '育成リソース計算機';
+    document.getElementById('gacha-mode-toggle').textContent = '📋';
+    setGachaResGame(document.querySelector('#gacha-res-grp-game .toggle-btn.on'));
+  } else {
+    container.classList.remove('gacha-res-mode');
+    mainPanel.style.display = '';
+    resPanel.style.display = 'none';
+    resultPanel.style.display = 'none';
+    havePanel.style.display = 'none';
+    document.getElementById('gacha-panel-title').textContent = '新しく記録する';
+    document.getElementById('gacha-mode-toggle').textContent = '🔧';
+  }
+}
+
+function setGachaResGame(btn, game) {
+  if (btn) {
+    document.querySelectorAll('#gacha-res-grp-game .toggle-btn').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    game = btn.dataset.val;
+  }
+  _gachaResGame = game;
+  _gachaResChar = null;
+  document.getElementById('gacha-res-char-input').value = '';
+  document.getElementById('gacha-res-selected-char-wrap').style.display = 'none';
+  document.getElementById('gacha-res-goal-wrap').style.display = 'none';
+  document.getElementById('gacha-res-result-panel').style.display = 'none';
+  document.getElementById('gacha-res-have-panel').style.display = 'none';
+  // ボタンを同期
+  document.querySelectorAll('#gacha-res-grp-game .toggle-btn').forEach(b => {
+    b.classList.toggle('on', b.dataset.val === game);
+  });
+  renderGachaResCharList('');
+}
+
+function getGachaResChars() {
+  if (_gachaResGame === 'zzz') return RES_ZZZ_CHARS;
+  if (_gachaResGame === 'genshin') return RES_GENSHIN_CHARS;
+  return RES_STARE_CHARS;
+}
+
+function renderGachaResCharList(q) {
+  const list = document.getElementById('gacha-res-char-list');
+  const chars = getGachaResChars();
+  const filt = q ? chars.filter(c => c.name.includes(q)) : chars;
+  if (!filt.length) {
+    list.innerHTML = '<div style="padding:10px 14px;font-size:12px;color:var(--text-faint);font-family:\'DM Mono\',monospace;">候補なし</div>';
+  } else {
+    list.innerHTML = filt.map(c => {
+      const icon = ATTR_ICON_MAP[c.attr] || '✦';
+      return `<div class="res-char-item" onclick="selectGachaResChar(${JSON.stringify(c.name)})">
+        <span class="rc-icon">${icon}</span>
+        <span class="rc-name">${c.name}</span>
+        <span class="rc-rarity">S</span>
+      </div>`;
+    }).join('');
+  }
+}
+
+function filterGachaResChars(v) {
+  renderGachaResCharList(v);
+  showGachaResCharList();
+}
+
+function showGachaResCharList() {
+  document.getElementById('gacha-res-char-list').classList.add('open');
+}
+
+// クリック外で候補リストを閉じる（ガチャモード用）
+document.addEventListener('click', (e) => {
+  const wrap = document.getElementById('gacha-res-char-input')?.closest('.res-char-search-wrap');
+  if (wrap && !wrap.contains(e.target)) {
+    const l = document.getElementById('gacha-res-char-list');
+    if (l) l.classList.remove('open');
+  }
+});
+
+function selectGachaResChar(name) {
+  const chars = getGachaResChars();
+  _gachaResChar = chars.find(c => c.name === name) || { name };
+  document.getElementById('gacha-res-char-list').classList.remove('open');
+  document.getElementById('gacha-res-char-input').value = '';
+  document.getElementById('gacha-res-selected-char-wrap').style.display = '';
+  document.getElementById('gacha-res-char-icon').textContent = ATTR_ICON_MAP[_gachaResChar.attr] || '✦';
+  document.getElementById('gacha-res-char-name').textContent = _gachaResChar.name;
+  document.getElementById('gacha-res-goal-wrap').style.display = '';
+  // ZZZのときだけセレクター描画
+  if (_gachaResGame === 'zzz') {
+    renderGachaResLvSelectors();
+    renderGachaResSkillSelectors();
+    renderGachaResCoreSelectors();
+    document.getElementById('gacha-res-lv-section').style.display = '';
+    document.getElementById('gacha-res-skill-section').style.display = '';
+    document.getElementById('gacha-res-core-section').style.display = '';
+  } else {
+    document.getElementById('gacha-res-lv-section').style.display = 'none';
+    document.getElementById('gacha-res-skill-section').style.display = 'none';
+    document.getElementById('gacha-res-core-section').style.display = 'none';
+  }
+  calcGachaResources();
+}
+
+function clearGachaResChar() {
+  _gachaResChar = null;
+  document.getElementById('gacha-res-selected-char-wrap').style.display = 'none';
+  document.getElementById('gacha-res-goal-wrap').style.display = 'none';
+  document.getElementById('gacha-res-result-panel').style.display = 'none';
+  document.getElementById('gacha-res-have-panel').style.display = 'none';
+}
+
+function renderGachaResLvSelectors() {
+  const steps = ZZZ_LV_STEPS;
+  const fromEl = document.getElementById('gacha-res-lv-from-btns');
+  const toEl   = document.getElementById('gacha-res-lv-to-btns');
+  const lvLabels = ['Lv1', ...steps.map(v => `Lv${v}`)];
+  const lvVals   = [1, ...steps];
+
+  fromEl.innerHTML = lvLabels.map((lbl, i) => {
+    const v = lvVals[i];
+    return `<button class="res-lv-btn${v === _gachaResLvFrom ? ' on' : ''}" onclick="setGachaResLvFrom(${v},this)">${lbl}</button>`;
+  }).join('');
+  toEl.innerHTML = lvLabels.map((lbl, i) => {
+    const v = lvVals[i];
+    return `<button class="res-lv-btn${v === _gachaResLvTo ? ' on' : ''}" onclick="setGachaResLvTo(${v},this)">${lbl}</button>`;
+  }).join('');
+}
+
+function setGachaResLvFrom(lv, el) {
+  _gachaResLvFrom = lv;
+  el.closest('.res-lv-selector').querySelectorAll('.res-lv-btn').forEach(b => b.classList.remove('on'));
+  el.classList.add('on');
+  calcGachaResources();
+}
+
+function setGachaResLvTo(lv, el) {
+  _gachaResLvTo = lv;
+  el.closest('.res-lv-selector').querySelectorAll('.res-lv-btn').forEach(b => b.classList.remove('on'));
+  el.classList.add('on');
+  calcGachaResources();
+}
+
+// スキルセレクター（ZZZ専用）
+function renderGachaResSkillSelectors() {
+  // Placeholder - similar to resource page
+}
+
+// コアパッシブセレクター（ZZZ専用）
+function renderGachaResCoreSelectors() {
+  // Placeholder - similar to resource page
+}
+
+function calcGachaResources() {
+  if (!_gachaResChar) return;
+  
+  const char = _gachaResChar;
+  const game = _gachaResGame;
+  
+  // 必要素材を計算
+  let mats = [];
+  if (game === 'zzz') {
+    // ZZZの場合、レベル上げに必要な素材を計算
+    const levelMats = ZZZ_LEVEL_MATS.filter(m => m.total);
+    mats = levelMats.map(m => ({
+      ...m,
+      needed: m.total(_gachaResLvFrom, _gachaResLvTo)
+    }));
+  }
+  
+  // 必要素材パネルに表示
+  const matBody = document.getElementById('gacha-res-material-body');
+  if (mats.length) {
+    matBody.innerHTML = mats.map(m => `
+      <div style="display:flex; gap:10px; align-items:center; padding:8px 0; border-bottom:1px solid var(--border);">
+        <span style="font-size:18px;">${m.icon}</span>
+        <div style="flex:1;">
+          <div style="font-size:12px;color:var(--text-muted);">${m.name}</div>
+          <div style="font-size:10px;color:var(--text-faint);">${m.src}</div>
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-size:14px;color:var(--accent);font-weight:600;">${m.needed}</div>
+      </div>
+    `).join('');
+  }
+  
+  document.getElementById('gacha-res-header-char').textContent = char.name;
+  document.getElementById('gacha-res-result-panel').style.display = 'block';
 }
 
 // ========== ZZZ レベルセレクター ==========
