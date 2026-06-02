@@ -268,9 +268,7 @@
   /* ===== 天井ガイドパネル ===== */
   .pity-panel {}
   .pity-game-tabs {
-    display: flex;
-    gap: 4px;
-    padding: 0.6rem 1rem 0;
+    display: none !important;
   }
   .pity-tab-btn {
     flex: 1;
@@ -1274,20 +1272,24 @@
   /* ゲームセレクターボタンを角丸枠で囲む */
   .game-selector-btn {
     border: 1px solid var(--border) !important;
-    border-radius: 8px !important;
-    padding: 5px 10px !important;
+    border-radius: 10px !important;
+    padding: 8px 16px !important;
+    font-size: 16px !important;
+    letter-spacing: 0.06em !important;
     background: var(--surface2) !important;
     transition: border-color 0.15s, background 0.15s, opacity 0.15s !important;
   }
   .game-selector-btn:hover {
     border-color: var(--border-hover) !important;
-    background: var(--surface) !important;
     opacity: 1 !important;
   }
-  /* ゲームラベルの固有カラー */
-  html[data-game="zzz"]     .game-selector-btn { color: #c8a84b; }
-  html[data-game="genshin"] .game-selector-btn { color: #4ba8c8; }
-  html[data-game="stare"]   .game-selector-btn { color: #a06cd5; }
+  /* ゲームラベルの固有カラー＋背景色 */
+  html[data-game="zzz"]     .game-selector-btn { color: #c8a84b; background: rgba(200,168,75,0.15) !important; border-color: rgba(200,168,75,0.4) !important; }
+  html[data-game="genshin"] .game-selector-btn { color: #4ba8c8; background: rgba(75,168,200,0.15) !important; border-color: rgba(75,168,200,0.4) !important; }
+  html[data-game="stare"]   .game-selector-btn { color: #a06cd5; background: rgba(160,108,213,0.15) !important; border-color: rgba(160,108,213,0.4) !important; }
+  html[data-game="zzz"]     .game-selector-btn:hover { background: rgba(200,168,75,0.25) !important; }
+  html[data-game="genshin"] .game-selector-btn:hover { background: rgba(75,168,200,0.25) !important; }
+  html[data-game="stare"]   .game-selector-btn:hover { background: rgba(160,108,213,0.25) !important; }
   html[data-game="zzz"]     .game-selector-btn::after { color: #c8a84b; }
   html[data-game="genshin"] .game-selector-btn::after { color: #4ba8c8; }
   html[data-game="stare"]   .game-selector-btn::after { color: #a06cd5; }
@@ -4087,6 +4089,8 @@ function switchGameUI(game) {
     if (allBtn) allBtn.classList.add('on');
     _verState[game].currentVer = 'all';
   }
+  // 天井ガイドをゲームに合わせて自動切り替え
+  switchPityTab(game);
   updateStoneCalcUI();
 }
 
