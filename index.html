@@ -1350,7 +1350,7 @@
     padding: 1.5rem;
   }
   .resource-left-panel {
-    min-height: 900px;
+    min-height: 600px;
   }
   @media (max-width: 1200px) {
     .resource-container { grid-template-columns: 420px 1fr 260px; }
@@ -1778,7 +1778,6 @@
   <div class="panel">
     <div class="panel-header">
       <span id="gacha-panel-title">新しく記録する</span>
-      <button class="gacha-mode-toggle-btn" id="gacha-mode-toggle" onclick="toggleGachaResMode()" title="育成リソース計算モードを切り替え">🔧</button>
     </div>
     <div class="panel-body">
 
@@ -2360,6 +2359,7 @@
         </div>
         <div class="field">
           <label>育成したいキャラ</label>
+          <div class="attr-filter-row" id="res-attr-filter"></div>
           <div class="res-char-search-wrap">
             <input type="text" id="res-char-input" placeholder="例：エレン、安比…" autocomplete="off" oninput="filterResChars(this.value)" onfocus="showResCharList()">
             <div class="res-char-list" id="res-char-list"></div>
@@ -4722,20 +4722,19 @@ function switchPage(page) {
   const resourceEl= document.getElementById('page-resource');
   const verEl     = document.getElementById('ver-selector-wrap');
   const label     = document.getElementById('current-page-label');
+  if (label) label.textContent = page === 'gacha' ? 'ガチャ記録' : '育成リソース';
 
   document.querySelectorAll('.page-dropdown-item').forEach(it => {
     it.classList.toggle('page-dropdown-item--active', it.dataset.page === page);
   });
 
   if (page === 'gacha') {
-    label.textContent = 'ガチャ記録';
     gachaEl.style.display = '';
     verEl.style.display = '';
     resourceEl.style.display = 'none';
     document.getElementById('tab-gacha').classList.add('active');
     document.getElementById('tab-resource').classList.remove('active');
   } else {
-    label.textContent = '育成リソース';
     gachaEl.style.display = 'none';
     verEl.style.display = 'none';
     resourceEl.style.display = 'block';
@@ -4748,12 +4747,12 @@ function switchPage(page) {
 // ---------- 育成リソース データ ----------
 // ZZZ: レベル1→60 に必要な素材（おおよその公式値）
 const ZZZ_LEVEL_MATS = [
-  { id: 'dinnie',  icon: '💰', name: 'ディニー',      src: '全般', perLv: 36000, total: (from, to) => Math.round((to - from) * 36000) },
-  { id: 'exp_tape',icon: '📼', name: '映像テープ（青）', src: '掃討・演習', perLv: null,
+  { id: 'dinnie',  icon: '💰', name: 'ディニー',      src: '全般', attrs: [1,2,3,4,5,6,7,8], perLv: 36000, total: (from, to) => Math.round((to - from) * 36000) },
+  { id: 'exp_tape',icon: '📼', name: '映像テープ（青）', src: '掃討・演習', attrs: [1,2,3,4,5,6,7,8], perLv: null,
     total: (from, to) => Math.round((to - from) * 1.5) },
-  { id: 'exp_film', icon: '🎞', name: '映像フィルム（金）',src: '掃討・演習', perLv: null,
+  { id: 'exp_film', icon: '🎞', name: '映像フィルム（金）',src: '掃討・演習', attrs: [1,2,3,4,5,6,7,8], perLv: null,
     total: (from, to) => Math.round((to - from) * 0.6) },
-  { id: 'adv_chip', icon: '🔧', name: '上位チップ（特化）', src: '曜日ダンジョン', perLv: null,
+  { id: 'adv_chip', icon: '🔧', name: '上位チップ（特化）', src: '曜日ダンジョン', attrs: [1,2,3,4,5,6,7,8], perLv: null,
     total: (from, to) => {
       const tiers = [0,2,3,4,6,8,10,12,15,18,20,24,28,30,35,40,45,50,55,60];
       let cnt = 0;
@@ -4770,15 +4769,15 @@ const ZZZ_LEVEL_MATS = [
 
 // ZZZ スキル素材（Lv1→12 × 3スキル）
 const ZZZ_SKILL_MATS = [
-  { id: 'skill_book_b', icon: '📖', name: 'スキル本（青）',  src: '曜日ダンジョン',
+  { id: 'skill_book_b', icon: '📖', name: 'スキル本（青）',  src: '曜日ダンジョン', attrs: [1,2,3,4,5,6,7,8],
     total: (from, to) => Math.max(0, Math.min(to,4) - Math.min(from,4)) * 2 * 3 },
-  { id: 'skill_book_p', icon: '📗', name: 'スキル本（紫）',  src: '曜日ダンジョン',
+  { id: 'skill_book_p', icon: '📗', name: 'スキル本（紫）',  src: '曜日ダンジョン', attrs: [1,2,3,4,5,6,7,8],
     total: (from, to) => Math.max(0, Math.min(to,8) - Math.max(from,4)) * 4 * 3 },
-  { id: 'skill_book_g', icon: '📙', name: 'スキル本（金）',  src: '曜日ダンジョン',
+  { id: 'skill_book_g', icon: '📙', name: 'スキル本（金）',  src: '曜日ダンジョン', attrs: [1,2,3,4,5,6,7,8],
     total: (from, to) => Math.max(0, Math.min(to,12) - Math.max(from,8)) * 6 * 3 },
-  { id: 'boss_mat',     icon: '👾', name: 'ボス素材',         src: '週ボス・任務',
+  { id: 'boss_mat',     icon: '👾', name: 'ボス素材',         src: '週ボス・任務', attrs: [1,2,3,4,5,6,7,8],
     total: (from, to) => Math.max(0, to - Math.max(from, 4)) * 1 * 3 },
-  { id: 'dinnie_skill', icon: '💰', name: 'ディニー（スキル）',src: '全般',
+  { id: 'dinnie_skill', icon: '💰', name: 'ディニー（スキル）',src: '全般', attrs: [1,2,3,4,5,6,7,8],
     total: (from, to) => {
       const costs = [0, 5000, 8000, 12000, 18000, 25000, 35000, 45000, 60000, 80000, 100000, 120000];
       let s = 0;
@@ -4870,13 +4869,69 @@ let _resGame = 'zzz';
 let _resChar = null;
 let _resInited = false;
 let _resHaveValues = {};
+let _resAttrFilter = '';
 
 function initResPage() {
   if (_resInited) return;
   _resInited = true;
   // ゲーム初期値はガチャ画面のゲームに合わせる
   setResGame(null, _currentGame || 'zzz');
+  buildResAttrFilters();
   renderResCharList('');
+}
+
+function getActiveResAttrFilters() {
+  if (_resGame === 'zzz') {
+    return [
+      { val: '', label: '全属性' },
+      { val: '1', label: '⚡電気' },
+      { val: '2', label: '🔥炎' },
+      { val: '3', label: '❄氷' },
+      { val: '4', label: '⚔物理' },
+      { val: '5', label: '✦エーテル' },
+      { val: '7', label: '✿特殊' },
+    ];
+  } else if (_resGame === 'genshin') {
+    return [
+      { val: '', label: '全元素' },
+      { val: 'g_pyro', label: '🔥炎' },
+      { val: 'g_hydro', label: '💧水' },
+      { val: 'g_cryo', label: '❄氷' },
+      { val: 'g_electro', label: '⚡雷' },
+      { val: 'g_dendro', label: '🌿草' },
+      { val: 'g_geo', label: '🪨岩' },
+      { val: 'g_anemo', label: '🌀風' },
+    ];
+  } else {
+    return [
+      { val: '', label: '全属性' },
+      { val: 'lightning', label: '⚡雷' },
+      { val: 'quantum', label: '🔮量' },
+      { val: 'wind', label: '🌀風' },
+      { val: 'fire', label: '🔥火' },
+      { val: 'ice', label: '❄氷' },
+      { val: 'physical', label: '⚔物理' },
+    ];
+  }
+}
+
+function buildResAttrFilters() {
+  const filterRow = document.getElementById('res-attr-filter');
+  if (!filterRow) return;
+  
+  const filters = getActiveResAttrFilters();
+  filterRow.innerHTML = filters.map(f =>
+    `<button type="button" class="attr-filter-btn${f.val === '' ? ' on' : ''}" data-attr="${f.val}" onclick="setResAttrFilter('${f.val}')">${f.label}</button>`
+  ).join('');
+}
+
+function setResAttrFilter(attr) {
+  _resAttrFilter = attr;
+  const filterRow = document.getElementById('res-attr-filter');
+  filterRow.querySelectorAll('.attr-filter-btn').forEach(b => b.classList.remove('on'));
+  filterRow.querySelector(`[data-attr="${attr}"]`).classList.add('on');
+  renderResCharList('');
+  document.getElementById('res-char-input').focus();
 }
 
 function setResGame(btn, game) {
@@ -4887,6 +4942,7 @@ function setResGame(btn, game) {
   }
   _resGame = game;
   _resChar = null;
+  _resAttrFilter = '';
   document.getElementById('res-char-input').value = '';
   document.getElementById('res-selected-char-wrap').style.display = 'none';
   document.getElementById('res-goal-wrap').style.display = 'none';
@@ -4903,6 +4959,7 @@ function setResGame(btn, game) {
   document.getElementById('res-lv-to').value = maxLv;
   document.getElementById('res-sk-to').max = maxSk;
   document.getElementById('res-sk-to').value = maxSk;
+  buildResAttrFilters();
   renderResCharList('');
 }
 
@@ -4915,7 +4972,12 @@ function getResChars() {
 function renderResCharList(q) {
   const list = document.getElementById('res-char-list');
   const chars = getResChars();
-  const filt = q ? chars.filter(c => c.name.includes(q)) : chars;
+  let filt = q ? chars.filter(c => c.name.includes(q)) : chars;
+  
+  if (_resAttrFilter) {
+    filt = filt.filter(c => String(c.attr) === _resAttrFilter);
+  }
+  
   if (!filt.length) {
     list.innerHTML = '<div style="padding:10px 14px;font-size:12px;color:var(--text-faint);font-family:\'DM Mono\',monospace;">候補なし</div>';
   } else {
@@ -5302,11 +5364,11 @@ function calcCoreSteps(from, to) {
 
 // コアパッシブ素材（各段階ごと）
 const ZZZ_CORE_MATS = [
-  { id:'core_wengine', icon:'🔩', name:'コア素材（音動機）', src:'フィールド/掃討',
+  { id:'core_wengine', icon:'🔩', name:'コア素材（音動機）', src:'フィールド/掃討', attrs: [1,2,3,4,5,6,7,8],
     total:(steps) => steps * 3 },
-  { id:'core_boss',    icon:'💠', name:'コアボス素材',       src:'週ボス・任務',
+  { id:'core_boss',    icon:'💠', name:'コアボス素材',       src:'週ボス・任務', attrs: [1,2,3,4,5,6,7,8],
     total:(steps) => Math.max(0, steps) * 1 },
-  { id:'core_dinnie',  icon:'💰', name:'ディニー（コア）',   src:'全般',
+  { id:'core_dinnie',  icon:'💰', name:'ディニー（コア）',   src:'全般', attrs: [1,2,3,4,5,6,7,8],
     total:(steps) => {
       const costs = [0, 40000, 60000, 80000, 100000, 120000];
       let s = 0;
@@ -5400,13 +5462,21 @@ function renderMatSection(title, items) {
   if (!items.length) return '';
   return `<div class="res-mat-section">
     <div class="res-mat-section-title">${title}</div>
-    ${items.map(m => `
+    ${items.map(m => {
+      let attrHtml = '';
+      if (_resGame === 'zzz' && _resChar && _resChar.attr) {
+        const attrInfo = ATTR_INFO[_resChar.attr] || ATTR_INFO[9];
+        attrHtml = `<span class="attr-icon ${attrInfo.cls}" title="${attrInfo.label}" style="font-size:11px; width:18px; height:18px;">${attrInfo.icon}</span>`;
+      }
+      return `
     <div class="res-mat-row">
       <span class="res-mat-icon">${m.icon}</span>
+      ${attrHtml}
       <span class="res-mat-name">${m.name}</span>
       <span class="res-mat-qty">${m.qty.toLocaleString()}</span>
       <span class="res-mat-src">${m.src}</span>
-    </div>`).join('')}
+    </div>`;
+    }).join('')}
   </div>`;
 }
 
