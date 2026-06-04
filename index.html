@@ -2253,7 +2253,7 @@
         <div class="field">
           <label>育成したいキャラ</label>
           <div class="res-char-search-wrap">
-            <input type="text" id="res-char-input" placeholder="例：エレン、フリーナ、花火…" autocomplete="off" oninput="filterResChars(this.value)" onfocus="showResCharList()">
+            <input type="text" id="res-char-input" placeholder="例：エレン、安比…" autocomplete="off" oninput="filterResChars(this.value)" onfocus="showResCharList()">
             <div class="res-char-list" id="res-char-list"></div>
           </div>
         </div>
@@ -4695,9 +4695,9 @@ const ZZZ_SKILL_MATS = [
 const RES_ZZZ_CHARS = (typeof AGENT_ROSTER !== 'undefined') ? AGENT_ROSTER : [
   // ---------- Sランク ----------
   {name:'エレン',      attr:3, skills:{通常:'低', 回避:'中', 連携:'高', スキル:'高', 終結:'中'}},
-  {name:'猫又',    attr:4, skills:{通常:'低', 回避:'中', 連携:'高', スキル:'高', 終結:'中'}},
-  {name:'ニコ',    attr:5, skills:{通常:'低', 回避:'低', 連携:'高', スキル:'高', 終結:'中'}},
-  {name:'11号',attr:2, skills:{通常:'高', 回避:'低', 連携:'中', スキル:'高', 終結:'低'}},
+  {name:'ネコマタ',    attr:4, skills:{通常:'低', 回避:'中', 連携:'高', スキル:'高', 終結:'中'}},
+  {name:'ニコール',    attr:5, skills:{通常:'低', 回避:'低', 連携:'高', スキル:'高', 終結:'中'}},
+  {name:'ソルジャー11',attr:2, skills:{通常:'高', 回避:'低', 連携:'中', スキル:'高', 終結:'低'}},
   {name:'ライカン',    attr:3, skills:{通常:'高', 回避:'中', 連携:'低', スキル:'高', 終結:'低'}},
   {name:'ジュユアン',  attr:5, skills:{通常:'低', 回避:'低', 連携:'高', スキル:'高', 終結:'中'}},
   {name:'グレース',    attr:1, skills:{通常:'低', 回避:'低', 連携:'高', スキル:'高', 終結:'中'}},
@@ -5349,7 +5349,6 @@ function updateStateLabels() {
     if (wl3) { wl3.textContent = '命定値1'; wl3.setAttribute('data-val', '命定値1'); }
   }
 }
-
 // 既存の関数をフックしてスタレ用ストレージにも対応させる
 const _loadLocal = loadLocal;
 loadLocal = function() {
@@ -5403,11 +5402,11 @@ document.getElementById('grp-banner').querySelectorAll('.btn-toggle').forEach(b 
 });
 
 // サジェスト機能を原神データにも対応させる
-const _initNamePicker = initNamePicker;
-initNamePicker = function(cfg) {
-  const inp = document.getElementById(cfg.inputId);
-  const sug = document.getElementById(cfg.suggestId);
-  const flt = document.getElementById(cfg.filterId);
+const initNamePicker = () => {
+  const inp = document.getElementById('char-name-input');
+  const sug = document.getElementById('char-suggestions');
+  const flt = document.getElementById('char-filter-attr');
+  if (!inp || !sug) return;
 
   function update() {
     const b = cfg.getBanner();
@@ -5429,23 +5428,42 @@ initNamePicker = function(cfg) {
     });
 
     if (res.length === 0) { sug.style.display = 'none'; return; }
-    sug.innerHTML = res.map(x => `<div class="suggest-item">${x.name}</div>`).join('');
+    sug.innerHTML = res.map(x => `<div class="suggest-item" style="cursor: pointer; padding: 8px; border-bottom: 1px solid var(--border);">${x.name}</div>`).join('');
     sug.style.display = 'block';
+
+    // --- ここから追加：サジェストされた名前をクリックした時の処理 ---
+    sug.querySelectorAll('.suggest-item').forEach(item => {
+      item.addEventListener('click', () => {
+        inp.value = item.textContent; // 入力欄に名前をセット
+        sug.style.display = 'none';   // サジェストを閉じる
+        
+        // キャラクター情報（スキル優先度など）を画面に反映させる関数を呼び出す
+        if (typeof onCharacterSelect === 'function') {
+          onCharacterSelect(item.textContent);
+        } else if (typeof renderCharDetails === 'function') {
+          renderCharDetails(item.textContent);
+        }
+      });
+    });
+    // --- ここまで ---
   }
-S
+
   inp.addEventListener('focus', update);
   inp.addEventListener('input', update);
+  
+  // 外側をクリックしたときにサジェストを閉じる
+  document.addEventListener('click', (e) => {
+    if (e.target !== inp && e.target !== sug && !sug.contains(e.target)) {
+      sug.style.display = 'none';
+    }
+  });
+
   if (flt) {
     flt.querySelectorAll('.btn-toggle').forEach(btn => {
       btn.addEventListener('click', () => setTimeout(update, 50));
     });
   }
 };
-
-// 初回バインドの上書き適用
-initNamePicker({ inputId: 'inp-name', suggestId: 'inp-suggest', filterId: 'inp-attr-filter', getBanner: () => getVal('grp-banner') });
-initNamePicker({ inputId: 'edit-name', suggestId: 'edit-suggest', filterId: 'inp-attr-filter', getBanner: () => { const r = records.find(x => x.id === editingId); return r ? r.banner : 'agent'; } });
-}
 </script>
 </body>
 </html>
