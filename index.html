@@ -5431,21 +5431,19 @@ const initNamePicker = () => {
     sug.innerHTML = res.map(x => `<div class="suggest-item" style="cursor: pointer; padding: 8px; border-bottom: 1px solid var(--border);">${x.name}</div>`).join('');
     sug.style.display = 'block';
 
-    // --- ここから追加：サジェストされた名前をクリックした時の処理 ---
+    // サジェストされた名前をクリックした時の処理
     sug.querySelectorAll('.suggest-item').forEach(item => {
       item.addEventListener('click', () => {
-        inp.value = item.textContent; // 入力欄に名前をセット
+        const selectedName = item.textContent;
+        inp.value = selectedName; // 入力欄に名前をセット
         sug.style.display = 'none';   // サジェストを閉じる
         
-        // キャラクター情報（スキル優先度など）を画面に反映させる関数を呼び出す
-        if (typeof onCharacterSelect === 'function') {
-          onCharacterSelect(item.textContent);
-        } else if (typeof renderCharDetails === 'function') {
-          renderCharDetails(item.textContent);
+        // 【修正点】このファイルにある正しい関数「renderCharacterDetails」を呼び出す
+        if (typeof renderCharacterDetails === 'function') {
+          renderCharacterDetails(selectedName);
         }
       });
     });
-    // --- ここまで ---
   }
 
   inp.addEventListener('focus', update);
