@@ -3404,12 +3404,6 @@ async function signInGoogle() {
     return;
   }
 
-  const host = location.hostname;
-  if (host === '127.0.0.1') {
-    flash('アドレスを http://localhost:3000 に変えて再試行してください', 'err');
-    return;
-  }
-
   btn.disabled = true;
   const provider = new firebase.auth.GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
@@ -5462,6 +5456,7 @@ const initNamePicker = () => {
     });
   }
 };
+} // end: if (typeof firebase !== 'undefined') else block
 </script>
 </body>
 </html>
