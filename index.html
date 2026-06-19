@@ -303,7 +303,13 @@
   }
 
   /* ===== 天井ガイドパネル ===== */
-  .pity-panel {}
+  .pity-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+  }
   .pity-game-tabs {
     display: none !important;
   }
@@ -4882,9 +4888,7 @@ function selectResChar(name) {
     document.getElementById('res-skill-section').style.display = '';
     document.getElementById('res-core-section').style.display = '';
     renderSkillPriority(_resChar);
-    // ZZZはスキル優先度だけ表示（必要素材・所持数は別途）
-    document.getElementById('res-result-panel').style.display = 'none';
-    document.getElementById('res-have-panel').style.display = 'none';
+    calcResources();
   } else {
     document.getElementById('res-lv-section').style.display = 'none';
     document.getElementById('res-skill-section').style.display = 'none';
