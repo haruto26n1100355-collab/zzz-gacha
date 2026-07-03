@@ -6,7 +6,7 @@
 <link rel="icon" href="favicon.ico" type="image/x-icon">
 <title>ZZZ ガチャ記録</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Rajdhani:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -68,7 +68,7 @@
   }
 
   body {
-    font-family: 'Noto Sans JP', sans-serif;
+    font-family: 'Rajdhani', 'Noto Sans JP', sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
@@ -112,7 +112,7 @@
   .game-dropdown-item {
     padding: 10px 16px;
     font-size: 13px;
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
     color: var(--text-muted);
     cursor: pointer;
     transition: background .15s, color .15s;
@@ -125,7 +125,7 @@
   .logo-mark { display: none; }
   /* ゲーム切替ボタン（テキスト型） */
   .game-selector-btn {
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
     font-size: 14px;
     font-weight: 600;
     color: var(--accent);
@@ -149,7 +149,7 @@
   }
   .game-selector-container.open .game-selector-btn::after { transform: rotate(180deg); }
   header h1 { font-size: 15px; font-weight: 500; letter-spacing: 0.02em; }
-  header span { font-size: 12px; color: var(--text-muted); font-family: 'DM Mono', monospace; }
+  header span { font-size: 12px; color: var(--text-muted); font-family: 'Orbitron', monospace; }
   
   .header-actions {
     margin-left: auto;
@@ -163,7 +163,7 @@
     background: transparent;
     color: var(--text-muted);
     font-size: 12px;
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
     cursor: pointer;
     transition: all .15s;
     letter-spacing: 0.02em;
@@ -184,7 +184,7 @@
   .auth-user {
     font-size: 11px;
     color: var(--text-muted);
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
     max-width: 140px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -206,7 +206,7 @@
     background: transparent;
     color: var(--text-muted);
     font-size: 11px;
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
     cursor: pointer;
     transition: all .15s;
     white-space: nowrap;
@@ -228,7 +228,7 @@
   }
   .ver-selector-label {
     font-size: 11px;
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
     color: var(--text-faint);
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -244,7 +244,7 @@
     background: transparent;
     color: var(--text-muted);
     font-size: 13px;
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
     cursor: pointer;
     transition: all .15s;
     letter-spacing: 0.02em;
@@ -282,7 +282,7 @@
     flex: 1;
     padding: 5px 8px;
     font-size: 11px;
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
     font-weight: 600;
     border: 1px solid var(--border);
     border-radius: 6px;
@@ -304,7 +304,7 @@
 
   .pity-section-title {
     font-size: 10px;
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
     color: var(--text-faint);
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -327,7 +327,7 @@
   .pity-base-label { font-size: 11px; color: var(--text-muted); }
   .pity-base-val {
     font-size: 18px;
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
     font-weight: 600;
     color: var(--accent);
     line-height: 1.2;
@@ -366,7 +366,7 @@
     justify-content: space-between;
     padding: 0 8px;
     font-size: 11px;
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
   }
   .pity-bar-pulls { color: var(--text); font-weight: 500; }
   .pity-bar-prob { color: var(--accent); font-weight: 600; }
@@ -379,7 +379,7 @@
   }
   .pity-tick {
     font-size: 10px;
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
     padding: 2px 5px;
     border-radius: 4px;
     background: var(--surface2);
@@ -404,7 +404,7 @@
   .pity-fifty-label { font-size: 10px; color: var(--text-faint); margin-bottom: 2px; }
   .pity-fifty-val {
     font-size: 16px;
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
     font-weight: 600;
     color: var(--text);
   }
@@ -434,7 +434,7 @@
     margin-bottom: 4px;
   }
   .pity-weapon-name { font-size: 12px; font-weight: 500; color: var(--text); }
-  .pity-weapon-prob { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--accent); font-weight: 600; }
+  .pity-weapon-prob { font-size: 12px; font-family: 'Orbitron', monospace; color: var(--accent); font-weight: 600; }
   .pity-weapon-sub { font-size: 10px; color: var(--text-muted); }
 
   @media (max-width: 1100px) {
@@ -460,7 +460,7 @@
     letter-spacing: 0.08em;
     color: var(--text-muted);
     text-transform: uppercase;
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -497,7 +497,7 @@
     letter-spacing: 0.06em;
     text-transform: uppercase;
     margin-bottom: 6px;
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
   }
   input[type=text], input[type=number] {
     width: 100%;
@@ -505,7 +505,7 @@
     border: 1px solid var(--border);
     border-radius: 8px;
     color: var(--text);
-    font-family: 'Noto Sans JP', sans-serif;
+    font-family: 'Rajdhani', 'Noto Sans JP', sans-serif;
     font-size: 14px;
     padding: 8px 12px;
     height: 38px;
@@ -527,7 +527,7 @@
     color: var(--text-muted);
     font-size: 12px;
     cursor: pointer;
-    font-family: 'Noto Sans JP', sans-serif;
+    font-family: 'Rajdhani', 'Noto Sans JP', sans-serif;
     transition: all .15s;
     line-height: 1.4;
   }
@@ -593,7 +593,7 @@
     padding: 10px 12px;
     font-size: 12px;
     color: var(--text-faint);
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
   }
 
   .toggle-group { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -605,7 +605,7 @@
     color: var(--text-muted);
     font-size: 13px;
     cursor: pointer;
-    font-family: 'Noto Sans JP', sans-serif;
+    font-family: 'Rajdhani', 'Noto Sans JP', sans-serif;
     transition: all .15s;
   }
   .toggle-btn:hover { border-color: var(--border-hover); color: var(--text); }
@@ -626,7 +626,7 @@
     font-size: 14px;
     font-weight: 700;
     cursor: pointer;
-    font-family: 'Noto Sans JP', sans-serif;
+    font-family: 'Rajdhani', 'Noto Sans JP', sans-serif;
     letter-spacing: 0.04em;
     transition: opacity .15s, transform .1s;
     margin-top: 1.25rem;
@@ -642,7 +642,7 @@
   }
   .stone-calc-title {
     font-size: 11px;
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
     color: var(--text-faint);
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -670,7 +670,7 @@
     border-radius: 8px;
     color: var(--text);
     font-size: 13px;
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
     transition: border-color .15s;
     width: 100%;
   }
@@ -705,7 +705,7 @@
   .stone-result-row:first-child { padding-top: 0; }
   .stone-result-label { color: var(--text-muted); }
   .stone-result-val {
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
     font-weight: 600;
     font-size: 13px;
     color: var(--text);
@@ -719,7 +719,7 @@
     border-radius: 8px;
     font-size: 12px;
     text-align: center;
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
     font-weight: 600;
     letter-spacing: 0.02em;
   }
@@ -737,7 +737,7 @@
     text-align: center;
     margin-top: 8px;
     height: 16px;
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
     transition: opacity .3s;
     opacity: 0;
   }
@@ -754,7 +754,7 @@
     border-bottom: 1px solid var(--border);
     align-items: center;
   }
-  .filter-label { font-size: 11px; color: var(--text-faint); font-family: 'DM Mono', monospace; }
+  .filter-label { font-size: 11px; color: var(--text-faint); font-family: 'Orbitron', monospace; }
   .filter-btn {
     padding: 3px 10px;
     border: 1px solid var(--border);
@@ -763,7 +763,7 @@
     color: var(--text-muted);
     font-size: 12px;
     cursor: pointer;
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
     transition: all .15s;
   }
   .filter-btn:hover { color: var(--text); border-color: var(--border-hover); }
@@ -774,7 +774,7 @@
   .empty-state {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 8px; color: var(--text-faint); font-size: 13px; padding: 3rem 0;
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
   }
   .empty-state .e-icon { font-size: 24px; opacity: 0.3; }
 
@@ -798,7 +798,7 @@
 
   .pull-count {
     text-align: right;
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
     font-size: 20px;
     font-weight: 500;
     color: var(--text-muted);
@@ -828,11 +828,11 @@
     font-size: 14px; font-weight: 500; color: var(--text);
     display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
   }
-  .record-sub { font-size: 11px; color: var(--text-muted); margin-top: 3px; font-family: 'DM Mono', monospace; }
+  .record-sub { font-size: 11px; color: var(--text-muted); margin-top: 3px; font-family: 'Orbitron', monospace; }
 
   .badge {
     font-size: 10px; font-weight: 700; padding: 1px 6px;
-    border-radius: 4px; font-family: 'DM Mono', monospace; letter-spacing: 0.04em;
+    border-radius: 4px; font-family: 'Orbitron', monospace; letter-spacing: 0.04em;
   }
   .badge-s { background: rgba(232,184,75,0.15); color: var(--s-rank); }
   .badge-a { background: rgba(122,162,232,0.15); color: var(--a-rank); }
@@ -967,7 +967,7 @@
     border-radius: 6px;
     line-height: 1;
     transition: all .15s;
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
   }
   .btn-edit:hover {
     color: var(--accent);
@@ -984,7 +984,7 @@
     border-radius: 6px;
     line-height: 1;
     transition: all .15s;
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
   }
   .btn-del:hover {
     color: var(--loss);
@@ -993,7 +993,7 @@
   }
 
   .divider {
-    font-size: 10px; color: var(--text-faint); font-family: 'DM Mono', monospace;
+    font-size: 10px; color: var(--text-faint); font-family: 'Orbitron', monospace;
     letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 0 2px;
     display: flex; align-items: center; gap: 8px;
   }
@@ -1002,7 +1002,7 @@
   .count-bar {
     display: flex; align-items: center; justify-content: space-between;
     padding: 0.6rem 1.25rem; border-top: 1px solid var(--border);
-    font-size: 11px; color: var(--text-faint); font-family: 'DM Mono', monospace;
+    font-size: 11px; color: var(--text-faint); font-family: 'Orbitron', monospace;
   }
 
   /* メモ */
@@ -1011,7 +1011,7 @@
     border: 1px solid var(--border);
     border-radius: 6px;
     color: var(--text);
-    font-family: 'Noto Sans JP', sans-serif;
+    font-family: 'Rajdhani', 'Noto Sans JP', sans-serif;
     outline: none;
     transition: border-color .15s;
   }
@@ -1037,7 +1037,7 @@
     font-size: 11px;
     color: var(--text-faint);
     margin-top: 3px;
-    font-family: 'Noto Sans JP', sans-serif;
+    font-family: 'Rajdhani', 'Noto Sans JP', sans-serif;
     font-style: italic;
     white-space: pre-wrap;
     word-break: break-all;
@@ -1060,7 +1060,7 @@
     border: 1px solid var(--border);
     border-radius: 8px;
     color: var(--text);
-    font-family: 'Noto Sans JP', sans-serif;
+    font-family: 'Rajdhani', 'Noto Sans JP', sans-serif;
     font-size: 13px;
     padding: 8px 12px;
     outline: none;
@@ -1085,7 +1085,7 @@
   .stats-bar:last-child { border-bottom: none; }
   .stat-section-label {
     font-size: 10px;
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -1099,8 +1099,8 @@
     align-items: center;
   }
   .stat-item { display: flex; flex-direction: column; gap: 2px; }
-  .stat-item .s-label { font-size: 10px; color: var(--text-faint); font-family: 'DM Mono', monospace; letter-spacing: 0.06em; }
-  .stat-item .s-val   { font-size: 15px; font-weight: 500; color: var(--text); font-family: 'DM Mono', monospace; }
+  .stat-item .s-label { font-size: 10px; color: var(--text-faint); font-family: 'Orbitron', monospace; letter-spacing: 0.06em; }
+  .stat-item .s-val   { font-size: 15px; font-weight: 500; color: var(--text); font-family: 'Orbitron', monospace; }
   .stat-item .s-val span { font-size: 10px; color: var(--text-muted); margin-left: 2px; }
 
   /* 編集モーダル */
@@ -1124,26 +1124,26 @@
   }
   .modal-title {
     font-size: 13px; font-weight: 500; color: var(--text-muted);
-    font-family: 'DM Mono', monospace; letter-spacing: 0.08em;
+    font-family: 'Orbitron', monospace; letter-spacing: 0.08em;
     text-transform: uppercase; margin-bottom: 1.25rem;
   }
   .modal-actions { display: flex; gap: 8px; margin-top: 1.25rem; }
   .btn-save {
     flex: 1; padding: 9px; background: var(--accent); color: #0e0f11;
     border: none; border-radius: 8px; font-size: 14px; font-weight: 700;
-    cursor: pointer; font-family: 'Noto Sans JP', sans-serif;
+    cursor: pointer; font-family: 'Rajdhani', 'Noto Sans JP', sans-serif;
   }
   .btn-cancel {
     padding: 9px 18px; background: none; border: 1px solid var(--border);
     color: var(--text-muted); border-radius: 8px; font-size: 14px;
-    cursor: pointer; font-family: 'Noto Sans JP', sans-serif;
+    cursor: pointer; font-family: 'Rajdhani', 'Noto Sans JP', sans-serif;
   }
 
   /* インポート確認用スタイル */
   .import-note {
     font-size: 12px;
     color: var(--text-muted);
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
     line-height: 1.7;
     margin-bottom: 1rem;
     padding: 10px 12px;
@@ -1165,7 +1165,7 @@
   }
   .file-warning strong { color: var(--loss); }
   .file-warning code {
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
     font-size: 12px;
     background: var(--surface2);
     padding: 2px 6px;
@@ -1226,12 +1226,12 @@
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--text-muted);
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
   }
   .chart-outer-sub {
     font-size: 11px;
     color: var(--text-faint);
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
   }
   .chart-toggle-arrow {
     font-size: 10px;
@@ -1247,7 +1247,7 @@
     background: transparent;
     color: var(--text-muted);
     font-size: 11px;
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
     cursor: pointer;
     transition: all .15s;
   }
@@ -1265,7 +1265,7 @@
   .chart-col-label {
     font-size: 11px;
     color: var(--text-faint);
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
     margin-bottom: 8px;
     letter-spacing: 0.04em;
   }
@@ -1275,7 +1275,7 @@
     text-align: center;
     font-size: 12px;
     color: var(--text-faint);
-    font-family: 'DM Mono', monospace;
+    font-family: 'Orbitron', monospace;
     padding: 2.5rem 0;
   }
   @media (max-width: 700px) {
@@ -2889,6 +2889,7 @@ document.addEventListener('click', (e) => {
 });
 
 let _currentGame = 'zzz';
+var currentGame = _currentGame;
 const KEY = () => _currentGame === 'zzz' ? 'zzz_gacha_v4' : _currentGame === 'genshin' ? 'genshin_gacha_v1' : 'stare_gacha_v1';
 let records = [];
 // ゲームごとにverの選択状態を独立して管理
@@ -3274,6 +3275,7 @@ function addRecord() {
 
   records.unshift({
     id: Date.now(),
+    game: _currentGame,
     ver: recordVer,
     banner, name, pull, rarity, cons,
     lose:    (banner === 'agent' || banner === 'character') ? lose    : '-',
@@ -3465,10 +3467,52 @@ function renderList() {
 }
 
 let editingId = null;
+let editingGame = null;
+
+function getRecordGame(r) {
+  if (r && (r.game === 'zzz' || r.game === 'genshin' || r.game === 'stare')) return r.game;
+  if (r && r.banner === 'agent') return 'zzz';
+  return _currentGame;
+}
+
+function syncGameState(game) {
+  _currentGame = game;
+  currentGame = game;
+}
+
+function updateEditLabels(game) {
+  const isG = game === 'genshin';
+  const isS = game === 'stare';
+  const editS = document.querySelector('#edit-grp-rarity .toggle-btn[data-val="S"]');
+  const editA = document.querySelector('#edit-grp-rarity .toggle-btn[data-val="A"]');
+  if (editS) editS.textContent = (isG || isS) ? '★5' : 'Sランク';
+  if (editA) editA.textContent = (isG || isS) ? '★4' : 'Aランク';
+
+  const wWin  = document.querySelector('#edit-grp-wpn-lose .toggle-btn[data-val="win"]');
+  const wLoss = document.querySelector('#edit-grp-wpn-lose .toggle-btn[data-val="loss"]');
+  const wDash = document.querySelector('#edit-grp-wpn-lose .toggle-btn[data-val="-"]');
+  if (isG) {
+    if (wWin) wWin.textContent = '限定';
+    if (wLoss) wLoss.textContent = 'すり抜け';
+    if (wDash) wDash.textContent = '恒常';
+  } else {
+    if (wWin) wWin.textContent = '確定';
+    if (wLoss) wLoss.textContent = 'すり抜け';
+    if (wDash) wDash.textContent = '75%';
+  }
+}
 
 function openEdit(id) {
   const r = records.find(r => r.id === id);
   if (!r) return;
+  const recordGame = getRecordGame(r);
+  editingGame = recordGame;
+  if (recordGame !== _currentGame || currentGame !== recordGame) {
+    syncGameState(recordGame);
+    switchGameUI(recordGame);
+    if (typeof refreshNamePickers === 'function') refreshNamePickers();
+  }
+  updateEditLabels(recordGame);
   editingId = id;
   document.getElementById('edit-name').value = r.name;
   document.getElementById('edit-pull').value = r.pull;
@@ -3477,7 +3521,7 @@ function openEdit(id) {
   setToggle('edit-grp-cons', r.cons || '0');
   setToggle('edit-grp-lose', r.lose || 'win');
   setToggle('edit-grp-wpn-lose', r.wpnLose || 'win');
-  document.getElementById('edit-field-lose').style.display     = r.banner === 'agent'  ? '' : 'none';
+  document.getElementById('edit-field-lose').style.display     = (r.banner === 'agent' || r.banner === 'character') ? '' : 'none';
   document.getElementById('edit-field-wpn-lose').style.display = r.banner === 'weapon' ? '' : 'none';
   document.getElementById('edit-modal').classList.add('open');
   const st = namePickerState['edit-name'];
@@ -3490,6 +3534,7 @@ function openEdit(id) {
 
 function closeEdit() {
   editingId = null;
+  editingGame = null;
   document.getElementById('edit-modal').classList.remove('open');
 }
 
@@ -3501,6 +3546,7 @@ function saveEdit() {
   if (!name) { return; }
   if (!pull || pull < 1) { return; }
   r.name    = name;
+  r.game    = editingGame || getRecordGame(r);
   r.pull    = pull;
   r.rarity  = getEditVal('edit-grp-rarity');
   r.cons    = getEditVal('edit-grp-cons');
@@ -3873,7 +3919,7 @@ function getChartColors() {
 
 function axisOpts(c, extra) {
   return {
-    ticks: { color: c.text, font: { family: "'DM Mono', monospace", size: 10 } },
+    ticks: { color: c.text, font: { family: "'Orbitron', monospace", size: 10 } },
     grid: { color: c.grid, drawBorder: false },
     border: { display: false },
     ...extra,
@@ -4003,7 +4049,7 @@ function renderSingleDist({ recs, canvasId, emptyId, labelId, labelText, barColo
       },
       scales: {
         x: axisOpts(c),
-        y: axisOpts(c, { beginAtZero: true, ticks: { color: c.text, font: { family: "'DM Mono', monospace", size: 10 }, stepSize: 1 } }),
+        y: axisOpts(c, { beginAtZero: true, ticks: { color: c.text, font: { family: "'Orbitron', monospace", size: 10 }, stepSize: 1 } }),
       }
     }
   });
@@ -4131,7 +4177,7 @@ function renderVerChart() {
           align: 'end',
           labels: {
             color: c.text,
-            font: { family: "'DM Mono', monospace", size: 10 },
+            font: { family: "'Orbitron', monospace", size: 10 },
             boxWidth: 10, padding: 10,
           }
         },
@@ -4149,14 +4195,14 @@ function renderVerChart() {
         yLeft: axisOpts(c, {
           position: 'left',
           beginAtZero: true,
-          title: { display: true, text: '平均連数', color: c.accent, font: { size: 10, family: "'DM Mono', monospace" } },
+          title: { display: true, text: '平均連数', color: c.accent, font: { size: 10, family: "'Orbitron', monospace" } },
         }),
         yRight: axisOpts(c, {
           position: 'right',
           beginAtZero: true,
           max: 100,
           grid: { display: false },
-          title: { display: true, text: 'すり抜け率 %', color: c.blue, font: { size: 10, family: "'DM Mono', monospace" } },
+          title: { display: true, text: 'すり抜け率 %', color: c.blue, font: { size: 10, family: "'Orbitron', monospace" } },
         }),
       }
     }
