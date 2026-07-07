@@ -87,6 +87,16 @@
     --border-hover: rgba(190,170,255,0.18);
   }
 
+  /* ZZZ：琥珀（ゴールド）系の縁取り */
+  html[data-game="zzz"]:not([data-theme="light"]) {
+    --border: rgba(200,168,75,0.16);
+    --border-hover: rgba(200,168,75,0.32);
+  }
+  html[data-game="zzz"][data-theme="light"] {
+    --border: rgba(184,146,42,0.22);
+    --border-hover: rgba(184,146,42,0.36);
+  }
+
   header { position: relative; }
 
   .btn-theme {
@@ -342,9 +352,10 @@
   .pity-content.on { display: block; }
 
   .pity-section-title {
-    font-size: 10px;
+    font-size: 11px;
     font-family: var(--font-display);
-    color: var(--text-faint);
+    font-weight: 700;
+    color: var(--accent);
     letter-spacing: 0.1em;
     text-transform: uppercase;
     margin-bottom: 6px;
@@ -375,7 +386,12 @@
 
   .pity-soft-label {
     font-size: 11px;
-    color: var(--text-muted);
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-dim);
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 5px;
     margin-bottom: 4px;
   }
   .pity-soft-label strong { color: var(--s-rank); }
@@ -458,7 +474,7 @@
     padding: 6px 8px;
     border-left: 2px solid var(--border);
   }
-  .pity-note strong { color: var(--text-muted); }
+  .pity-note strong { color: var(--accent); font-weight: 700; }
 
   .pity-weapon-row {
     background: var(--surface2);
@@ -505,6 +521,18 @@
     gap: 10px;
     min-height: 42px;
   }
+
+  /* サイバーパンク風パネル識別：ネオンの上部ライン + シェイプマーカー */
+  .record-panel  { border-top: 3px solid #22d3ee; box-shadow: inset 0 1px 12px rgba(34,211,238,0.18); }
+  .history-panel { border-top: 3px solid #ff8c42; box-shadow: inset 0 1px 12px rgba(255,140,66,0.18); }
+  .pity-panel    { border-top: 3px solid #a855f7; box-shadow: inset 0 1px 12px rgba(168,85,247,0.18); }
+
+  .record-panel  .panel-header { color: #22d3ee; }
+  .history-panel .panel-header { color: #ff8c42; }
+  .pity-panel    .panel-header { color: #a855f7; }
+
+  .record-panel  .panel-header::before { content: '▸'; font-size: 13px; }
+  .history-panel .panel-header::before { content: '◆'; font-size: 10px; }
   .header-search {
     margin-left: auto;
     display: flex;
@@ -867,18 +895,24 @@
     font-size: 14px; font-weight: 500; color: var(--text);
     display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
   }
-  .record-sub { font-size: 11px; color: var(--text-muted); margin-top: 3px; font-family: var(--font-display); }
 
   .badge {
     font-size: 10px; font-weight: 700; padding: 1px 6px;
     border-radius: 4px; font-family: var(--font-display); letter-spacing: 0.04em;
   }
-  .badge-s { background: rgba(232,184,75,0.15); color: var(--s-rank); }
-  .badge-a { background: rgba(122,162,232,0.15); color: var(--a-rank); }
+  .badge-s {
+    background: rgba(232,184,75,0.18); color: var(--s-rank);
+    border: 1px solid rgba(232,184,75,0.4);
+    box-shadow: 0 0 5px rgba(232,184,75,0.2);
+  }
+  .badge-a { background: rgba(122,162,232,0.08); color: var(--a-rank); font-weight: 600; opacity: 0.8; }
   .badge-win { background: var(--win-bg); color: var(--win); }
   .badge-loss { background: var(--loss-bg); color: var(--loss); }
   .badge-wpn { background: rgba(255,255,255,0.05); color: var(--text-muted); }
-  .badge-cons { background: rgba(180,140,255,0.15); color: #b48cff; border: 1px solid rgba(180,140,255,0.25); }
+  .badge-cons {
+    background: transparent; color: var(--text-muted);
+    border: 1px solid var(--border); font-size: 9px; font-weight: 500;
+  }
   .badge-75 {
     position: relative;
     -webkit-background-clip: text;
@@ -1229,7 +1263,6 @@
     .record-item { padding: 8px 10px; gap: 8px; }
     .pull-count { font-size: 17px; min-width: 36px; }
     .record-name { font-size: 13px; gap: 4px; }
-    .record-sub { font-size: 10px; }
     .badge { font-size: 9px; padding: 1px 5px; }
   }
 
@@ -1360,6 +1393,7 @@
   .game-dropdown-item:hover { background: var(--surface2); }
   .game-dropdown-item[data-game="zzz"]:hover     { color: #c8a84b; }
   .game-dropdown-item[data-game="genshin"]:hover { color: #4ba8c8; }
+  .game-dropdown-item[data-game="stare"]:hover   { color: #a06cd5; }
   html[data-game="genshin"] { --accent: #4ba8c8; --accent-dim: rgba(75,168,200,0.12); --accent-mid: rgba(75,168,200,0.35); --accent-border: rgba(75,168,200,0.3); }
   html[data-game="stare"]   { --accent: #a06cd5; --accent-dim: rgba(160,108,213,0.12); --accent-mid: rgba(160,108,213,0.35); --accent-border: rgba(160,108,213,0.3); }
   html[data-game="zzz"] body {
@@ -1390,7 +1424,9 @@
   html[data-game="zzz"] .chart-outer,
   html[data-game="zzz"] .gacha-res-left-panel {
     background: rgba(18,20,24,0.88);
-    border-color: rgba(255,255,255,0.14);
+    border-left-color: rgba(200,168,75,0.28);
+    border-right-color: rgba(200,168,75,0.28);
+    border-bottom-color: rgba(200,168,75,0.28);
     box-shadow: 0 18px 42px rgba(0,0,0,0.28);
     backdrop-filter: blur(10px) saturate(1.12);
     -webkit-backdrop-filter: blur(10px) saturate(1.12);
@@ -1418,7 +1454,9 @@
   html[data-game="zzz"][data-theme="light"] .chart-outer,
   html[data-game="zzz"][data-theme="light"] .gacha-res-left-panel {
     background: rgba(255,255,255,0.88);
-    border-color: rgba(0,0,0,0.12);
+    border-left-color: rgba(184,146,42,0.3);
+    border-right-color: rgba(184,146,42,0.3);
+    border-bottom-color: rgba(184,146,42,0.3);
     box-shadow: 0 18px 42px rgba(30,32,38,0.12);
   }
   html[data-game="zzz"][data-theme="light"] .panel-header {
@@ -1430,6 +1468,152 @@
   html[data-game="zzz"][data-theme="light"] .chart-outer-header,
   html[data-game="zzz"][data-theme="light"] .game-dropdown-menu {
     background: rgba(238,240,244,0.88);
+  }
+  html[data-game="genshin"] body {
+    background: var(--bg);
+  }
+  html[data-game="genshin"] body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(180deg, rgba(10,18,22,0.72), rgba(10,18,22,0.86)),
+      linear-gradient(90deg, rgba(10,18,22,0.62), rgba(10,18,22,0.34) 48%, rgba(10,18,22,0.78)),
+      url('genshin-bg.jpg') center / cover no-repeat;
+    transform: translateZ(0);
+    will-change: transform;
+  }
+  html[data-game="genshin"] body > * {
+    position: relative;
+    z-index: 1;
+  }
+  html[data-game="genshin"] body > .modal-overlay {
+    position: fixed;
+    z-index: 100;
+  }
+  html[data-game="genshin"] .panel,
+  html[data-game="genshin"] .chart-outer,
+  html[data-game="genshin"] .gacha-res-left-panel {
+    background: rgba(15,24,29,0.88);
+    border-left-color: rgba(75,168,200,0.32);
+    border-right-color: rgba(75,168,200,0.32);
+    border-bottom-color: rgba(75,168,200,0.32);
+    box-shadow: 0 18px 42px rgba(0,0,0,0.28);
+    backdrop-filter: blur(10px) saturate(1.12);
+    -webkit-backdrop-filter: blur(10px) saturate(1.12);
+  }
+  html[data-game="genshin"] .panel-header {
+    background: rgba(6,14,18,0.32);
+  }
+  html[data-game="genshin"] input[type=text],
+  html[data-game="genshin"] input[type=number],
+  html[data-game="genshin"] .pity-weapon-row,
+  html[data-game="genshin"] .chart-outer-header,
+  html[data-game="genshin"] .game-dropdown-menu {
+    background: rgba(23,36,43,0.84);
+  }
+  html[data-game="genshin"][data-theme="light"] body {
+    background: var(--bg);
+  }
+  html[data-game="genshin"][data-theme="light"] body::before {
+    background:
+      linear-gradient(180deg, rgba(244,249,250,0.74), rgba(244,249,250,0.84)),
+      linear-gradient(90deg, rgba(244,249,250,0.78), rgba(244,249,250,0.40) 48%, rgba(244,249,250,0.82)),
+      url('genshin-bg.jpg') center / cover no-repeat;
+  }
+  html[data-game="genshin"][data-theme="light"] .panel,
+  html[data-game="genshin"][data-theme="light"] .chart-outer,
+  html[data-game="genshin"][data-theme="light"] .gacha-res-left-panel {
+    background: rgba(255,255,255,0.88);
+    border-left-color: rgba(26,136,176,0.28);
+    border-right-color: rgba(26,136,176,0.28);
+    border-bottom-color: rgba(26,136,176,0.28);
+    box-shadow: 0 18px 42px rgba(30,48,56,0.12);
+  }
+  html[data-game="genshin"][data-theme="light"] .panel-header {
+    background: rgba(255,255,255,0.36);
+  }
+  html[data-game="genshin"][data-theme="light"] input[type=text],
+  html[data-game="genshin"][data-theme="light"] input[type=number],
+  html[data-game="genshin"][data-theme="light"] .pity-weapon-row,
+  html[data-game="genshin"][data-theme="light"] .chart-outer-header,
+  html[data-game="genshin"][data-theme="light"] .game-dropdown-menu {
+    background: rgba(238,246,248,0.88);
+  }
+  html[data-game="stare"] body {
+    background: var(--bg);
+  }
+  html[data-game="stare"] body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(180deg, rgba(12,12,28,0.64), rgba(12,12,28,0.78)),
+      linear-gradient(90deg, rgba(12,12,28,0.56), rgba(12,12,28,0.26) 48%, rgba(12,12,28,0.68)),
+      url('stare-bg-3rd.jpg') center / cover no-repeat;
+    transform: translateZ(0);
+    will-change: transform;
+  }
+  html[data-game="stare"] body > * {
+    position: relative;
+    z-index: 1;
+  }
+  html[data-game="stare"] body > .modal-overlay {
+    position: fixed;
+    z-index: 100;
+  }
+  html[data-game="stare"] .panel,
+  html[data-game="stare"] .chart-outer,
+  html[data-game="stare"] .gacha-res-left-panel {
+    background: rgba(19,18,34,0.88);
+    border-left-color: rgba(160,108,213,0.32);
+    border-right-color: rgba(160,108,213,0.32);
+    border-bottom-color: rgba(160,108,213,0.32);
+    box-shadow: 0 18px 42px rgba(0,0,0,0.30);
+    backdrop-filter: blur(10px) saturate(1.12);
+    -webkit-backdrop-filter: blur(10px) saturate(1.12);
+  }
+  html[data-game="stare"] .panel-header {
+    background: rgba(8,7,18,0.34);
+  }
+  html[data-game="stare"] input[type=text],
+  html[data-game="stare"] input[type=number],
+  html[data-game="stare"] .pity-weapon-row,
+  html[data-game="stare"] .chart-outer-header,
+  html[data-game="stare"] .game-dropdown-menu {
+    background: rgba(31,29,52,0.84);
+  }
+  html[data-game="stare"][data-theme="light"] body {
+    background: var(--bg);
+  }
+  html[data-game="stare"][data-theme="light"] body::before {
+    background:
+      linear-gradient(180deg, rgba(247,245,252,0.66), rgba(247,245,252,0.76)),
+      linear-gradient(90deg, rgba(247,245,252,0.72), rgba(247,245,252,0.36) 48%, rgba(247,245,252,0.74)),
+      url('stare-bg-3rd.jpg') center / cover no-repeat;
+  }
+  html[data-game="stare"][data-theme="light"] .panel,
+  html[data-game="stare"][data-theme="light"] .chart-outer,
+  html[data-game="stare"][data-theme="light"] .gacha-res-left-panel {
+    background: rgba(255,255,255,0.88);
+    border-left-color: rgba(122,68,176,0.28);
+    border-right-color: rgba(122,68,176,0.28);
+    border-bottom-color: rgba(122,68,176,0.28);
+    box-shadow: 0 18px 42px rgba(42,32,58,0.12);
+  }
+  html[data-game="stare"][data-theme="light"] .panel-header {
+    background: rgba(255,255,255,0.36);
+  }
+  html[data-game="stare"][data-theme="light"] input[type=text],
+  html[data-game="stare"][data-theme="light"] input[type=number],
+  html[data-game="stare"][data-theme="light"] .pity-weapon-row,
+  html[data-game="stare"][data-theme="light"] .chart-outer-header,
+  html[data-game="stare"][data-theme="light"] .game-dropdown-menu {
+    background: rgba(241,238,247,0.88);
   }
   /* ゲームセレクターボタンを角丸枠で囲む */
   .game-selector-btn {
@@ -1527,7 +1711,7 @@
 <div class="container" id="page-gacha">
 
   <!-- 入力フォーム または リソース計算パネル -->
-  <div class="panel">
+  <div class="panel record-panel">
     <div class="panel-header">
       <span id="gacha-panel-title">新しく記録する</span>
     </div>
@@ -3399,10 +3583,6 @@ function renderList() {
           : '';
     const consBadge = (r.cons !== undefined && r.cons !== '0')
       ? `<span class="badge badge-cons">${r.cons}凸</span>` : '';
-    const bannerLbl = r.banner === 'agent' ? 'エージェント'
-      : r.banner === 'character' ? 'キャラクター'
-      : r.banner === 'weapon' ? (_currentGame === 'genshin' ? '武器' : _currentGame === 'stare' ? '光円錐' : '音動機')
-      : r.banner;
     const losePart  = (r.banner === 'agent' || r.banner === 'character') ? loseBadge : wpnLoseBadge;
     const displayName = searchQuery ? highlightText(r.name, searchQuery) : escapeHtml(r.name);
     const memoPart = r.memo
@@ -3418,7 +3598,7 @@ function renderList() {
       <div class="pull-count${pullCls}">${r.pull}<span class="unit">連</span></div>
       <div class="record-info">
         <div class="record-name">${attrIcon} ${displayName} ${rareBadge}${consBadge}${losePart}</div>
-        <div class="record-sub">${bannerLbl}</div>${memoPart}
+        ${memoPart}
       </div>
       <div class="item-actions">
         <button class="btn-edit" onclick="openEdit(${r.id})" title="編集">✎</button>
