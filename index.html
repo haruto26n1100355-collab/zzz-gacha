@@ -1406,8 +1406,8 @@
     z-index: 0;
     pointer-events: none;
     background:
-      linear-gradient(180deg, rgba(14,15,17,0.78), rgba(14,15,17,0.86)),
-      linear-gradient(90deg, rgba(14,15,17,0.70), rgba(14,15,17,0.38) 48%, rgba(14,15,17,0.76)),
+      linear-gradient(180deg, rgba(14,15,17,0.62), rgba(14,15,17,0.72)),
+      linear-gradient(90deg, rgba(14,15,17,0.55), rgba(14,15,17,0.26) 48%, rgba(14,15,17,0.60)),
       url('zzz.webp') center / cover no-repeat;
     transform: translateZ(0);
     will-change: transform;
@@ -1479,8 +1479,8 @@
     z-index: 0;
     pointer-events: none;
     background:
-      linear-gradient(180deg, rgba(10,18,22,0.72), rgba(10,18,22,0.86)),
-      linear-gradient(90deg, rgba(10,18,22,0.62), rgba(10,18,22,0.34) 48%, rgba(10,18,22,0.78)),
+      linear-gradient(180deg, rgba(10,18,22,0.56), rgba(10,18,22,0.70)),
+      linear-gradient(90deg, rgba(10,18,22,0.46), rgba(10,18,22,0.22) 48%, rgba(10,18,22,0.62)),
       url('genshin-bg.jpg') center / cover no-repeat;
     transform: translateZ(0);
     will-change: transform;
@@ -2674,6 +2674,7 @@ const GENSHIN_CHAR_ROSTER = [
   { name: 'シトラリ', attr: 'g_cryo', aliases: ['sitorari', 'しとらり'] },
   { name: 'エスコフィエ', attr: 'g_cryo', aliases: ['esukofie', 'えすこふぃえ'] },
   { name: 'ローエン', attr: 'g_cryo', aliases: ['ro-enn', 'ろーえん'] },
+  { name: 'サンドローネ', attr: 'g_cryo', aliases: ['さんどろーね','sandoro-ne']},
   // 雷
   { name: 'リサ', attr: 'g_electro', aliases: ['りさ', 'risa'] },
   { name: 'レザー', attr: 'g_electro', aliases: ['reza-', 'れざー'] },
@@ -2743,26 +2744,11 @@ const GENSHIN_CHAR_ROSTER = [
 ];
 
 const GENSHIN_WEAPON_ROSTER = [
-  { name: '天空の刃', attr: 'g_any' },
-  { name: '天空の誇り', attr: 'g_any' },
-  { name: '天空の翼', attr: 'g_any' },
-  { name: '天空の巻', attr: 'g_any' },
-  { name: '天空の脊', attr: 'g_any' },
-  { name: '霧切の廻光', attr: 'g_cryo' },
-  { name: '護摩の杖', attr: 'g_pyro' },
-  { name: '草薙の稲光', attr: 'g_electro' },
-  { name: '松籟の響く頃', attr: 'g_cryo' },
-  { name: '飛雷の鳴弦', attr: 'g_electro' },
-  { name: '冬極の白星', attr: 'g_cryo' },
-  { name: '赤角石華', attr: 'g_geo' },
-  { name: '波乱月白経津', attr: 'g_hydro' },
-  { name: '裁判の時', attr: 'g_electro' },
-  { name: 'カリバーン', attr: 'g_hydro' },
-  { name: '猟人の道', attr: 'g_any' },
-  { name: '千岩古剣', attr: 'g_geo' },
-  { name: '断浪長鎧', attr: 'g_hydro' },
-  { name: '神楽の真影', attr: 'g_electro' },
-  { name: '落霞と孤鶩の剣', attr: 'g_any' },
+  { name: '弓', attr: 'g_bow', aliases: ['ゆみ', 'bow'] },
+  { name: '片手剣', attr: 'g_sword', aliases: ['かたてけん', 'sword'] },
+  { name: '両手剣', attr: 'g_claymore', aliases: ['りょうてけん', 'claymore'] },
+  { name: '法器', attr: 'g_catalyst', aliases: ['ほうき', 'catalyst'] },
+  { name: '槍', attr: 'g_polearm', aliases: ['やり', 'polearm'] },
 ];
 
 // ===== 崩壊：スターレイル マスターデータ =====
