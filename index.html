@@ -598,6 +598,12 @@
     transition: all .15s;
     line-height: 1.4;
   }
+  .attr-filter-icon {
+    width: 13px;
+    height: 13px;
+    margin-right: 3px;
+    vertical-align: -2px;
+  }
   .attr-filter-btn:hover { border-color: var(--border-hover); color: var(--text); }
   .attr-filter-btn.on {
     background: var(--accent-dim);
@@ -958,7 +964,9 @@
   .attr-fire     { background: rgba(232,120,75,0.2);  color: #e8784b; border: 1px solid rgba(232,120,75,0.3); }
   .attr-ice      { background: rgba(100,200,240,0.2); color: #64c8f0; border: 1px solid rgba(100,200,240,0.3); padding-top: 3px; }
   .attr-physical { background: rgba(200,168,75,0.2);  color: #c8a84b; border: 1px solid rgba(200,168,75,0.3); padding-top: 3px; }
-  .attr-ether    { background: rgba(180,140,255,0.2); color: #b48cff; border: 1px solid rgba(180,140,255,0.3); padding-top: 3px; }
+  .attr-ether    { background: rgba(180,140,255,0.2); color: #b48cff; border: 1px solid rgba(180,140,255,0.3); }
+  .attr-ether-img { width: 16px; height: 16px; display: block; }
+  .attr-yixuan-img { width: 16px; height: 15px; display: block; }
   .attr-unknown  { background: rgba(255,255,255,0.05); color: var(--text-faint); border: 1px solid var(--border); }
   .attr-wind { background: rgba(60,220,180,0.18); color: #40d8b0; border: 1px solid rgba(60,220,180,0.35); }
   /* スタレ属性アイコン */
@@ -2328,8 +2336,8 @@ const ATTR_INFO = {
   2: { cls: 'attr-fire',     icon: '🔥', label: '炎' },
   3: { cls: 'attr-ice',      icon: '❄',  label: '氷' },
   4: { cls: 'attr-physical', icon: '⚔',  label: '物理' },
-  5: { cls: 'attr-ether',    icon: '✦',  label: 'エーテル' },
-  6: { cls: 'attr-yixuan',   icon: '⧖',  label: 'エーテル（イーシェン）' },
+  5: { cls: 'attr-ether',    icon: '<img class="attr-ether-img" src="zzz-ether-icon.png" alt="">',  label: 'エーテル' },
+  6: { cls: 'attr-ether',    icon: '<img class="attr-yixuan-img" src="zzz-yixuan-icon.png" alt="">',  label: 'エーテル（イーシェン）' },
   7: { cls: 'attr-miyabi',   icon: '✿',  label: '氷（星見雅）' },
   8: { cls: 'attr-trigger',  icon: '✦',  label: '物理（瞬光）' },
   9: { cls: 'attr-unknown',  icon: '？',  label: '不明' },
@@ -2427,10 +2435,6 @@ function getAttrIcon(name, banner) {
           const svg = `<svg width="14" height="14" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg"><g transform="translate(7,7)"><ellipse rx="2.2" ry="4.5" fill="rgba(100,200,240,0.7)" stroke="#a0e8ff" stroke-width="0.4" transform="rotate(0)"/><ellipse rx="2.2" ry="4.5" fill="rgba(100,200,240,0.7)" stroke="#a0e8ff" stroke-width="0.4" transform="rotate(60)"/><ellipse rx="2.2" ry="4.5" fill="rgba(100,200,240,0.7)" stroke="#a0e8ff" stroke-width="0.4" transform="rotate(120)"/></g><circle cx="7" cy="7" r="1.8" fill="#a0e8ff" stroke="#64c8f0" stroke-width="0.5"/></svg>`;
           return `<span class="attr-icon attr-miyabi" title="${a.label}">${svg}</span>`;
         }
-        if (item.attr === 6) {
-          const svg = `<svg width="14" height="14" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg"><path d="M7 1 L10 4 L13 7 L10 10 L7 13 L4 10 L1 7 L4 4 Z" fill="none" stroke="#c8a84b" stroke-width="1.2"/><path d="M7 3.5 L9 5.5 L11 7 L9 8.5 L7 10.5 L5 8.5 L3 7 L5 5.5 Z" fill="rgba(200,168,75,0.3)" stroke="#e8d080" stroke-width="0.6"/><circle cx="7" cy="7" r="1.2" fill="#c8a84b"/></svg>`;
-          return `<span class="attr-icon attr-yixuan" title="${a.label}">${svg}</span>`;
-        }
         return `<span class="attr-icon ${a.cls}" title="${a.label}">${a.icon}</span>`;
       }
       if ((item.aliases || []).some(a => a === normalized || a.toLowerCase() === lower)) {
@@ -2465,14 +2469,6 @@ function getAttrIcon(name, banner) {
       <circle cx="7" cy="7" r="1.8" fill="#a0e8ff" stroke="#64c8f0" stroke-width="0.5"/>
     </svg>`;
     return `<span class="attr-icon attr-miyabi" title="${a.label}">${svg}</span>`;
-  }
-  if (attrId === 6) {
-    const svg = `<svg width="14" height="14" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg">
-      <path d="M7 1 L10 4 L13 7 L10 10 L7 13 L4 10 L1 7 L4 4 Z" fill="none" stroke="#c8a84b" stroke-width="1.2"/>
-      <path d="M7 3.5 L9 5.5 L11 7 L9 8.5 L7 10.5 L5 8.5 L3 7 L5 5.5 Z" fill="rgba(200,168,75,0.3)" stroke="#e8d080" stroke-width="0.6"/>
-      <circle cx="7" cy="7" r="1.2" fill="#c8a84b"/>
-    </svg>`;
-    return `<span class="attr-icon attr-yixuan" title="${a.label}">${svg}</span>`;
   }
   return `<span class="attr-icon ${a.cls}" title="${a.label}">${a.icon}</span>`;
 }
@@ -2899,7 +2895,7 @@ const ZZZ_ATTR_FILTERS = [
   { val: '2', label: '🔥 炎' },
   { val: '3', label: '❄ 氷' },
   { val: '4', label: '⚔ 物理' },
-  { val: '5', label: '✦ エーテル' },
+  { val: '5', label: '<img class="attr-filter-icon" src="zzz-ether-icon.png" alt="">エーテル' },
   { val: '10', label: '🌪️ 風' },
 ];
 
