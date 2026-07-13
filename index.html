@@ -967,6 +967,13 @@
   .attr-ether    { background: rgba(180,140,255,0.2); color: #b48cff; border: 1px solid rgba(180,140,255,0.3); }
   .attr-ether-img { width: 16px; height: 16px; display: block; }
   .attr-yixuan-img { width: 16px; height: 15px; display: block; }
+  .attr-wind-img { width: 16px; height: 15px; display: block; }
+  .attr-electric-img { width: 16px; height: 15px; display: block; }
+  .attr-fire-img { width: 15px; height: 16px; display: block; }
+  .attr-ice-img { width: 15px; height: 16px; display: block; }
+  .attr-physical-img { width: 16px; height: 16px; display: block; }
+  .attr-elegance-img { width: 16px; height: 15px; display: block; }
+  .attr-flash-img { width: 15px; height: 14px; display: block; }
   .attr-unknown  { background: rgba(255,255,255,0.05); color: var(--text-faint); border: 1px solid var(--border); }
   .attr-wind { background: rgba(60,220,180,0.18); color: #40d8b0; border: 1px solid rgba(60,220,180,0.35); }
   /* スタレ属性アイコン */
@@ -2332,16 +2339,16 @@ const CHAR_ATTR = {
 };
 
 const ATTR_INFO = {
-  1: { cls: 'attr-electric', icon: '⚡', label: '電気' },
-  2: { cls: 'attr-fire',     icon: '🔥', label: '炎' },
-  3: { cls: 'attr-ice',      icon: '❄',  label: '氷' },
-  4: { cls: 'attr-physical', icon: '⚔',  label: '物理' },
+  1: { cls: 'attr-electric', icon: '<img class="attr-electric-img" src="zzz-electric-icon.png" alt="">', label: '電気' },
+  2: { cls: 'attr-fire',     icon: '<img class="attr-fire-img" src="zzz-fire-icon.png" alt="">', label: '炎' },
+  3: { cls: 'attr-ice',      icon: '<img class="attr-ice-img" src="zzz-ice-icon.png" alt="">',  label: '氷' },
+  4: { cls: 'attr-physical', icon: '<img class="attr-physical-img" src="zzz-physical-icon.png" alt="">',  label: '物理' },
   5: { cls: 'attr-ether',    icon: '<img class="attr-ether-img" src="zzz-ether-icon.png?v=2" alt="">',  label: 'エーテル' },
   6: { cls: 'attr-ether',    icon: '<img class="attr-yixuan-img" src="zzz-yixuan-icon.png" alt="">',  label: 'エーテル（イーシェン）' },
-  7: { cls: 'attr-miyabi',   icon: '✿',  label: '氷（星見雅）' },
-  8: { cls: 'attr-trigger',  icon: '✦',  label: '物理（瞬光）' },
+  7: { cls: 'attr-miyabi',   icon: '<img class="attr-elegance-img" src="zzz-elegance-icon.png" alt="">',  label: '氷（星見雅）' },
+  8: { cls: 'attr-trigger',  icon: '<img class="attr-flash-img" src="zzz-flash-icon.png" alt="">',  label: '物理（瞬光）' },
   9: { cls: 'attr-unknown',  icon: '？',  label: '不明' },
-  10: { cls: 'attr-wind',    icon: '🌪️',   label: '風' },
+  10: { cls: 'attr-wind',    icon: '<img class="attr-wind-img" src="zzz-wind-icon.png" alt="">',   label: '風' },
 };
 
 function normalizeAttrName(name) {
@@ -2428,12 +2435,10 @@ function getAttrIcon(name, banner) {
       if (item.name === normalized || item.name.toLowerCase() === lower) {
         const a = ATTR_INFO[item.attr] || ATTR_INFO[9];
         if (item.attr === 8) {
-          const svg = `<svg width="14" height="14" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg"><g transform="translate(7,7)"><path d="M0,-1 C1,-3 4,-4 3,-1 C4,0 3,3 1,1 Z" fill="rgba(160,120,240,0.85)" stroke="#c0a0ff" stroke-width="0.3" transform="rotate(0)"/><path d="M0,-1 C1,-3 4,-4 3,-1 C4,0 3,3 1,1 Z" fill="rgba(160,120,240,0.85)" stroke="#c0a0ff" stroke-width="0.3" transform="rotate(72)"/><path d="M0,-1 C1,-3 4,-4 3,-1 C4,0 3,3 1,1 Z" fill="rgba(160,120,240,0.85)" stroke="#c0a0ff" stroke-width="0.3" transform="rotate(144)"/><path d="M0,-1 C1,-3 4,-4 3,-1 C4,0 3,3 1,1 Z" fill="rgba(160,120,240,0.85)" stroke="#c0a0ff" stroke-width="0.3" transform="rotate(216)"/><path d="M0,-1 C1,-3 4,-4 3,-1 C4,0 3,3 1,1 Z" fill="rgba(160,120,240,0.85)" stroke="#c0a0ff" stroke-width="0.3" transform="rotate(288)"/></g><circle cx="7" cy="7" r="1.5" fill="#c0a0ff" stroke="#9060d0" stroke-width="0.5"/></svg>`;
-          return `<span class="attr-icon attr-trigger" title="${a.label}" style="animation: miyabi-spin 3s linear infinite; display:inline-flex; align-items:center; justify-content:center;">${svg}</span>`;
+          return `<span class="attr-icon attr-trigger" title="${a.label}" style="animation: miyabi-spin 3s linear infinite; display:inline-flex; align-items:center; justify-content:center;"><img class="attr-flash-img" src="zzz-flash-icon.png" alt=""></span>`;
         }
         if (item.attr === 7) {
-          const svg = `<svg width="14" height="14" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg"><g transform="translate(7,7)"><ellipse rx="2.2" ry="4.5" fill="rgba(100,200,240,0.7)" stroke="#a0e8ff" stroke-width="0.4" transform="rotate(0)"/><ellipse rx="2.2" ry="4.5" fill="rgba(100,200,240,0.7)" stroke="#a0e8ff" stroke-width="0.4" transform="rotate(60)"/><ellipse rx="2.2" ry="4.5" fill="rgba(100,200,240,0.7)" stroke="#a0e8ff" stroke-width="0.4" transform="rotate(120)"/></g><circle cx="7" cy="7" r="1.8" fill="#a0e8ff" stroke="#64c8f0" stroke-width="0.5"/></svg>`;
-          return `<span class="attr-icon attr-miyabi" title="${a.label}">${svg}</span>`;
+          return `<span class="attr-icon attr-miyabi" title="${a.label}"><img class="attr-elegance-img" src="zzz-elegance-icon.png" alt=""></span>`;
         }
         return `<span class="attr-icon ${a.cls}" title="${a.label}">${a.icon}</span>`;
       }
@@ -2447,28 +2452,10 @@ function getAttrIcon(name, banner) {
   if (!attrId) return '<span class="attr-icon attr-unknown">？</span>';
   const a = ATTR_INFO[attrId];
   if (attrId === 8) {
-    const svg = `<svg width="14" height="14" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg">
-      <g transform="translate(7,7)">
-        <path d="M0,-1 C1,-3 4,-4 3,-1 C4,0 3,3 1,1 Z" fill="rgba(160,120,240,0.85)" stroke="#c0a0ff" stroke-width="0.3" transform="rotate(0)"/>
-        <path d="M0,-1 C1,-3 4,-4 3,-1 C4,0 3,3 1,1 Z" fill="rgba(160,120,240,0.85)" stroke="#c0a0ff" stroke-width="0.3" transform="rotate(72)"/>
-        <path d="M0,-1 C1,-3 4,-4 3,-1 C4,0 3,3 1,1 Z" fill="rgba(160,120,240,0.85)" stroke="#c0a0ff" stroke-width="0.3" transform="rotate(144)"/>
-        <path d="M0,-1 C1,-3 4,-4 3,-1 C4,0 3,3 1,1 Z" fill="rgba(160,120,240,0.85)" stroke="#c0a0ff" stroke-width="0.3" transform="rotate(216)"/>
-        <path d="M0,-1 C1,-3 4,-4 3,-1 C4,0 3,3 1,1 Z" fill="rgba(160,120,240,0.85)" stroke="#c0a0ff" stroke-width="0.3" transform="rotate(288)"/>
-      </g>
-      <circle cx="7" cy="7" r="1.5" fill="#c0a0ff" stroke="#9060d0" stroke-width="0.5"/>
-    </svg>`;
-    return `<span class="attr-icon attr-trigger" title="${a.label}" style="animation: miyabi-spin 3s linear infinite; display:inline-flex; align-items:center; justify-content:center;">${svg}</span>`;
+    return `<span class="attr-icon attr-trigger" title="${a.label}" style="animation: miyabi-spin 3s linear infinite; display:inline-flex; align-items:center; justify-content:center;"><img class="attr-flash-img" src="zzz-flash-icon.png" alt=""></span>`;
   }
   if (attrId === 7) {
-    const svg = `<svg width="14" height="14" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg">
-      <g transform="translate(7,7)">
-        <ellipse rx="2.2" ry="4.5" fill="rgba(100,200,240,0.7)" stroke="#a0e8ff" stroke-width="0.4" transform="rotate(0)"/>
-        <ellipse rx="2.2" ry="4.5" fill="rgba(100,200,240,0.7)" stroke="#a0e8ff" stroke-width="0.4" transform="rotate(60)"/>
-        <ellipse rx="2.2" ry="4.5" fill="rgba(100,200,240,0.7)" stroke="#a0e8ff" stroke-width="0.4" transform="rotate(120)"/>
-      </g>
-      <circle cx="7" cy="7" r="1.8" fill="#a0e8ff" stroke="#64c8f0" stroke-width="0.5"/>
-    </svg>`;
-    return `<span class="attr-icon attr-miyabi" title="${a.label}">${svg}</span>`;
+    return `<span class="attr-icon attr-miyabi" title="${a.label}"><img class="attr-elegance-img" src="zzz-elegance-icon.png" alt=""></span>`;
   }
   return `<span class="attr-icon ${a.cls}" title="${a.label}">${a.icon}</span>`;
 }
@@ -2600,6 +2587,7 @@ const WEAPON_ROSTER = [
   { name: 'ゲームボール(ファンド)', attr: 9, aliases: ['fando', 'ふぁんど'] },
   { name: 'ホットスプリング(ファンド)', attr: 9, aliases: ['fando', 'ふぁんど'] },
   { name: 'エレクトロウォーク(ファンド)', attr: 9, aliases: ['fando', 'ふぁんど'] },
+  { name: '金襴の心(ヴェリナ)', attr: 10, aliases: ['verina', 'ゔぇりな', 'べりな'] },
 ];
 
 /** 候補リストの属性を CHAR_ATTR に同期（表記ゆれ・別名も含む） */
@@ -2891,12 +2879,12 @@ const GENSHIN_ATTR_FILTERS = [
 
 const ZZZ_ATTR_FILTERS = [
   { val: '', label: 'すべて' },
-  { val: '1', label: '⚡ 電気' },
-  { val: '2', label: '🔥 炎' },
-  { val: '3', label: '❄ 氷' },
-  { val: '4', label: '⚔ 物理' },
+  { val: '1', label: '<img class="attr-filter-icon" src="zzz-electric-icon.png" alt="">電気' },
+  { val: '2', label: '<img class="attr-filter-icon" src="zzz-fire-icon.png" alt="">炎' },
+  { val: '3', label: '<img class="attr-filter-icon" src="zzz-ice-icon.png" alt="">氷' },
+  { val: '4', label: '<img class="attr-filter-icon" src="zzz-physical-icon.png" alt="">物理' },
   { val: '5', label: '<img class="attr-filter-icon" src="zzz-ether-icon.png?v=2" alt="">エーテル' },
-  { val: '10', label: '🌪️ 風' },
+  { val: '10', label: '<img class="attr-filter-icon" src="zzz-wind-icon.png" alt="">風' },
 ];
 
 const ATTR_FILTERS = ZZZ_ATTR_FILTERS; // 後方互換
