@@ -805,6 +805,77 @@
     color: var(--loss);
   }
 
+  /* ===== 限定キャラ確保シミュレーション ===== */
+  .sim-guarantee-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  .sim-guarantee-row label {
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    width: 80px;
+    flex-shrink: 0;
+  }
+  .sim-result {
+    margin-top: 10px;
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 12px;
+    display: none;
+  }
+  .sim-result.show { display: block; }
+  .sim-result-headline {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+  .sim-result-label {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .sim-result-prob {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--accent);
+  }
+  .sim-bar-wrap {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: var(--surface3, rgba(255,255,255,0.08));
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .sim-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: var(--accent);
+    transition: width .3s;
+  }
+  .sim-sub-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .sim-sub-row strong {
+    font-family: var(--font-display);
+    color: var(--text);
+    font-weight: 600;
+  }
+  .sim-note {
+    font-size: 10.5px;
+    color: var(--text-faint);
+    line-height: 1.5;
+  }
+
   #flash {
     font-size: 12px;
     text-align: center;
@@ -960,10 +1031,10 @@
     background-clip: border-box;
   }
   .record-name .attr-icon { isolation: isolate; }
-  .attr-electric { background: rgba(122,162,232,0.2); color: #7aa2e8; border: 1px solid rgba(122,162,232,0.3); padding-top: 3px; }
+  .attr-electric { background: rgba(122,162,232,0.2); color: #7aa2e8; border: 1px solid rgba(122,162,232,0.3); }
   .attr-fire     { background: rgba(232,120,75,0.2);  color: #e8784b; border: 1px solid rgba(232,120,75,0.3); }
-  .attr-ice      { background: rgba(100,200,240,0.2); color: #64c8f0; border: 1px solid rgba(100,200,240,0.3); padding-top: 3px; }
-  .attr-physical { background: rgba(200,168,75,0.2);  color: #c8a84b; border: 1px solid rgba(200,168,75,0.3); padding-top: 3px; }
+  .attr-ice      { background: rgba(100,200,240,0.2); color: #64c8f0; border: 1px solid rgba(100,200,240,0.3); }
+  .attr-physical { background: rgba(200,168,75,0.2);  color: #c8a84b; border: 1px solid rgba(200,168,75,0.3); }
   .attr-ether    { background: rgba(180,140,255,0.2); color: #b48cff; border: 1px solid rgba(180,140,255,0.3); }
   .attr-ether-img { width: 16px; height: 16px; display: block; }
   .attr-yixuan-img { width: 16px; height: 15px; display: block; }
@@ -1845,6 +1916,44 @@
             <span class="stone-result-val" id="sr-stone-diff">—</span>
           </div>
           <div class="stone-shortage" id="sr-msg"></div>
+        </div>
+      </div>
+
+      <div class="stone-calc sim-calc">
+        <div class="stone-calc-title" id="sim-calc-title">🎲 限定キャラ確保シミュレーション</div>
+        <div class="stone-row">
+          <label>現在の連数</label>
+          <input class="stone-input" type="number" id="sim-cur-pulls" min="0" placeholder="例：10" oninput="calcProbability()">
+          <span class="stone-unit">連</span>
+        </div>
+        <div class="stone-row">
+          <label id="sim-stone-label">現在の石</label>
+          <input class="stone-input" type="number" id="sim-stone-units" min="0" placeholder="0" oninput="calcProbability()">
+          <span class="stone-unit" id="sim-stone-unit">個(1個=1連)</span>
+        </div>
+        <div class="stone-row">
+          <label id="sim-have-label">端数ポリクロ</label>
+          <input class="stone-input" type="number" id="sim-have" min="0" placeholder="0" oninput="calcProbability()">
+          <span class="stone-unit" id="sim-have-unit">ポリクロ</span>
+        </div>
+        <div class="sim-guarantee-row">
+          <label>現在の状態</label>
+          <div class="toggle-group" id="grp-sim-guarantee">
+            <button class="toggle-btn on" data-val="normal">通常（50/50）</button>
+            <button class="toggle-btn" data-val="guaranteed">すり抜け後（確定）</button>
+          </div>
+        </div>
+        <div class="sim-result" id="sim-result">
+          <div class="sim-result-headline">
+            <span class="sim-result-label">限定キャラを確保できる確率</span>
+            <span class="sim-result-prob" id="sim-prob">—</span>
+          </div>
+          <div class="sim-bar-wrap"><div class="sim-bar-fill" id="sim-bar-fill" style="width:0%"></div></div>
+          <div class="sim-sub-row">
+            <span>使えるガチャ回数: <strong id="sim-avail-pulls">0</strong>連</span>
+            <span>成功時の平均消費: <strong id="sim-avg-pulls">—</strong>連</span>
+          </div>
+          <div class="sim-note" id="sim-note">現在の天井カウントと石の合計から、モンテカルロシミュレーション（2万回試行）で確保確率を推定しています。</div>
         </div>
       </div>
     </div>
@@ -3429,6 +3538,7 @@ function initToggle(groupId) {
       grp.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('on'));
       btn.classList.add('on');
       if (groupId === 'grp-banner') onBannerChange(btn.dataset.val);
+      if (groupId === 'grp-sim-guarantee') calcProbability();
     });
   });
 }
@@ -3954,6 +4064,12 @@ function updateStoneCalcUI() {
   if (unitEl)  unitEl.textContent  = cfg.unit;
   if (haveEl)  haveEl.textContent  = '現在の' + cfg.unit;
   calcStone();
+
+  const simUnitEl = document.getElementById('sim-have-unit');
+  const simHaveEl = document.getElementById('sim-have-label');
+  if (simUnitEl) simUnitEl.textContent = cfg.unit;
+  if (simHaveEl) simHaveEl.textContent = '端数' + cfg.unit;
+  calcProbability();
 }
 
 function calcStone() {
@@ -4036,6 +4152,112 @@ function calcStone() {
     }
   }
 }
+
+// ===== 限定キャラ確保シミュレーション（モンテカルロ法） =====
+// キャラクターバナー（S級/★5）のソフト・ハード天井モデル。
+// 3タイトルとも基本0.6%・+6%/連・90連で確定という共通仕様のため、
+// ソフト天井の開始連数だけゲームごとに変える。
+const PITY_MODEL = {
+  zzz:     { base: 0.006, softStart: 76, hardPity: 90, softStep: 0.06 },
+  genshin: { base: 0.006, softStart: 74, hardPity: 90, softStep: 0.06 },
+  stare:   { base: 0.006, softStart: 74, hardPity: 90, softStep: 0.06 },
+};
+
+// n連目（このガチャの天井カウント上でn回目）の単発排出率を返す
+function sRankRate(game, n) {
+  const m = PITY_MODEL[game] || PITY_MODEL.zzz;
+  if (n >= m.hardPity) return 1;
+  if (n >= m.softStart) {
+    const p = m.base + (n - m.softStart + 1) * m.softStep;
+    return Math.min(1, p);
+  }
+  return m.base;
+}
+
+// 1回分のシミュレーション：現在の天井カウント・確定状態から、
+// 与えられた残り回数（budget）以内に限定キャラを引けるかどうかを判定する
+function simulateOneRun(game, startPity, startGuarantee, budget) {
+  let pity = startPity;
+  let guarantee = startGuarantee;
+  for (let used = 1; used <= budget; used++) {
+    pity++;
+    const p = sRankRate(game, pity);
+    if (Math.random() < p) {
+      // S級（★5）が出た
+      if (guarantee || Math.random() < 0.5) {
+        return { success: true, pullsUsed: used };
+      }
+      // すり抜け：次は確定、天井カウントはリセットして続行
+      guarantee = true;
+      pity = 0;
+    }
+  }
+  return { success: false, pullsUsed: budget };
+}
+
+function runMonteCarlo(game, startPity, startGuarantee, budget, trials = 20000) {
+  if (budget <= 0) {
+    return { prob: 0, avgPullsOnSuccess: null };
+  }
+  let successCount = 0;
+  let pullsSum = 0;
+  for (let i = 0; i < trials; i++) {
+    const r = simulateOneRun(game, startPity, startGuarantee, budget);
+    if (r.success) {
+      successCount++;
+      pullsSum += r.pullsUsed;
+    }
+  }
+  return {
+    prob: successCount / trials,
+    avgPullsOnSuccess: successCount > 0 ? pullsSum / successCount : null,
+  };
+}
+
+function calcProbability() {
+  const resultEl = document.getElementById('sim-result');
+  if (!resultEl) return;
+
+  const cfg        = STONE_RATE[_currentGame] || STONE_RATE.zzz;
+  const curPulls   = parseInt(document.getElementById('sim-cur-pulls')?.value)   || 0;
+  const stoneUnits = parseInt(document.getElementById('sim-stone-units')?.value) || 0;
+  const haveStone  = parseInt(document.getElementById('sim-have')?.value)        || 0;
+  const guaranteed = getVal('grp-sim-guarantee') === 'guaranteed';
+
+  // 石（1個=1連分=perPull）＋端数ポリクロ、両方を連数に変換して合算
+  const availPulls = stoneUnits + Math.floor(haveStone / cfg.perPull);
+
+  document.getElementById('sim-avail-pulls').textContent = availPulls;
+
+  if (curPulls <= 0 && stoneUnits <= 0 && haveStone <= 0) {
+    resultEl.classList.remove('show');
+    return;
+  }
+  resultEl.classList.add('show');
+
+  const noteEl = document.getElementById('sim-note');
+  const probEl = document.getElementById('sim-prob');
+
+  if (availPulls <= 0) {
+    probEl.textContent = '—';
+    probEl.style.color = 'var(--text-muted)';
+    document.getElementById('sim-bar-fill').style.width = '0%';
+    document.getElementById('sim-avg-pulls').textContent = '—';
+    noteEl.textContent = '石（ポリクロ）を入力すると、追加で引ける回数から確率を計算します。連数だけでは「これ以上引けるか」が分からないため計算できません。';
+    return;
+  }
+  noteEl.textContent = '現在の天井カウントと石の合計から、モンテカルロシミュレーション（2万回試行）で確保確率を推定しています。';
+
+  const { prob, avgPullsOnSuccess } = runMonteCarlo(_currentGame, curPulls, guaranteed, availPulls);
+  const pct = Math.round(prob * 1000) / 10; // 小数点1桁
+
+  probEl.textContent = pct + '%';
+  probEl.style.color = pct >= 70 ? 'var(--win)' : (pct >= 30 ? 'var(--accent)' : 'var(--loss)');
+
+  document.getElementById('sim-bar-fill').style.width = pct + '%';
+  document.getElementById('sim-avg-pulls').textContent = avgPullsOnSuccess !== null ? Math.round(avgPullsOnSuccess) : '—';
+}
+
 
 // ===== テーマ切り替え =====
 function toggleTheme() {
@@ -4392,6 +4614,7 @@ initToggle('grp-rarity');
 initToggle('grp-cons');
 initToggle('grp-lose');
 initToggle('grp-wpn-lose');
+initToggle('grp-sim-guarantee');
 
 // ===== 天井ガイド タブ切り替え =====
 function switchPityTab(game) {
