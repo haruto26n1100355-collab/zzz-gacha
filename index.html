@@ -924,7 +924,7 @@
 
   .record-item {
     display: grid;
-    grid-template-columns: 48px 1fr auto;
+    grid-template-columns: 40px 48px 1fr auto;
     align-items: center;
     gap: 10px;
     padding: 10px 12px;
@@ -935,6 +935,37 @@
     transition: border-color .15s;
   }
   .record-item:hover { border-color: var(--border-hover); }
+
+  .record-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    border: 1px solid var(--accent);
+    background: var(--surface);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .record-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .record-avatar.record-avatar-empty { border-color: var(--border); }
+  .record-avatar .placeholder-person-icon { width: 60%; height: 60%; color: var(--text-faint); }
+
+  .char-photo-box {
+    width: 140px;
+    height: 140px;
+    margin: 0 auto 12px;
+    border-radius: 14px;
+    border: 2px solid var(--accent);
+    background: var(--surface2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .char-photo-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .char-photo-box .placeholder-person-icon { width: 46%; height: 46%; color: var(--text-faint); }
   @keyframes slideIn {
     from { opacity:0; transform: translateY(-4px); }
     to   { opacity:1; transform: translateY(0); }
@@ -1813,6 +1844,10 @@
 
       <div class="field">
         <label>キャラ / 武器名</label>
+        <div class="char-photo-box" id="char-photo-box">
+          <img id="char-photo-img" alt="" style="display:none">
+          <svg id="char-photo-placeholder" class="placeholder-person-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="8" r="4" fill="currentColor"/><path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7" fill="currentColor"/></svg>
+        </div>
         <div class="attr-filter-row" id="inp-attr-filter"></div>
         <div class="name-picker-wrap">
           <input type="text" id="inp-name" placeholder="例：雅、青衣、朱鳶（一部入力で候補表示）" autocomplete="off" data-placeholder-zzz="例：雅、青衣、朱鳶（一部入力で候補表示）" data-placeholder-genshin="例：楓原万葉、胡桃、ヌヴィレット（一部入力で候補表示）">
@@ -2303,6 +2338,10 @@
     <div class="modal-title">記録を編集</div>
     <div class="field">
       <label>キャラ / 武器名</label>
+      <div class="char-photo-box" id="edit-photo-box">
+        <img id="edit-photo-img" alt="" style="display:none">
+        <svg id="edit-photo-placeholder" class="placeholder-person-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="8" r="4" fill="currentColor"/><path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7" fill="currentColor"/></svg>
+      </div>
       <div class="attr-filter-row" id="edit-attr-filter"></div>
       <div class="name-picker-wrap">
         <input type="text" id="edit-name" placeholder="例：安比、猫又、星見雅" autocomplete="off">
@@ -2998,6 +3037,101 @@ const ZZZ_ATTR_FILTERS = [
 
 const ATTR_FILTERS = ZZZ_ATTR_FILTERS; // 後方互換
 
+// キャラクター画像マッピング（名前 -> 画像データURL）。
+// 対応する画像がない名前は自動的にプレースホルダーアイコンが表示される。
+// 画像を追加したい場合は、ここに "キャラ名": "data:image/png;base64,...." の形で追加するだけでOK。
+const CHARACTER_IMAGES = {
+  '柳': '柳.png',
+  '11号': '11号.png',
+  'オルペウス': 'オルペウス.png',
+  'アストラ': 'アストラ.png',
+  '0号アンビー': '0号アンビー.png',
+  'S級ビリー': 'S級ビリー.png',
+  'エレン': 'エレン.png',
+  'シーシィア': 'シーシィア.png',
+  'イドリー': 'イドリー.png',
+  'アリス': 'アリス.png',
+  'アンドー': 'アンドー.png',
+  'アンビー': 'アンビー.png',
+  'シード': 'シード.png',
+  'イヴリン': 'イヴリン.png',
+  'ザオ': 'ザオ.png',
+  'グレース': 'グレース.png',
+  'アリア': 'アリア.png',
+  'カリン': 'カリン.png',
+  'ヴェリナ': 'ヴェリナ.png',
+  'シーザー': 'シーザー.png',
+  'クレタ': 'クレタ.png',
+  'シグリット': 'シグリット.png',
+  'ジェーン': 'ジェーン.png',
+  'ノルムー': 'ノルムー.png',
+  'セス': 'セス.png',
+  'ニコ': 'ニコ.png',
+  'トリガー': 'トリガー.png',
+  'ベン': 'ベン.png',
+  'リュシア': 'リュシア.png',
+  'リナ': 'リナ.png',
+  'プロメイア': 'プロメイア.png',
+  'プルクラ': 'プルクラ.png',
+  'ダイアリン': 'ダイアリン.png',
+  'ライカン': 'ライカン.png',
+  'ライト': 'ライト.png',
+  'ピュロイス': 'ピュロイス.png',
+  'ビビアン': 'ビビアン.png',
+  'ヒューゴ': 'ヒューゴ.png',
+  'パイパー': 'パイパー.png',
+  'ビリー': 'ビリー.png',
+  'バーニス': 'バーニス.png',
+  'ルーシー': 'ルーシー.png',
+  '儀玄': '儀玄.png',
+  '星見雅': '星見雅.png',
+  '橘福福': '橘福福.png',
+  '瞬光': '瞬光.png',
+  '盤岳': '盤岳.png',
+  '猫又': '猫又.png',
+  '南宮羽': '南宮羽.png',
+  '真斗': '真斗.png',
+  '蒼角': '蒼角.png',
+  '青衣': '青衣.png',
+  '千夏': '千夏.png',
+  '潘引壺': '潘引壺.png',
+  '悠真': '悠真.png',
+  '柚葉': '柚葉.png',
+  '朱鳶': 'しゅえん.webp',
+};
+
+function getCharPhotoSrc(name) {
+  if (!name) return null;
+  return CHARACTER_IMAGES[name.trim()] || null;
+}
+
+// 新規記録フォーム／編集モーダルのプレビュー画像を更新する
+function updateCharPhotoPreview(imgId, placeholderId, name) {
+  const img = document.getElementById(imgId);
+  const placeholder = document.getElementById(placeholderId);
+  if (!img || !placeholder) return;
+  const src = getCharPhotoSrc(name);
+  if (src) {
+    img.src = src;
+    img.style.display = '';
+    placeholder.style.display = 'none';
+  } else {
+    img.removeAttribute('src');
+    img.style.display = 'none';
+    placeholder.style.display = '';
+  }
+}
+
+// 履歴リストの各アイテムに表示する小さいアバターのHTMLを返す
+const PLACEHOLDER_PERSON_SVG = '<svg class="placeholder-person-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="8" r="4" fill="currentColor"/><path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7" fill="currentColor"/></svg>';
+function getRecordAvatarHtml(name) {
+  const src = getCharPhotoSrc(name);
+  if (src) {
+    return '<div class="record-avatar"><img src="' + src + '" alt=""></div>';
+  }
+  return '<div class="record-avatar record-avatar-empty">' + PLACEHOLDER_PERSON_SVG + '</div>';
+}
+
 const namePickerState = {};
 
 function attrMatchesFilter(itemAttr, filterVal) {
@@ -3093,6 +3227,11 @@ function initNamePicker(cfg) {
   input.addEventListener('input', () => {
     state.activeIdx = -1;
     renderNameSuggest(state);
+    if (state.inputId === 'inp-name') {
+      updateCharPhotoPreview('char-photo-img', 'char-photo-placeholder', input.value);
+    } else if (state.inputId === 'edit-name') {
+      updateCharPhotoPreview('edit-photo-img', 'edit-photo-placeholder', input.value);
+    }
   });
   input.addEventListener('focus', () => renderNameSuggest(state));
   input.addEventListener('keydown', (e) => handleNameSuggestKey(e, state));
@@ -3147,6 +3286,11 @@ function pickNameSuggest(state, name) {
   input.value = name;
   suggest.classList.remove('open');
   state.activeIdx = -1;
+  if (state.inputId === 'inp-name') {
+    updateCharPhotoPreview('char-photo-img', 'char-photo-placeholder', name);
+  } else if (state.inputId === 'edit-name') {
+    updateCharPhotoPreview('edit-photo-img', 'edit-photo-placeholder', name);
+  }
 }
 
 function closeNameSuggest(state) {
@@ -3595,6 +3739,7 @@ function addRecord() {
   document.getElementById('inp-name').value = '';
   document.getElementById('inp-pull').value = '';
   document.getElementById('inp-memo').value = '';
+  updateCharPhotoPreview('char-photo-img', 'char-photo-placeholder', '');
   renderList();
 }
 
@@ -3675,6 +3820,7 @@ function renderList() {
                   : r.pull >= 80               ? ' pull-danger'
                   : '';
     return `<div class="record-item">
+      ${getRecordAvatarHtml(r.name)}
       <div class="pull-count${pullCls}">${r.pull}<span class="unit">連</span></div>
       <div class="record-info">
         <div class="record-name">${attrIcon} ${displayName} ${rareBadge}${consBadge}${losePart}</div>
@@ -3803,6 +3949,7 @@ function openEdit(id) {
   updateEditLabels(_currentGame);
   editingId = id;
   document.getElementById('edit-name').value = r.name;
+  updateCharPhotoPreview('edit-photo-img', 'edit-photo-placeholder', r.name);
   document.getElementById('edit-pull').value = r.pull;
   document.getElementById('edit-memo').value = r.memo || '';
   setToggle('edit-grp-rarity', r.rarity);
