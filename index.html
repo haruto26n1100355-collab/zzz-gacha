@@ -924,7 +924,7 @@
 
   .record-item {
     display: grid;
-    grid-template-columns: 40px 48px 1fr auto;
+    grid-template-columns: 18px 40px 48px 1fr auto;
     align-items: center;
     gap: 10px;
     padding: 10px 12px;
@@ -932,9 +932,28 @@
     border: 1px solid var(--border);
     border-radius: 8px;
     animation: slideIn .2s ease;
-    transition: border-color .15s;
+    transition: border-color .15s, box-shadow .15s;
   }
   .record-item:hover { border-color: var(--border-hover); }
+  .record-item.dragging { opacity: 0.35; }
+  .record-item.drag-over-top    { box-shadow: inset 0 2px 0 0 var(--accent); }
+  .record-item.drag-over-bottom { box-shadow: inset 0 -2px 0 0 var(--accent); }
+
+  .drag-handle {
+    width: 18px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-faint);
+    font-size: 14px;
+    line-height: 1;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+  }
+  .drag-handle:hover { color: var(--text-muted); }
+  .record-item.dragging .drag-handle { cursor: grabbing; }
 
   .record-avatar {
     width: 40px;
@@ -3757,6 +3776,72 @@ function flash(msg, type) {
   el._t = setTimeout(() => el.classList.remove('show'), 2000);
 }
 
+let _dragSrcEl = null;
+
+function enableDragReorder(listEl) {
+  const items = listEl.querySelectorAll('.record-item[data-id]');
+  items.forEach(item => {
+    const handle = item.querySelector('.drag-handle');
+    if (!handle) return;
+
+    const arm = () => { item.draggable = true; };
+    handle.addEventListener('mousedown', arm);
+    handle.addEventListener('touchstart', arm, { passive: true });
+
+    item.addEventListener('dragstart', (e) => {
+      _dragSrcEl = item;
+      item.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      try { e.dataTransfer.setData('text/plain', item.dataset.id); } catch(err) {}
+    });
+
+    item.addEventListener('dragend', () => {
+      item.classList.remove('dragging');
+      item.draggable = false;
+      listEl.querySelectorAll('.drag-over-top,.drag-over-bottom').forEach(el => {
+        el.classList.remove('drag-over-top', 'drag-over-bottom');
+      });
+      if (_dragSrcEl) {
+        _dragSrcEl = null;
+        reorderRecordsByDom();
+      }
+    });
+
+    item.addEventListener('dragover', (e) => {
+      if (!_dragSrcEl || _dragSrcEl === item) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      const rect = item.getBoundingClientRect();
+      const before = e.clientY < rect.top + rect.height / 2;
+      item.classList.toggle('drag-over-top', before);
+      item.classList.toggle('drag-over-bottom', !before);
+      listEl.insertBefore(_dragSrcEl, before ? item : item.nextSibling);
+    });
+
+    item.addEventListener('dragleave', () => {
+      item.classList.remove('drag-over-top', 'drag-over-bottom');
+    });
+
+    item.addEventListener('drop', (e) => { e.preventDefault(); });
+  });
+}
+
+// ドラッグ操作で変わったDOM順を records 配列に反映する
+// （現在表示中でない記録は元の相対位置を保ったまま、表示中の記録だけを新しい順序で並び替える）
+function reorderRecordsByDom() {
+  const listEl = document.getElementById('record-list');
+  const items = Array.from(listEl.querySelectorAll('.record-item[data-id]'));
+  if (!items.length) return;
+  const newOrderIds = items.map(el => Number(el.dataset.id));
+  const idSet = new Set(newOrderIds);
+  const byId = new Map(records.map(r => [r.id, r]));
+  let idx = 0;
+  const newRecords = records.map(r => idSet.has(r.id) ? byId.get(newOrderIds[idx++]) : r);
+  records = newRecords;
+  save();
+  renderList();
+}
+
 function renderList() {
   let list = recordsForView();
   if (bannerFilter) list = list.filter(r => r.banner === bannerFilter);
@@ -3819,7 +3904,8 @@ function renderList() {
                   : r.pull >= 60 && r.pull <= 79 ? ' pull-caution'
                   : r.pull >= 80               ? ' pull-danger'
                   : '';
-    return `<div class="record-item">
+    return `<div class="record-item" data-id="${r.id}">
+      <div class="drag-handle" title="ドラッグして並び替え">⠿</div>
       ${getRecordAvatarHtml(r.name)}
       <div class="pull-count${pullCls}">${r.pull}<span class="unit">連</span></div>
       <div class="record-info">
@@ -3848,6 +3934,7 @@ function renderList() {
   }
 
   el.innerHTML = html;
+  enableDragReorder(el);
 
   const allVer = recordsForView();
   const isG    = _currentGame === 'genshin';
