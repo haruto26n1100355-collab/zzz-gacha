@@ -1,0 +1,11 @@
+{
+  "name": "zzz-gacha-tracker",
+  "private": true,
+  "scripts": {
+    "deploy": "firebase deploy --only hosting",
+    "deploy:ci": "firebase deploy --only hosting --non-interactive"
+  },
+  "devDependencies": {
+    "firebase-tools": "^13.35.1"
+  }
+}

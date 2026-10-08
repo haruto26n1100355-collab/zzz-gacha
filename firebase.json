@@ -1,0 +1,34 @@
+{
+  "hosting": {
+    "site": "zzz-gacha-tracker",
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "package.json",
+      "package-lock.json",
+      "server.rb",
+      "サーバーを起動.command",
+      "デプロイ.command",
+      "FIREBASE_SETUP.md",
+      "HOSTING_DEPLOY.md",
+      "firestore.rules",
+      "firebase-config.example.js",
+      "firebase-config.js",
+      "github-recovery-codes.txt",
+      "test.html",
+      "Blender",
+      "Claude",
+      "VS Code"
+    ],
+    "headers": [
+      {
+        "source": "**/*.@(html|js|css)",
+        "headers": [
+          { "key": "Cache-Control", "value": "no-cache" }
+        ]
+      }
+    ]
+  }
+}

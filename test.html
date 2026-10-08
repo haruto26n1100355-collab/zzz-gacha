@@ -1,0 +1,480 @@
+/* =========================================================
+   1. state化（既存変数を置き換え）
+========================================================= */
+
+// 置き換え前
+// let currentVer   = '1';
+// let bannerFilter = '';
+// let pendingImport = null;
+// let editingId = null;
+
+const state = {
+  currentVer: '1',
+  bannerFilter: '',
+  pendingImport: null,
+  editingId: null,
+  search: '',
+};
+
+
+/* =========================================================
+   2. Date.now() → UUID化
+========================================================= */
+
+// addRecord() 内
+
+records.unshift({
+  id: crypto.randomUUID(), // ←変更
+  ver: state.currentVer,
+  banner,
+  name,
+  pull,
+  rarity,
+  cons,
+  lose: banner === 'agent' ? lose : '-',
+  wpnLose: banner === 'weapon' ? wpnLose : '-',
+});
+
+
+/* =========================================================
+   3. currentVer / bannerFilter 修正
+========================================================= */
+
+function selectVer(el, ver) {
+  document.querySelectorAll('.ver-range-btn')
+    .forEach(b => b.classList.remove('on'));
+
+  el.classList.add('on');
+
+  state.currentVer = ver;
+
+  renderList();
+}
+
+function setBannerFilter(el, val) {
+  document.querySelectorAll('.filter-btn')
+    .forEach(b => b.classList.remove('on'));
+
+  el.classList.add('on');
+
+  state.bannerFilter = val;
+
+  renderList();
+}
+
+
+/* =========================================================
+   4. 検索バー追加（HTML）
+========================================================= */
+
+/*
+.filter-row の下に追加
+*/
+
+<div style="padding: 0.75rem 1.25rem; border-bottom:1px solid var(--border);">
+  <input
+    type="text"
+    id="search-input"
+    placeholder="名前検索..."
+    oninput="onSearch(this.value)"
+  >
+</div>
+
+
+/* =========================================================
+   5. 検索処理
+========================================================= */
+
+function onSearch(val) {
+  state.search = val.toLowerCase();
+  renderList();
+}
+
+
+/* =========================================================
+   6. pity（天井）カウンター
+========================================================= */
+
+function getPityInfo(list) {
+
+  const sList = list
+    .filter(r => r.rarity === 'S')
+    .sort((a,b) => b.id.localeCompare(a.id));
+
+  if (!sList.length) {
+    return {
+      remain: 90,
+      lastPull: 0
+    };
+  }
+
+  const latest = sList[0];
+
+  return {
+    remain: Math.max(0, 90 - latest.pull),
+    lastPull: latest.pull
+  };
+}
+
+
+/* =========================================================
+   7. renderList 最適化版
+========================================================= */
+
+function renderList() {
+
+  // 現在Ver
+  const currentRecords = records.filter(
+    r => r.ver === state.currentVer
+  );
+
+  // バナー絞り込み
+  let list = state.bannerFilter
+    ? currentRecords.filter(
+        r => r.banner === state.bannerFilter
+      )
+    : [...currentRecords];
+
+  // 検索
+  if (state.search) {
+    list = list.filter(r =>
+      r.name.toLowerCase().includes(state.search)
+    );
+  }
+
+  const el = document.getElementById('record-list');
+
+  if (!list.length) {
+
+    el.innerHTML = `
+      <div class="empty-state">
+        <div class="e-icon">◇</div>
+        <div>記録がありません</div>
+      </div>
+    `;
+
+    document.getElementById('count-label').textContent = '0 件';
+    document.getElementById('s-count').textContent = '';
+
+    document.getElementById('stats-bar').style.display = 'none';
+
+    return;
+  }
+
+  // 分類
+  const agentRecs = list.filter(r => r.banner === 'agent');
+  const weaponRecs = list.filter(r => r.banner === 'weapon');
+
+  // pity
+  const pity = getPityInfo(currentRecords);
+
+  function makeItem(r) {
+
+    const attrIcon = getAttrIcon(r.name);
+
+    const rareBadge = r.rarity === 'S'
+      ? '<span class="badge badge-s">S</span>'
+      : '<span class="badge badge-a">A</span>';
+
+    const consBadge =
+      r.cons !== '0'
+        ? `<span class="badge badge-cons">${r.cons}凸</span>`
+        : '';
+
+    const loseBadge = r.banner === 'agent'
+      ? (
+          r.lose === 'win'
+            ? '<span class="badge badge-win">確定</span>'
+            : r.lose === 'loss'
+              ? '<span class="badge badge-loss">すり抜け</span>'
+              : '<span class="badge badge-50">50%</span>'
+        )
+      : (
+          r.wpnLose === 'win'
+            ? '<span class="badge badge-win">確定</span>'
+            : r.wpnLose === 'loss'
+              ? '<span class="badge badge-loss">すり抜け</span>'
+              : '<span class="badge badge-75">75%</span>'
+        );
+
+    const pityClass = r.pull >= 70
+      ? 'soft-pity'
+      : '';
+
+    return `
+      <div class="record-item">
+
+        <div class="pull-count ${pityClass}">
+          ${r.pull}
+          <span class="unit">連</span>
+        </div>
+
+        <div class="record-info">
+          <div class="record-name">
+            ${attrIcon}
+            ${r.name}
+            ${rareBadge}
+            ${consBadge}
+            ${loseBadge}
+          </div>
+
+          <div class="record-sub">
+            ${r.banner === 'agent'
+              ? 'エージェント'
+              : '音動機'}
+          </div>
+        </div>
+
+        <div class="item-actions">
+          <button
+            class="btn-edit"
+            onclick="openEdit('${r.id}')"
+          >
+            ✎
+          </button>
+
+          <button
+            class="btn-del"
+            onclick="deleteRecord('${r.id}')"
+          >
+            ×
+          </button>
+        </div>
+
+      </div>
+    `;
+  }
+
+  let html = '';
+
+  // pity表示
+  html += `
+    <div class="pity-box">
+      天井まであと
+      <strong>${pity.remain}</strong>
+      連
+    </div>
+  `;
+
+  if (!state.bannerFilter) {
+
+    if (agentRecs.length) {
+
+      html += `<div class="divider">エージェント</div>`;
+
+      html += agentRecs.map(makeItem).join('');
+    }
+
+    if (weaponRecs.length) {
+
+      html += `<div class="divider">音動機</div>`;
+
+      html += weaponRecs.map(makeItem).join('');
+    }
+
+  } else {
+
+    html = list.map(makeItem).join('');
+  }
+
+  el.innerHTML = html;
+
+  // stats
+  const sRanks = currentRecords.filter(
+    r => r.rarity === 'S'
+  );
+
+  const avgPull = sRanks.length
+    ? Math.round(
+        sRanks.reduce((a,r)=>a+r.pull,0)
+        / sRanks.length
+      )
+    : '-';
+
+  const agentS = currentRecords.filter(
+    r => r.banner === 'agent'
+      && r.rarity === 'S'
+  );
+
+  const lossCount = agentS.filter(
+    r => r.lose === 'loss'
+  ).length;
+
+  const lossRate = agentS.length
+    ? Math.round(lossCount / agentS.length * 100)
+    : '-';
+
+  document.getElementById('stats-bar').style.display = '';
+
+  document.getElementById('st-total').innerHTML =
+    currentRecords.length + '<span>件</span>';
+
+  document.getElementById('st-s').innerHTML =
+    sRanks.length + '<span>件</span>';
+
+  document.getElementById('st-avg').innerHTML =
+    avgPull + '<span>連</span>';
+
+  document.getElementById('st-loss').innerHTML =
+    lossRate + '<span>%</span>';
+
+  document.getElementById('count-label').textContent =
+    list.length + ' 件';
+
+  document.getElementById('s-count').textContent =
+    sRanks.length
+      ? `Sランク ${sRanks.length} 件`
+      : '';
+}
+
+
+/* =========================================================
+   8. soft pity CSS
+========================================================= */
+
+/*
+style に追加
+*/
+
+.soft-pity {
+  color: var(--s-rank);
+  text-shadow:
+    0 0 8px rgba(232,184,75,0.5);
+}
+
+
+/* =========================================================
+   9. pity box CSS
+========================================================= */
+
+/*
+style に追加
+*/
+
+.pity-box {
+  margin-bottom: 12px;
+  padding: 10px 14px;
+
+  border:
+    1px solid rgba(232,184,75,0.2);
+
+  background:
+    rgba(232,184,75,0.06);
+
+  border-radius: 8px;
+
+  font-size: 13px;
+
+  color: var(--text-muted);
+
+  font-family: 'DM Mono', monospace;
+}
+
+.pity-box strong {
+  color: var(--s-rank);
+  font-size: 18px;
+  margin: 0 4px;
+}
+
+
+/* =========================================================
+   10. ミヤビ重複修正
+========================================================= */
+
+/*
+ここ修正
+*/
+
+// 削除
+// 'ミヤビ':3,'miyabi':3,
+
+// 修正
+'ミヤビ':3,
+'miyabi-ice':3,
+
+// 残す
+'星見雅':7,
+'雅':7,
+'miyabi':7,
+
+
+/* =========================================================
+   11. openEdit 修正
+========================================================= */
+
+function openEdit(id) {
+
+  const r = records.find(r => r.id === id);
+
+  if (!r) return;
+
+  state.editingId = id;
+
+  document.getElementById('edit-name').value = r.name;
+
+  document.getElementById('edit-pull').value = r.pull;
+
+  setToggle('edit-grp-rarity', r.rarity);
+
+  setToggle('edit-grp-cons', r.cons || '0');
+
+  setToggle('edit-grp-lose', r.lose || 'win');
+
+  setToggle('edit-grp-wpn-lose', r.wpnLose || 'win');
+
+  document.getElementById('edit-field-lose').style.display =
+    r.banner === 'agent' ? '' : 'none';
+
+  document.getElementById('edit-field-wpn-lose').style.display =
+    r.banner === 'weapon' ? '' : 'none';
+
+  document.getElementById('edit-modal')
+    .classList.add('open');
+}
+
+
+/* =========================================================
+   12. saveEdit 修正
+========================================================= */
+
+function saveEdit() {
+
+  const r = records.find(
+    r => r.id === state.editingId
+  );
+
+  if (!r) return;
+
+  const name = document
+    .getElementById('edit-name')
+    .value.trim();
+
+  const pull = parseInt(
+    document.getElementById('edit-pull').value
+  );
+
+  if (!name || !pull) return;
+
+  r.name = name;
+  r.pull = pull;
+
+  r.rarity = getEditVal('edit-grp-rarity');
+
+  r.cons = getEditVal('edit-grp-cons');
+
+  r.lose =
+    r.banner === 'agent'
+      ? getEditVal('edit-grp-lose')
+      : '-';
+
+  r.wpnLose =
+    r.banner === 'weapon'
+      ? getEditVal('edit-grp-wpn-lose')
+      : '-';
+
+  save();
+
+  closeEdit();
+
+  renderList();
+}

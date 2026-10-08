@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<title>ZZZ ガチャ記録</title>
+<link rel="stylesheet" href="style.css?v=20261008-dex2">
+
+</head>
+<body>
+
+<div class="file-warning" id="auth-help" style="display:none">
+  <strong>Google で戻ったのにログインされない場合（Windows など）</strong><br>
+  ① ブラウザで <strong>ポップアップを許可</strong>（アドレス欄のブロックアイコン）<br>
+  ② Edge/Chrome の <strong>Cookie（サードパーティ）</strong> を許可<br>
+  ③ 広告ブロックをオフ<br>
+  ④ ページを再読み込みして「Google でログイン」をもう一度
+</div>
+
+<div class="file-warning" id="file-warning" style="display:none">
+  <strong>file:// で開いているため Google ログインは使えません。</strong><br>
+  Finder で <code>サーバーを起動.command</code> をダブルクリックするか、ターミナルで
+  <code>cd ~/Desktop/work && ruby -run -e httpd . -p 3000</code> を実行し、
+  アドレス欄に <code>http://localhost:3000</code> を入力して開いてください（<code>127.0.0.1</code> では Google ログイン不可）。
+</div>
+
+<header>
+  <strong style="font-size: 15px; margin-right: 8px;">ガチャ記録</strong>
+  <span id="header-subtitle">/ Zenless Zone Zero</span>
+
+
+  <div class="header-actions">
+    <button class="btn-theme" id="btn-theme" onclick="toggleTheme()" title="ライト/ダーク切り替え">🌙</button>
+    <button class="btn-io" onclick="triggerImport()">↑ インポート</button>
+    <button class="btn-io" onclick="exportData()">↓ エクスポート</button>
+    <div class="auth-wrap" id="auth-wrap">
+      <span class="sync-dot" id="sync-dot" title="クラウド同期"></span>
+      <span class="auth-user" id="auth-user" style="display:none"></span>
+      <button type="button" class="btn-google" id="btn-login">Google でログイン</button>
+      <button class="btn-google" id="btn-logout" onclick="signOutGoogle()" style="display:none">ログアウト</button>
+    </div>
+  </div>
+</header>
+
+<input type="file" id="import-file-input" accept=".json" onchange="handleImportFile(event)">
+
+<!-- バージョン選択 -->
+<div class="ver-selector" id="ver-selector-wrap">
+  <div class="ver-selector-label">version</div>
+  <div class="ver-selector-btns" id="ver-selector-btns">
+    <button class="ver-range-btn" id="ver-btn-all" data-ver="all" onclick="selectVer(this,'all')">ALL</button>
+    <button class="ver-range-btn on" id="ver-btn-1" data-ver="1" onclick="selectVer(this,'1')">1.0 〜 1.7</button>
+    <button class="ver-range-btn" id="ver-btn-2" data-ver="2" onclick="selectVer(this,'2')">2.0 〜 2.8</button>
+    <button class="ver-range-btn" id="ver-btn-3" data-ver="3" onclick="selectVer(this,'3')">3.0 〜</button>
+  </div>
+</div>
+
+<div class="container" id="page-gacha">
+
+  <!-- 入力フォーム または リソース計算パネル -->
+  <div class="panel record-panel">
+    <div class="panel-header">
+      <span id="gacha-panel-title">新しく記録する</span>
+    </div>
+    <div class="panel-body">
+
+      <div class="field">
+        <label>バナー種別</label>
+        <div class="toggle-group" id="grp-banner">
+          <button class="toggle-btn on" id="btn-banner-agent" data-val="agent">エージェント</button>
+          <button class="toggle-btn" id="btn-banner-weapon" data-val="weapon">音動機（武器）</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>キャラ / 武器名</label>
+        <div class="char-photo-box" id="char-photo-box">
+          <img id="char-photo-img" alt="" style="display:none">
+          <svg id="char-photo-placeholder" class="placeholder-person-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="8" r="4" fill="currentColor"/><path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7" fill="currentColor"/></svg>
+        </div>
+        <div class="attr-filter-row" id="inp-attr-filter"></div>
+        <div class="name-picker-wrap">
+          <input type="text" id="inp-name" placeholder="例：雅、青衣、朱鳶（一部入力で候補表示）" autocomplete="off">
+          <div class="name-suggest-list" id="inp-suggest"></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>何連目で出たか</label>
+        <input type="number" id="inp-pull" min="1" max="80" placeholder="例：34">
+      </div>
+
+      <div class="field">
+        <label>レア度</label>
+        <div class="toggle-group" id="grp-rarity">
+          <button class="toggle-btn on" id="btn-rarity-s" data-val="S">Sランク</button>
+          <button class="toggle-btn" id="btn-rarity-a" data-val="A">Aランク</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>凸数</label>
+        <div class="toggle-group" id="grp-cons">
+          <button class="toggle-btn on" data-val="0">0凸</button>
+          <button class="toggle-btn" data-val="1">1凸</button>
+          <button class="toggle-btn" data-val="2">2凸</button>
+          <button class="toggle-btn" data-val="3">3凸</button>
+          <button class="toggle-btn" data-val="4">4凸</button>
+          <button class="toggle-btn" data-val="5">5凸</button>
+          <button class="toggle-btn" data-val="6">6凸</button>
+        </div>
+      </div>
+
+      <div class="field" id="field-lose">
+        <label>すり抜け</label>
+        <div class="toggle-group" id="grp-lose">
+          <button class="toggle-btn on" data-val="win">確定</button>
+          <button class="toggle-btn" data-val="loss">すり抜け</button>
+          <button class="toggle-btn" data-val="-">50%</button>
+        </div>
+      </div>
+
+      <div class="field" id="field-wpn-lose" style="display:none">
+        <label id="lbl-wpn-lose">すり抜け</label>
+        <div class="toggle-group" id="grp-wpn-lose">
+          <button class="toggle-btn on" id="btn-wpn-lose-win" data-val="win">確定</button>
+          <button class="toggle-btn" id="btn-wpn-lose-loss" data-val="loss">すり抜け</button>
+          <button class="toggle-btn" id="btn-wpn-lose-dash" data-val="-">75%</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>メモ（任意）</label>
+        <textarea class="memo-textarea" id="inp-memo" placeholder="例：石50個消費、リセマラ分、フェス限など…" rows="2"></textarea>
+      </div>
+
+      <button class="btn-submit" onclick="addRecord()">記録する</button>
+      <div id="flash"></div>
+
+      <!-- 石カウンター -->
+      <div class="stone-calc">
+        <div class="stone-calc-title" id="stone-calc-title">💎 石カウンター</div>
+        <div class="stone-row">
+          <label>目標連数</label>
+          <input class="stone-input" type="number" id="stone-pulls" min="1" max="999" placeholder="例：11" oninput="calcStone()">
+          <span class="stone-unit">連</span>
+        </div>
+        <div class="stone-row">
+          <label>現在の連数</label>
+          <input class="stone-input" type="number" id="stone-cur-pulls" min="0" placeholder="例：10" oninput="calcStone()">
+          <span class="stone-unit">連</span>
+        </div>
+        <div class="stone-row">
+          <label id="stone-have-label">現在の石</label>
+          <input class="stone-input" type="number" id="stone-have" min="0" placeholder="0" oninput="calcStone()">
+          <span class="stone-unit" id="stone-have-unit">ポリクロ</span>
+        </div>
+        <div class="stone-result" id="stone-result">
+          <div class="stone-result-row">
+            <span class="stone-result-label">目標</span>
+            <span class="stone-result-val accent" id="sr-pulls">—</span>
+          </div>
+          <div class="stone-result-row">
+            <span class="stone-result-label">現在</span>
+            <span class="stone-result-val" id="sr-cur">—</span>
+          </div>
+          <div class="stone-result-row">
+            <span class="stone-result-label" id="sr-pull-diff-label">連数の差</span>
+            <span class="stone-result-val" id="sr-pull-diff">—</span>
+          </div>
+          <div class="stone-result-row" id="sr-row-need">
+            <span class="stone-result-label">必要な石</span>
+            <span class="stone-result-val" id="sr-need">—</span>
+          </div>
+          <div class="stone-result-row" id="sr-row-have">
+            <span class="stone-result-label" id="sr-have-label">現在の石</span>
+            <span class="stone-result-val" id="sr-have-val">—</span>
+          </div>
+          <div class="stone-result-row" id="sr-row-stone-diff">
+            <span class="stone-result-label" id="sr-stone-diff-label">石の過不足</span>
+            <span class="stone-result-val" id="sr-stone-diff">—</span>
+          </div>
+          <div class="stone-shortage" id="sr-msg"></div>
+        </div>
+      </div>
+
+      <div class="stone-calc sim-calc">
+        <div class="stone-calc-title" id="sim-calc-title">🎲 限定キャラ確保シミュレーション</div>
+        <div class="stone-row">
+          <label>現在の連数</label>
+          <input class="stone-input" type="number" id="sim-cur-pulls" min="0" placeholder="例：10" oninput="calcProbability()">
+          <span class="stone-unit">連</span>
+        </div>
+        <div class="stone-row">
+          <label id="sim-stone-label">現在の石</label>
+          <input class="stone-input" type="number" id="sim-stone-units" min="0" placeholder="0" oninput="calcProbability()">
+          <span class="stone-unit" id="sim-stone-unit">個(1個=1連)</span>
+        </div>
+        <div class="stone-row">
+          <label id="sim-have-label">端数ポリクロ</label>
+          <input class="stone-input" type="number" id="sim-have" min="0" placeholder="0" oninput="calcProbability()">
+          <span class="stone-unit" id="sim-have-unit">ポリクロ</span>
+        </div>
+        <div class="sim-guarantee-row">
+          <label>現在の状態</label>
+          <div class="toggle-group" id="grp-sim-guarantee">
+            <button class="toggle-btn on" data-val="normal">通常（50/50）</button>
+            <button class="toggle-btn" data-val="guaranteed">すり抜け後（確定）</button>
+          </div>
+        </div>
+        <div class="sim-result" id="sim-result">
+          <div class="sim-result-headline">
+            <span class="sim-result-label">限定キャラを確保できる確率</span>
+            <span class="sim-result-prob" id="sim-prob">—</span>
+          </div>
+          <div class="sim-bar-wrap"><div class="sim-bar-fill" id="sim-bar-fill" style="width:0%"></div></div>
+          <div class="sim-sub-row">
+            <span>使えるガチャ回数: <strong id="sim-avail-pulls">0</strong>連</span>
+            <span>成功時の平均消費: <strong id="sim-avg-pulls">—</strong>連</span>
+          </div>
+          <div class="sim-note" id="sim-note">現在の天井カウントと石の合計から、モンテカルロシミュレーション（2万回試行）で確保確率を推定しています。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 履歴 -->
+  <div class="panel history-panel">
+    <div class="panel-header">
+      <span>履歴</span>
+      <div class="header-search">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" id="search-input" placeholder="名前・メモで検索…" autocomplete="off" oninput="onSearchInput(this)">
+        <button class="search-clear" id="search-clear" onclick="clearSearch()" title="クリア">✕</button>
+      </div>
+    </div>
+
+    <!-- 履歴 / 図鑑 の切り替えタブ -->
+    <div class="view-tabs">
+      <button type="button" class="view-tab on" data-view="list" onclick="setHistoryView('list')">📜 履歴</button>
+      <button type="button" class="view-tab" data-view="dex" onclick="setHistoryView('dex')">📖 キャラ図鑑</button>
+    </div>
+
+    <div class="filter-row">
+      <span class="filter-label">バナー：</span>
+      <button class="filter-btn on" data-val="" onclick="setBannerFilter(this,'')">すべて</button>
+      <button class="filter-btn" id="filter-btn-agent" data-val="agent" onclick="setBannerFilter(this,'agent')">エージェント</button>
+      <button class="filter-btn" id="filter-btn-weapon" data-val="weapon" onclick="setBannerFilter(this,'weapon')">音動機</button>
+    </div>
+
+    <!-- ===== グラフセクション（バナー下・エージェント上） ===== -->
+    <div class="chart-outer" id="chart-section" style="max-width:100%; margin:0; padding:0; border-bottom:1px solid var(--border);">
+      <div class="chart-outer-inner" style="border:none; border-radius:0;">
+        <div class="chart-outer-header" onclick="toggleChartSection()">
+          <div class="chart-outer-title">
+            <span class="chart-outer-label">📊 統計グラフ</span>
+            <span class="chart-outer-sub" id="chart-outer-sub"></span>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <button class="chart-tab-btn on" data-tab="dist" onclick="event.stopPropagation();switchChartTab(this,'dist')">連数分布</button>
+            <button class="chart-tab-btn" data-tab="ver" onclick="event.stopPropagation();switchChartTab(this,'ver')">バージョン別推移</button>
+            <span class="chart-toggle-arrow">▾</span>
+          </div>
+        </div>
+
+        <div class="chart-body" id="chart-body">
+          <!-- 連数分布タブ -->
+          <div class="chart-pane on" id="chart-pane-dist">
+            <div class="chart-two-col">
+              <div class="chart-col">
+                <div class="chart-col-label" id="chart-dist-label-agent"></div>
+                <div class="chart-canvas-wrap"><canvas id="chart-dist-agent"></canvas></div>
+                <div class="chart-empty" id="chart-dist-agent-empty" style="display:none">記録がありません</div>
+              </div>
+              <div class="chart-col">
+                <div class="chart-col-label" id="chart-dist-label-weapon"></div>
+                <div class="chart-canvas-wrap"><canvas id="chart-dist-weapon"></canvas></div>
+                <div class="chart-empty" id="chart-dist-weapon-empty" style="display:none">記録がありません</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- バージョン別推移タブ -->
+          <div class="chart-pane" id="chart-pane-ver">
+            <div class="chart-canvas-wrap chart-canvas-tall"><canvas id="chart-ver"></canvas></div>
+            <div class="chart-empty" id="chart-ver-empty" style="display:none">複数バージョンの記録がありません</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="stats-wrap" style="display:none">
+      <!-- エージェント / キャラクター統計 -->
+      <div class="stats-bar" id="stats-bar-agent">
+        <div class="stat-section-label" id="st-agent-title">エージェント</div>
+        <div class="stat-item"><div class="s-label">記録数</div><div class="s-val" id="st-agent-total">0<span>件</span></div></div>
+        <div class="stat-item"><div class="s-label" id="st-agent-s-label">Sランク</div><div class="s-val" id="st-agent-s">0<span>件</span></div></div>
+        <div class="stat-item"><div class="s-label">平均連数</div><div class="s-val" id="st-agent-avg">-<span>連</span></div></div>
+        <div class="stat-item"><div class="s-label">すり抜け率</div><div class="s-val" id="st-agent-loss">-<span>%</span></div></div>
+      </div>
+      <!-- 音動機 / 武器統計 -->
+      <div class="stats-bar" id="stats-bar-weapon">
+        <div class="stat-section-label" id="st-weapon-title">音動機</div>
+        <div class="stat-item"><div class="s-label">記録数</div><div class="s-val" id="st-weapon-total">0<span>件</span></div></div>
+        <div class="stat-item"><div class="s-label" id="st-weapon-s-label">Sランク</div><div class="s-val" id="st-weapon-s">0<span>件</span></div></div>
+        <div class="stat-item"><div class="s-label">平均連数</div><div class="s-val" id="st-weapon-avg">-<span>連</span></div></div>
+        <div class="stat-item"><div class="s-label">すり抜け率</div><div class="s-val" id="st-weapon-loss">-<span>%</span></div></div>
+      </div>
+    </div>
+
+    <!-- ===== キャラ図鑑ビュー（Sランクのエージェント） ===== -->
+    <div id="dex-view">
+      <div class="dex-summary" id="dex-sub"></div>
+      <div class="dex-grid" id="dex-grid"></div>
+    </div>
+
+    <div id="record-list"></div>
+    <div class="count-bar">
+      <span id="count-label">0 件</span>
+      <span id="s-count"></span>
+    </div>
+  </div>
+
+  <!-- 天井ガイドパネル -->
+  <div class="panel pity-panel">
+    <div class="panel-header">🎯 天井ガイド</div>
+    <!-- ZZZ -->
+    <div class="pity-content on" id="pity-zzz">
+      <div class="pity-section-title">エージェント</div>
+      <div class="pity-base-row">
+        <div class="pity-base-icon">⭐</div>
+        <div class="pity-base-info">
+          <div class="pity-base-label">基本確率</div>
+          <div class="pity-base-val">0.6<span>%</span></div>
+        </div>
+        <div class="pity-base-info">
+          <div class="pity-base-label">天井</div>
+          <div class="pity-base-val">90<span>連</span></div>
+        </div>
+      </div>
+      <div class="pity-soft-label">確率上昇（ソフト天井）: <strong>76連〜</strong></div>
+      <div class="pity-bar-wrap"><div class="pity-bar-fill" style="width:0.6%"></div><div class="pity-bar-text"><span class="pity-bar-pulls">1〜75連</span><span class="pity-bar-prob">0.6%</span></div></div>
+      <div class="pity-bar-wrap"><div class="pity-bar-fill" style="width:6%"></div><div class="pity-bar-text"><span class="pity-bar-pulls">76連〜</span><span class="pity-bar-prob">+6%/連</span></div></div>
+      <div class="pity-bar-wrap"><div class="pity-bar-fill" style="width:100%"></div><div class="pity-bar-text"><span class="pity-bar-pulls">90連</span><span class="pity-bar-prob">100%確定</span></div></div>
+      <div class="pity-tick-row">
+        <div class="pity-tick">1連 0.6%</div>
+        <div class="pity-tick">50連 ~26%</div>
+        <div class="pity-tick soft">76連 6.6%</div>
+        <div class="pity-tick soft">80連 ~30%</div>
+        <div class="pity-tick hard">90連 100%</div>
+      </div>
+      <div class="pity-fifty-wrap">
+        <div class="pity-fifty-item">
+          <div class="pity-fifty-label">50/50勝率</div>
+          <div class="pity-fifty-val accent">50%</div>
+        </div>
+        <div class="pity-fifty-item">
+          <div class="pity-fifty-label">すり抜け後</div>
+          <div class="pity-fifty-val accent">確定</div>
+        </div>
+        <div class="pity-fifty-item">
+          <div class="pity-fifty-label">最大保証</div>
+          <div class="pity-fifty-val">180連</div>
+        </div>
+      </div>
+      <div class="pity-note">
+        <strong>ソフト天井:</strong> 76連目から1連ごとに+6%上昇し、90連で100%確定。前回すり抜けた場合、次は確定。
+      </div>
+
+      <div class="pity-section-title">音動機（武器）</div>
+      <div class="pity-base-row">
+        <div class="pity-base-icon">🎵</div>
+        <div class="pity-base-info">
+          <div class="pity-base-label">基本確率</div>
+          <div class="pity-base-val">1.0<span>%</span></div>
+        </div>
+        <div class="pity-base-info">
+          <div class="pity-base-label">天井</div>
+          <div class="pity-base-val">80<span>連</span></div>
+        </div>
+      </div>
+      <div class="pity-soft-label">確率上昇: <strong>66連〜</strong></div>
+      <div class="pity-bar-wrap"><div class="pity-bar-fill" style="width:1%"></div><div class="pity-bar-text"><span class="pity-bar-pulls">1〜65連</span><span class="pity-bar-prob">1.0%</span></div></div>
+      <div class="pity-bar-wrap"><div class="pity-bar-fill" style="width:100%"></div><div class="pity-bar-text"><span class="pity-bar-pulls">80連</span><span class="pity-bar-prob">100%確定</span></div></div>
+      <div class="pity-tick-row">
+        <div class="pity-tick">1連 1.0%</div>
+        <div class="pity-tick soft">66連〜 上昇開始</div>
+        <div class="pity-tick hard">80連 100%</div>
+      </div>
+      <div class="pity-fifty-wrap">
+        <div class="pity-fifty-item">
+          <div class="pity-fifty-label">75/25</div>
+          <div class="pity-fifty-val accent">75%</div>
+        </div>
+        <div class="pity-fifty-item">
+          <div class="pity-fifty-label">すり抜け後</div>
+          <div class="pity-fifty-val accent">確定</div>
+        </div>
+        <div class="pity-fifty-item">
+          <div class="pity-fifty-label">最大保証</div>
+          <div class="pity-fifty-val">160連</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- 編集モーダル -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-title">記録を編集</div>
+    <div class="field">
+      <label>キャラ / 武器名</label>
+      <div class="char-photo-box" id="edit-photo-box">
+        <img id="edit-photo-img" alt="" style="display:none">
+        <svg id="edit-photo-placeholder" class="placeholder-person-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="8" r="4" fill="currentColor"/><path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7" fill="currentColor"/></svg>
+      </div>
+      <div class="attr-filter-row" id="edit-attr-filter"></div>
+      <div class="name-picker-wrap">
+        <input type="text" id="edit-name" placeholder="例：安比、猫又、星見雅" autocomplete="off">
+        <div class="name-suggest-list" id="edit-suggest"></div>
+      </div>
+    </div>
+    <div class="field">
+      <label>何連目で出たか</label>
+      <input type="number" id="edit-pull" min="1" max="80">
+    </div>
+    <div class="field">
+      <label>レア度</label>
+      <div class="toggle-group" id="edit-grp-rarity">
+        <button class="toggle-btn on" data-val="S">Sランク</button>
+        <button class="toggle-btn" data-val="A">Aランク</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>凸数</label>
+      <div class="toggle-group" id="edit-grp-cons">
+        <button class="toggle-btn on" data-val="0">0凸</button>
+        <button class="toggle-btn" data-val="1">1凸</button>
+        <button class="toggle-btn" data-val="2">2凸</button>
+        <button class="toggle-btn" data-val="3">3凸</button>
+        <button class="toggle-btn" data-val="4">4凸</button>
+        <button class="toggle-btn" data-val="5">5凸</button>
+        <button class="toggle-btn" data-val="6">6凸</button>
+      </div>
+    </div>
+    <div class="field" id="edit-field-lose">
+      <label>すり抜け</label>
+      <div class="toggle-group" id="edit-grp-lose">
+        <button class="toggle-btn on" data-val="win">確定</button>
+        <button class="toggle-btn" data-val="loss">すり抜け</button>
+        <button class="toggle-btn" data-val="-">50%</button>
+      </div>
+    </div>
+    <div class="field" id="edit-field-wpn-lose" style="display:none">
+      <label>すり抜け</label>
+      <div class="toggle-group" id="edit-grp-wpn-lose">
+        <button class="toggle-btn on" data-val="win">確定</button>
+        <button class="toggle-btn" data-val="loss">すり抜け</button>
+        <button class="toggle-btn" data-val="-">75%</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>メモ（任意）</label>
+      <textarea class="memo-textarea" id="edit-memo" placeholder="例：石50個消費、リセマラ分など…" rows="2"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-save" onclick="saveEdit()">保存する</button>
+      <button class="btn-cancel" onclick="closeEdit()">キャンセル</button>
+    </div>
+  </div>
+</div>
+
+<!-- インポート確認モーダル -->
+<div class="modal-overlay" id="import-modal">
+  <div class="modal">
+    <div class="modal-title">データをインポート</div>
+    <div class="import-note">
+      <strong>⚠ 現在のデータはすべて上書きされます。</strong><br>
+      インポート前にエクスポートしてバックアップを取ることをおすすめします。
+    </div>
+    <div style="font-size:13px; color: var(--text-muted); margin-bottom: 0.5rem;" id="import-preview"></div>
+    <div class="modal-actions">
+      <button class="btn-save" onclick="confirmImport()" style="background:var(--loss);color:#fff;">上書きしてインポート</button>
+      <button class="btn-cancel" onclick="closeImport()">キャンセル</button>
+    </div>
+  </div>
+</div>
+
+<div class="undo-toast" id="undo-toast">
+  <span id="undo-toast-msg"></span>
+  <button type="button" class="btn-undo" id="undo-toast-btn">元に戻す</button>
+</div>
+
+<script src="add.js?v=20261008-dex2"></script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+<!-- Firebase（設定は firebase-init.js 内に記載） -->
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
+<script src="firebase_int.js?v=20260924-1448"></script>
+</body>
+</html>
