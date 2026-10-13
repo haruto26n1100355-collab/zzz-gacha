@@ -173,7 +173,7 @@ const AGENT_ROSTER = [
   { name: 'イヴリン', attr: 2, aliases: ['iburin,', 'いぶりん'] },
   { name: 'ライト', attr: 2, aliases: ['raito', 'らいと'] },
   { name: '盤岳', attr: 2, aliases: ['bangaku', 'ばんがく'] },
-  { name: '真斗', attr: 2, aliases: ['manato', 'まなと', 'komano', 'こまの'] },
+  { name: '真斗', attr: 2, aliases: ['manato', 'まなと', 'komano', 'こまの', '狛野真斗', '狛野'] },
   { name: 'オルペウス', attr: 2, aliases: ['orupeusu', 'おるぺうす'] },
   { name: 'S級ビリー', attr: 2, aliases: ['Skyuubiri-', 'びりー', 'beri-'] },
   { name: '橘福福', attr: 2, aliases: ['福福', 'フーフー', 'fu-fu-'] },
@@ -296,6 +296,30 @@ function syncCharAttrFromRosters() {
   }
 }
 syncCharAttrFromRosters();
+
+// ===== レア度の自動判定 =====
+// A級のエージェントはここに書いたものだけ。それ以外はすべてS級。増減したいときはここを編集してください。
+// 音動機は「(エージェント名)」の部分で判定します（例：ハウスキーパー(カリン) → カリンがA級なのでA級）
+const A_RANK_AGENTS = ['アンビー','ニコ','ビリー','蒼角','ベン','アンドー','カリン','ルーシー','セス','プルクラ','潘引壺','真斗'];
+const _aRankSet = new Set(A_RANK_AGENTS);
+// 名前・よみ → エージェント正式名（別名で記録していても同じキャラとして扱う）
+const _agentKeyMap = (() => {
+  const m = new Map();
+  // 別名が被ったとき（例：びりー）はA級側を優先
+  const sorted = [...AGENT_ROSTER].sort((a, b) => (_aRankSet.has(b.name) ? 1 : 0) - (_aRankSet.has(a.name) ? 1 : 0));
+  sorted.forEach(a => m.set(dexKey(a.name), a.name));
+  sorted.forEach(a => (a.aliases || []).forEach(k => { if (!m.has(dexKey(k))) m.set(dexKey(k), a.name); }));
+  return m;
+})();
+function rarityOf(r) {
+  let nm = String((r && r.name) || '').trim();
+  if (r && r.banner === 'weapon') {
+    const m = nm.match(/[（(]([^（）()]+)[）)]\s*$/);
+    if (m) nm = m[1];
+  }
+  const agent = _agentKeyMap.get(dexKey(nm));
+  return (agent && _aRankSet.has(agent)) ? 'A' : 'S';
+}
 
 const ZZZ_ATTR_FILTERS = [
   { val: '', label: 'すべて' },
@@ -978,7 +1002,6 @@ function addRecord() {
   const name   = document.getElementById('inp-name').value.trim();
   const pull   = parseInt(document.getElementById('inp-pull').value);
   const banner = getVal('grp-banner');
-  const rarity = getVal('grp-rarity');
   const cons   = getVal('grp-cons');
   const lose    = getVal('grp-lose');
   const wpnLose = getVal('grp-wpn-lose');
@@ -991,7 +1014,7 @@ function addRecord() {
     id: Date.now(),
     game: _currentGame,
     ver: recordVer,
-    banner, name, pull, rarity, cons,
+    banner, name, pull, rarity: rarityOf({ banner, name }), cons,
     lose:    (banner === 'agent' || banner === 'character') ? lose    : '-',
     wpnLose: banner === 'weapon' ? wpnLose : '-',
     memo,
@@ -1139,9 +1162,7 @@ function reorderRecordsByDom() {
 }
 
 
-// ===== キャラ図鑑（Sランクのエージェントのみ） =====
-// Aランクのエージェントは図鑑に出さない。増減したいときはここを編集してください。
-const DEX_A_RANK_AGENTS = ['アンビー','セス','ニコ','ビリー','ベン','蒼角','カリン','ルーシー','パイパー','アンドー'];
+// ===== キャラ図鑑（S級のエージェントのみ。A級は A_RANK_AGENTS で管理） =====
 function dexKey(s) {
   return String(s || '').trim().normalize('NFKC').toLowerCase();
 }
@@ -1162,7 +1183,7 @@ function renderDex() {
   const sub = document.getElementById('dex-sub');
   if (!grid) return;
 
-  const aSet = new Set(DEX_A_RANK_AGENTS);
+  const aSet = new Set(A_RANK_AGENTS);
   const entries = AGENT_ROSTER
     .filter(a => !aSet.has(a.name))
     .map(a => ({ name: a.name, owned: false, cons: 0 }));
@@ -1176,7 +1197,7 @@ function renderDex() {
 
   // 所持判定は表示中のバージョンに関係なく全記録から行う。凸数は記録の中で最大のもの
   records.forEach(r => {
-    if (r.rarity !== 'S') return;
+    if (rarityOf(r) !== 'S') return;
     if (r.banner !== 'agent' && r.banner !== 'character') return;
     const nm = String(r.name || '').trim();
     if (!nm || aSet.has(nm)) return;
@@ -1237,7 +1258,7 @@ function renderList() {
 
   function makeItem(r) {
     const attrIcon  = getAttrIcon(r.name, r.banner);
-    const rareBadge = r.rarity === 'S'
+    const rareBadge = rarityOf(r) === 'S'
       ? '<span class="badge badge-s">S</span>'
       : '<span class="badge badge-a">A</span>';
     const loseBadge = r.lose === 'win'
@@ -1312,14 +1333,14 @@ function renderList() {
   document.getElementById('st-weapon-s-label').textContent = sLabel;
   const agentBanners = ['agent', 'character'];
   const agentAll  = allVer.filter(r => agentBanners.includes(r.banner));
-  const agentSAll = agentAll.filter(r => r.rarity === 'S');
+  const agentSAll = agentAll.filter(r => rarityOf(r) === 'S');
   const agentAvg  = agentSAll.length ? Math.round(agentSAll.reduce((a,r)=>a+r.pull,0)/agentSAll.length) : null;
   const agentLoss = agentSAll.filter(r => r.lose === 'loss').length;
   const agentLossRate = agentSAll.length ? Math.round(agentLoss/agentSAll.length*100) : null;
 
   // ── 音動機 / 武器統計 ──
   const weaponAll  = allVer.filter(r => r.banner === 'weapon');
-  const weaponSAll = weaponAll.filter(r => r.rarity === 'S');
+  const weaponSAll = weaponAll.filter(r => rarityOf(r) === 'S');
   const weaponAvg  = weaponSAll.length ? Math.round(weaponSAll.reduce((a,r)=>a+r.pull,0)/weaponSAll.length) : null;
   const weaponLoss = weaponSAll.filter(r => r.wpnLose === 'loss').length;
   const weaponLossRate = weaponSAll.length ? Math.round(weaponLoss/weaponSAll.length*100) : null;
@@ -1354,7 +1375,7 @@ function renderList() {
   }
 
   // count-label / s-count は表示中リストベース
-  const sCount = list.filter(r => r.rarity === 'S').length;
+  const sCount = list.filter(r => rarityOf(r) === 'S').length;
 
   document.getElementById('count-label').textContent = list.length + ' 件';
   document.getElementById('s-count').textContent = sCount ? `Sランク ${sCount} 件` : '';
@@ -1362,7 +1383,7 @@ function renderList() {
   // データがある場合はグラフセクションを表示可能にし、開いていれば再描画
   const chartSection = document.getElementById('chart-section');
   if (chartSection) {
-    chartSection.classList.toggle('visible', recordsForView().some(r => r.rarity === 'S'));
+    chartSection.classList.toggle('visible', recordsForView().some(r => rarityOf(r) === 'S'));
     if (typeof renderCharts === 'function') renderCharts();
   }
 }
@@ -1370,11 +1391,6 @@ function renderList() {
 let editingId = null;
 
 function updateEditLabels() {
-  const editS = document.querySelector('#edit-grp-rarity .toggle-btn[data-val="S"]');
-  const editA = document.querySelector('#edit-grp-rarity .toggle-btn[data-val="A"]');
-  if (editS) editS.textContent = 'Sランク';
-  if (editA) editA.textContent = 'Aランク';
-
   const wWin  = document.querySelector('#edit-grp-wpn-lose .toggle-btn[data-val="win"]');
   const wLoss = document.querySelector('#edit-grp-wpn-lose .toggle-btn[data-val="loss"]');
   const wDash = document.querySelector('#edit-grp-wpn-lose .toggle-btn[data-val="-"]');
@@ -1392,7 +1408,6 @@ function openEdit(id) {
   updateCharPhotoPreview('edit-photo-img', 'edit-photo-placeholder', r.name);
   document.getElementById('edit-pull').value = r.pull;
   document.getElementById('edit-memo').value = r.memo || '';
-  setToggle('edit-grp-rarity', r.rarity);
   setToggle('edit-grp-cons', r.cons || '0');
   setToggle('edit-grp-lose', r.lose || 'win');
   setToggle('edit-grp-wpn-lose', r.wpnLose || 'win');
@@ -1422,7 +1437,7 @@ function saveEdit() {
   r.name    = name;
   r.game    = _currentGame;
   r.pull    = pull;
-  r.rarity  = getEditVal('edit-grp-rarity');
+  r.rarity  = rarityOf({ banner: r.banner, name });
   r.cons    = getEditVal('edit-grp-cons');
   r.lose    = (r.banner === 'agent' || r.banner === 'character') ? getEditVal('edit-grp-lose')     : '-';
   r.wpnLose = r.banner === 'weapon' ? getEditVal('edit-grp-wpn-lose') : '-';
@@ -1449,7 +1464,7 @@ document.getElementById('edit-modal').addEventListener('click', function(e) {
 });
 
 // 編集モーダルのトグル初期化
-['edit-grp-rarity','edit-grp-cons','edit-grp-lose','edit-grp-wpn-lose'].forEach(id => {
+['edit-grp-cons','edit-grp-lose','edit-grp-wpn-lose'].forEach(id => {
   const grp = document.getElementById(id);
   grp.querySelectorAll('.toggle-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -1822,7 +1837,7 @@ function renderCharts() {
 }
 
 function updateChartSub() {
-  const recs = recordsForView().filter(r => r.rarity === 'S');
+  const recs = recordsForView().filter(r => rarityOf(r) === 'S');
   const sub  = document.getElementById('chart-outer-sub');
   if (!sub) return;
   sub.textContent = recs.length
@@ -1840,7 +1855,7 @@ function renderDistCharts() {
   const allRecs = recordsForView();
 
   _chartDistAgent  = renderSingleDist({
-    recs:      allRecs.filter(r => agentBanners.includes(r.banner) && r.rarity === 'S' && r.pull),
+    recs:      allRecs.filter(r => agentBanners.includes(r.banner) && rarityOf(r) === 'S' && r.pull),
     canvasId:  'chart-dist-agent',
     emptyId:   'chart-dist-agent-empty',
     labelId:   'chart-dist-label-agent',
@@ -1855,7 +1870,7 @@ function renderDistCharts() {
   });
 
   _chartDistWeapon = renderSingleDist({
-    recs:      allRecs.filter(r => r.banner === 'weapon' && r.rarity === 'S' && r.pull),
+    recs:      allRecs.filter(r => r.banner === 'weapon' && rarityOf(r) === 'S' && r.pull),
     canvasId:  'chart-dist-weapon',
     emptyId:   'chart-dist-weapon-empty',
     labelId:   'chart-dist-label-weapon',
@@ -1936,7 +1951,7 @@ function renderVerChart() {
   // バージョン別に集計（ALLバージョンのデータで）
   const verMap = {};
   records.forEach(r => {
-    if (!r.ver || r.rarity !== 'S') return;
+    if (!r.ver || rarityOf(r) !== 'S') return;
     if (!verMap[r.ver]) verMap[r.ver] = {
       agentPulls: [], agentLoss: 0, agentTotal: 0,
       weaponPulls:[], weaponLoss: 0, weaponTotal: 0,
@@ -2080,7 +2095,6 @@ function renderVerChart() {
 
 loadLocal();
 initToggle('grp-banner');
-initToggle('grp-rarity');
 initToggle('grp-cons');
 initToggle('grp-lose');
 initToggle('grp-wpn-lose');
