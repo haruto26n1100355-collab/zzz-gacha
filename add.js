@@ -177,6 +177,7 @@ const AGENT_ROSTER = [
   { name: 'オルペウス', attr: 2, aliases: ['orupeusu', 'おるぺうす'] },
   { name: 'S級ビリー', attr: 2, aliases: ['Skyuubiri-', 'びりー', 'beri-'] },
   { name: '橘福福', attr: 2, aliases: ['福福', 'フーフー', 'fu-fu-'] },
+  { name: 'フィオニー', attr: 2, aliases: ['fioni-', 'fionii', 'ふぃおにー'] },
   { name: 'エレン', attr: 3, aliases: ['eren', 'えれん'] },
   { name: 'ライカン', attr: 3, aliases: ['raikan', 'らいかん'] },
   { name: '蒼角', attr: 3, aliases: ['soukaku', 'そうかく'] },
@@ -209,6 +210,7 @@ const AGENT_ROSTER = [
   { name: 'ビビアン', attr: 5, aliases: ['bibian', 'びびあん', 'vivian'] },
   { name: 'ヴェリナ', attr: 10, aliases: ['verina', 'ゔぇりな', 'べりな'] },
   { name: 'ロクシー', attr: 10, aliases: ['rokusi-', 'ろくしー'] },
+  { name: 'セヴェリアン', attr: 10, aliases: ['severian', 'seberian', 'seberiann', 'せゔぇりあん', 'せべりあん'] },
   { name: 'レミエール', attr: 11, aliases: ['remie-ru', 'れみえーる'] },
 ];
 
@@ -232,6 +234,7 @@ const WEAPON_ROSTER = [
   { name: '憤怒の銃騒(オルペウス)', attr: 2,aliases: ['orupeusu', 'おるぺうす'] },
   { name: '心弦のノクターン(イヴリン)', attr: 2, aliases: ['ivurin', 'iburin', 'いぶりん'] },
   { name: '招福の虎炉(橘福福)', attr: 2, aliases: ['ふーふー', 'ちー', 'fu-fu-'] },
+  { name: '転生の炎翼(フィオニー)', attr: 2, aliases: ['fioni-', 'fionii', 'ふぃおにー'] },
   { name: '炎心の桂冠(ライト)', attr: 2, aliases: ['raito', 'らいと'] },
   { name: 'バーニング・シェイカー(バーニス)', attr: 2, aliases: ['ba-nisu', 'ばーにす'] },
   { name: '喧嘩腰のボンバルダム(ルーシー)', attr: 2, aliases: ['ru-si-', 'るーしー'] },
@@ -285,6 +288,7 @@ const WEAPON_ROSTER = [
   { name: 'エレクトロウォーク(ファンド)', attr: 9, aliases: ['fando', 'ふぁんど'] },
   { name: '金襴の心(ヴェリナ)', attr: 10, aliases: ['verina', 'ゔぇりな', 'べりな'] },
   { name: '緋月の銀棺(ロクシー)', attr: 10, aliases: ['rokusi-', 'ろくしー'] },
+  { name: '罪捕らえる牢獄(セヴェリアン)', attr: 10, aliases: ['severian', 'seberian', 'seberiann', 'せゔぇりあん', 'せべりあん'] },
   { name: '空舞う翼、帰還の詩(レミエール)', attr: 11, aliases: ['remie-ru', 'れみえーる'] },
 ];
 
@@ -300,7 +304,7 @@ syncCharAttrFromRosters();
 // ===== レア度の自動判定 =====
 // A級のエージェントはここに書いたものだけ。それ以外はすべてS級。増減したいときはここを編集してください。
 // 音動機は「(エージェント名)」の部分で判定します（例：ハウスキーパー(カリン) → カリンがA級なのでA級）
-const A_RANK_AGENTS = ['アンビー','ニコ','ビリー','蒼角','ベン','アンドー','カリン','ルーシー','セス','プルクラ','潘引壺','真斗'];
+const A_RANK_AGENTS = ['アンビー','ニコ','ビリー','蒼角','ベン','アンドー','カリン','ルーシー','セス','プルクラ','潘引壺','真斗','パイパー'];
 const _aRankSet = new Set(A_RANK_AGENTS);
 // 名前・よみ → エージェント正式名（別名で記録していても同じキャラとして扱う）
 const _agentKeyMap = (() => {
@@ -398,6 +402,8 @@ const CHARACTER_IMAGES = {
   '柚葉': '柚葉.png',
   '朱鳶': 'しゅえん.webp',
   'レミエール': 'レミエール.png',
+  'フィオニー': 'フィオニー.png',
+  'セヴェリアン': 'セヴェリアン.png',
   '空舞う翼、帰還の詩(レミエール)': '空舞う翼、帰還の詩(レミエール).png',
 };
 
@@ -1172,6 +1178,9 @@ function setHistoryView(mode) {
   const panel = document.querySelector('.history-panel');
   if (!panel) return;
   panel.classList.toggle('dex-mode', mode === 'dex');
+  // 図鑑はバージョンに関係ないので、図鑑画面ではバージョン選択を隠す
+  const verWrap = document.getElementById('ver-selector-wrap');
+  if (verWrap) verWrap.style.display = (mode === 'dex') ? 'none' : '';
   document.querySelectorAll('.view-tab').forEach(b => {
     b.classList.toggle('on', b.dataset.view === mode);
   });
